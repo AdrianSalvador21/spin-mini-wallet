@@ -1,6 +1,9 @@
 {
   "common": {
     "appName": "Spin Mini Wallet",
+    "brand": {
+      "logoAlt": "Spin by OXXO"
+    },
     "metadata": {
       "description": "Envía dinero y consulta tu saldo y movimientos con Spin by OXXO."
     },

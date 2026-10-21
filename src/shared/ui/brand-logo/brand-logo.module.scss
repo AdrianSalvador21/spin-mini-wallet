@@ -1,0 +1,9 @@
+.brand-logo {
+  display: block;
+  width: 84px;
+  height: auto;
+}
+
+.brand-logo--on-dark {
+  filter: drop-shadow(0 2px 6px rgb(42 35 56 / 0.25));
+}

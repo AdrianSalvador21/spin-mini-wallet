@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 @theme static {
+  --color-white: #ffffff;
+
   --color-brand-purple: #531bc8;
   --color-brand-purple-2: #7549d3;
   --color-brand-orange: #ff6600;

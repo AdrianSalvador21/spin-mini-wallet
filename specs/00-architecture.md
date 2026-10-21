@@ -316,6 +316,7 @@ Approved tokens (extracted from spinbyoxxo.com.mx):
 
 | CSS token | Value | Usage |
 | --- | --- | --- |
+| `--color-white` | `#FFFFFF` | Text and logos on purple surfaces |
 | `--color-brand-purple` | `#531BC8` | Headers, focus, navigation |
 | `--color-brand-purple-2` | `#7549D3` | Gradient end |
 | `--color-brand-orange` | `#FF6600` | Main CTA, one per screen |
