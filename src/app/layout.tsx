@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Montserrat, Open_Sans } from "next/font/google";
+import { locale } from "@/shared/i18n/config";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -16,20 +19,28 @@ const openSans = Open_Sans({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: {
-    template: "%s · Spin Mini Wallet",
-    default: "Spin Mini Wallet",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("common");
+  const appName = t("appName");
+
+  return {
+    title: {
+      template: `%s · ${appName}`,
+      default: appName,
+    },
+    description: t("metadata.description"),
+  };
+}
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="es-MX"
+      lang={locale}
       className={`${montserrat.variable} ${openSans.variable} h-full`}
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+      </body>
     </html>
   );
 }

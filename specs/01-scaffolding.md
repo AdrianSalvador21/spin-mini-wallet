@@ -60,6 +60,7 @@ declare module "next-intl" {
 {
   "common": {
     "appName": "Spin Mini Wallet",
+    "metadata": { "description": "Envía dinero y consulta tu saldo y movimientos con Spin by OXXO." },
     "home": { "title": "Tu dinero, tan fácil como suena", "subtitle": "Base del proyecto lista" }
   }
 }
@@ -84,10 +85,10 @@ Each step leaves the app running and can be committed on its own.
 5. **Sass and tokens.** Install `sass` as a dev dependency. Rewrite `src/app/globals.css`: import Tailwind and declare the tokens from SPEC 00 section 14 in `@theme static` (colors, radii, fonts), so every token is emitted on `:root` even when no Tailwind utility uses it, because SCSS Modules read them directly. Remove the dark mode block. Create `src/shared/styles/_breakpoints.scss` (`md` and `lg` mixins) and `src/shared/styles/_typography.scss` (`display` and `body` mixins).
    - Why: one source of tokens. Both Tailwind utilities and SCSS Modules consume them, so a color change happens in one place.
 
-6. **Fonts and root layout.** Replace Geist with `Montserrat` (400, 600, 700, 800, 900) and `Open_Sans` (400, 600, 700), with `--font-montserrat` and `--font-open-sans` variables, consumed by the `--font-display` and `--font-body` tokens defined in step 5. Set `lang="es-MX"` on `<html>`. Define metadata with `title.template` `"%s · Spin Mini Wallet"` and a description.
+6. **Fonts and root layout.** Replace Geist with `Montserrat` (400, 600, 700, 800, 900) and `Open_Sans` (400, 600, 700), with `--font-montserrat` and `--font-open-sans` variables, consumed by the `--font-display` and `--font-body` tokens defined in step 5. Set `lang="es-MX"` on `<html>`. Define metadata with `title.template` `"%s · Spin Mini Wallet"`; the description is added in step 7 because it is user-facing text and must come from the message files.
    - Why: these are the fonts Spin uses in production. `next/font` serves them from our own domain, with no runtime requests to Google and no layout shift.
 
-7. **i18n with next-intl.** Install `next-intl`. Wrap the config in `next.config.ts` with `createNextIntlPlugin("./src/shared/i18n/request.ts")`, keeping `cacheComponents`, `partialPrefetching`, `turbopack` and `experimental`. Create `src/shared/i18n/request.ts` with the fixed `es-MX` locale and `timeZone: "America/Mexico_City"`. Create `src/messages/es-MX/common.json`, `src/messages/es-MX/index.ts` and `src/shared/i18n/next-intl.d.ts` with the `AppConfig` augmentation. Wrap the layout with `NextIntlClientProvider`.
+7. **i18n with next-intl.** Install `next-intl`. Wrap the config in `next.config.ts` with `createNextIntlPlugin("./src/shared/i18n/request.ts")`, keeping `cacheComponents`, `partialPrefetching`, `turbopack` and `experimental`. Create `src/shared/i18n/config.ts` exporting the fixed `es-MX` locale and `timeZone: "America/Mexico_City"`, and `src/shared/i18n/request.ts`, which returns them with the messages. Create `src/messages/es-MX/common.json`, `src/messages/es-MX/index.ts` and `src/shared/i18n/next-intl.d.ts` with the `AppConfig` augmentation. Wrap the layout with `NextIntlClientProvider` and build the metadata (title template and description) with `generateMetadata` from `common`.
    - Why: every text lives in files from day one. Typing turns a missing key into a compile error. The fixed locale reads no cookies or headers, so it does not break Cache Components prerendering.
 
 8. **Branded base page.** Create `src/shared/ui/brand-logo/brand-logo.tsx` and `brand-logo.module.scss` (BEM: `.brand-logo`, `.brand-logo--on-dark`), rendering `/assets/shared/spin-oxxo-logo.svg` with `next/image`. Rewrite `src/app/page.tsx` as a temporary page: purple gradient background, logo and the `common.home` texts. Layout with Tailwind utilities, custom styles in `src/app/page.module.scss`.
