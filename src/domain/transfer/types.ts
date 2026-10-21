@@ -5,9 +5,19 @@ import type { UserId } from "../user/types";
 
 export type TransferId = Brand<string, "TransferId">;
 
+export const TRANSFER_RECIPIENT_KIND = {
+  CONTACT: "contact",
+  NEW: "new",
+} as const;
+
 export type TransferRecipientInput =
-  | { kind: "contact"; contactId: string }
-  | { kind: "new"; name: string; account: RecipientAccount; saveAsFavorite: boolean };
+  | { kind: typeof TRANSFER_RECIPIENT_KIND.CONTACT; contactId: string }
+  | {
+      kind: typeof TRANSFER_RECIPIENT_KIND.NEW;
+      name: string;
+      account: RecipientAccount;
+      saveAsFavorite: boolean;
+    };
 
 export interface Transfer {
   id: TransferId;
