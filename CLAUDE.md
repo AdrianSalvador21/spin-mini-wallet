@@ -19,6 +19,8 @@ This project runs **Next.js 16.4.2** with **React 19.3**, a version newer than y
 - User-facing text is in Spanish (es-MX) and lives in `src/messages/es-MX/*.json`, never inline in components. Add a key, reference it with `useTranslations`/`getTranslations`; an unknown key is a TypeScript error (see `src/shared/i18n/next-intl.d.ts`).
 - Styling: Tailwind utilities only for page layout (flex, grid, gap, padding, breakpoints); component look-and-feel goes in a co-located `*.module.scss` written in BEM (`.block`, `.block__element`, `.block--modifier`) that consumes the CSS variables from `src/app/globals.css`'s `@theme static` block — never hardcode a hex value in SCSS.
 - Branches: `main` (user-merged), `develop` (integration), `feature/NN-slug` per milestone (branched from `develop`, merged back via PR). `specs/.spec-config.yml` has `AutoCreateBranch: false`.
+- No nested ternaries to branch on a discriminated union's tag. Use a `switch` over the discriminant, one `case` per member, exhaustive via a shared `assertUnreachable(value: never)` helper in the `default` branch (see `src/domain/shared/assert-unreachable.ts`). Cover that `default` with a test that casts an invalid tag through `as unknown as <UnionType>`, so the 100 %/80 % coverage gates stay meaningful instead of excluding it.
+- A discriminated union's literal tag values (e.g. `RecipientAccount.type`) are declared once as an `as const` object next to the union in its `types.ts`, and every comparison or object literal that sets the tag references that constant — never the raw string literal — outside of test fixtures asserting the actual wire format.
 
 ## Commands
 
