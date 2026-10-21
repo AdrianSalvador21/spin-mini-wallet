@@ -72,8 +72,8 @@ Each step leaves the app running and can be committed on its own.
 1. **Base branches.** Rename `master` to `main`. Create `develop` from `main` and `feature/01-scaffolding` from `develop`. Commit `CLAUDE.md` and `public/assets/shared/spin-oxxo-logo.svg`, which are currently untracked.
    - Why: the agreed flow is feature → PR → `develop`, and the user merges into `main`. Starting from a clean history avoids mixing loose files with the scaffolding.
 
-2. **Pinned runtime.** Create `.nvmrc` with `24`. Add `"engines": { "node": ">=24 <25" }` to `package.json`. Bump `@types/node` to `^24`. Add the `"typecheck": "tsc --noEmit"` script.
-   - Why: CI, Vercel and the local machine use the same Node version. Vitest 5 requires `@types/node` 22 or 24+, and the project ships 20.
+2. **Pinned runtime.** Create `.nvmrc` with `24`. Add `"engines": { "node": ">=24 <25" }` to `package.json`. Bump `@types/node` to `^24`. Add the `"typecheck": "next typegen && tsc --noEmit"` script.
+   - Why: CI, Vercel and the local machine use the same Node version. Vitest 5 requires `@types/node` 22 or 24+, and the project ships 20. `next typegen` runs first because globals such as `LayoutProps` live in `.next/types`, which does not exist on a clean checkout or in CI.
 
 3. **Move to `src/`.** Move `app/` to `src/app/`. Change `paths` in `tsconfig.json` to `"@/*": ["./src/*"]`. Delete `public/file.svg`, `globe.svg`, `next.svg`, `vercel.svg` and `window.svg`. Replace `src/app/page.tsx` with a minimal placeholder. Verify with `npm run dev`.
    - Why: separates code from repo configuration (doc `src-folder.md`). Also, `proxy.ts` must live inside `src/` when this folder is used.
