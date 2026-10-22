@@ -302,14 +302,15 @@ Session:
 
 - The `smw_session` cookie holds `base64url(payload).signature`. The payload is `{ userId, issuedAt, expiresAt }` and the signature is HMAC-SHA256 with `SESSION_SECRET`.
 - Attributes: `HttpOnly`, `SameSite=Lax`, `Path=/`, `Secure` in production, absolute expiry of 30 minutes.
-- `proxy.ts` verifies signature and expiry: redirects `/home` and `/transfers/*` to `/login` without a session, and `/login` and `/register` to `/home` with one.
+- `proxy.ts` verifies signature and expiry: redirects `/home` and `/transfers/*` to `/login` without a session, and `/login` and `/register` to `/home` with one. `/` redirects to `/login` or `/home`. An invalid or expired cookie counts as no session.
+- `proxy.ts` never redirects `/api/**`: Route Handlers answer `401` JSON themselves, and an API client must never receive a redirect to an HTML page.
 - Defense in depth (doc `proxy.md` and the data security guide): every Server Action and every Route Handler re-checks the session with `requireSession()`. The proxy is not the only barrier.
 
 Credentials:
 
 - Passwords hashed with `scrypt` from `node:crypto` and a random per-user salt. Comparison uses `timingSafeEqual`.
-- Login always answers "Los datos no coinciden" so it never reveals whether the user exists.
-- In-memory rate limit: 5 failed attempts per identifier every 15 minutes; the sixth gets a wait message.
+- A failed login names the method in use ("El celular o la contraseña no coinciden" / "El email o la contraseña no coinciden") but never reveals whether the user exists.
+- In-memory rate limit, per instance: 5 failed attempts per identifier inside a fixed 15-minute window that starts at the first failure. The key is the method plus the normalized identifier, so formatting variants of one phone share a counter. Once blocked, every attempt is rejected with a wait message until the window ends, even one with the right password. A successful login resets the counter. The limiter runs after schema validation and before `scrypt`.
 
 Web surface:
 
@@ -354,6 +355,7 @@ Approved tokens (extracted from spinbyoxxo.com.mx):
 | `--color-success` / `-bg` | `#12805C` / `#E3F5EE` | Credits, success |
 | `--color-danger` / `-bg` | `#C62828` / `#FDECEC` | Errors |
 | `--color-warning` / `-bg` | `#A15C00` / `#FFF3DF` | Timeout |
+| `--color-info` / `-bg` | `#3D1199` / `#EEE8FA` | Info alerts (processing) |
 | `--radius-s/m/l/pill` | `10px` / `16px` / `24px` / `999px` | Inputs, cards, buttons |
 
 - Typography: Montserrat (400–900) for headings and amounts, Open Sans (400–700) for body, both through `next/font/google`. Amounts use `tabular-nums`.
@@ -378,7 +380,7 @@ Approved tokens (extracted from spinbyoxxo.com.mx):
 - Vitest does not support `async` Server Components (doc `testing/vitest.md`); those are covered by E2E.
 - MSW runs with `onUnhandledRequest: "error"` so no test hits the real network.
 - 80 % coverage threshold on `src/domain`, `src/server` and `src/shared/lib`.
-- E2E uses its own `MOCK_DB_PATH`, regenerated before each run.
+- E2E runs its own server on port 3100 with `MOCK_DB_PATH=.data/e2e-db.json`, set explicitly in `playwright.config.ts` and never read from the parent environment. `e2e/global-setup.ts` deletes that file before each run, so the seed is regenerated and `.data/db.json` is never touched.
 
 ## 16. Quality, CI and delivery
 
