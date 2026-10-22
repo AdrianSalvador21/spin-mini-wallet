@@ -2,7 +2,7 @@ import "server-only";
 import { newContactSchema } from "@/domain/contact/schemas";
 import { toFieldErrors } from "@/domain/shared/validation";
 import { API_ERROR_CODE } from "@/shared/lib/api/contract";
-import { errorResponse } from "../api-error";
+import { errorResponse, toApiError } from "../api-error";
 import { readJsonBody, json } from "../json";
 import { createRouteHandler, type HttpDependencies } from "../route-handler";
 
@@ -26,8 +26,12 @@ export function createCreateContactHandler(deps: HttpDependencies) {
       );
     }
 
-    const contact = await deps.services.contact.create(ctx.session.userId, parsed.data);
+    const result = await deps.services.contact.create(ctx.session.userId, parsed.data);
 
-    return json(contact, 201);
+    if (!result.ok) {
+      return errorResponse(toApiError(result.error), ctx.requestId);
+    }
+
+    return json(result.value.contact, result.value.created ? 201 : 200);
   });
 }
