@@ -2,6 +2,7 @@ import type { Brand } from "../shared/brand";
 import type { Money } from "../money/money";
 import type { UserId } from "../user/types";
 import type { TransferId } from "../transfer/types";
+import type { RecipientAccount } from "../contact/types";
 
 export type MovementId = Brand<string, "MovementId">;
 
@@ -35,6 +36,7 @@ export interface Movement {
   amount: Money;
   counterpartyName?: string;
   merchantName?: string;
+  counterpartyAccount?: RecipientAccount;
   transferId?: TransferId;
   createdAt: string;
 }

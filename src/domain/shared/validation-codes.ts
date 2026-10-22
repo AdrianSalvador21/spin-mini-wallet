@@ -36,6 +36,7 @@ export const VALIDATION_CODES = [
   "IDEMPOTENCY_KEY_INVALID",
   "BODY_INVALID_JSON",
   "LIMIT_INVALID",
+  "DIRECTION_INVALID",
 ] as const;
 
 export type ValidationCode = (typeof VALIDATION_CODES)[number];
