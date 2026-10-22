@@ -70,6 +70,20 @@ e2e/                Playwright specs
 - `src/features/<x>/{components,hooks}/**` additionally cannot import `@/server` (only `actions.ts` files may).
 - `no-console` is an error everywhere under `src/` except `src/shared/observability/**`.
 
+### Domain layer (`src/domain/`)
+
+Framework-free TypeScript, one folder per concept (`shared`, `money`, `user`, `contact`, `wallet`, `transfer`), each with `types.ts` (entities, branded IDs), `validators.ts` (pure `Result<T, ValidationCode>` functions) and, where it applies, `schemas.ts` (Zod) and `rules.ts` (business rules). Nothing here throws for an expected failure: validators return `Result<T, E>` (`ok`/`err` from `src/domain/shared/result.ts`) and business rules in `transfer/rules.ts` return every violation at once, not just the first.
+
+Error codes are the only thing the domain says about a failure. `ValidationCode` (`src/domain/shared/validation-codes.ts`) is a closed, English, framework-free union — the domain never produces a user-facing message. To add a new code:
+
+1. Add it to the `VALIDATION_CODES` array (its `ValidationCode` union member follows automatically).
+2. Return it from the validator that detects the failure.
+3. Add its Spanish copy to `src/messages/es-MX/errors.json` under `errors.validation.<CODE>` — `src/messages/es-MX/errors.test.ts` fails the build if a code has no message, so this step isn't optional.
+
+Zod schemas (`schemas.ts` files) wrap the validators above through `fromValidator` (`src/domain/shared/validation.ts`): it turns a `(input: string) => Result<T, ValidationCode>` function into a Zod transform whose issue `message` is the `ValidationCode` itself, so a schema never invents its own error text. `toFieldErrors` (same file) turns a `z.ZodError` into `Record<string, ValidationCode[]>`, which is what Route Handlers and forms consume.
+
+`src/domain/**` has its own 100 % coverage threshold in `vitest.config.mts` (the rest of the app keeps 80 %) — a pure function with an untested branch is a bug waiting in a financial app, not an acceptable gap.
+
 ### Styling tokens (`src/app/globals.css`)
 
 Spin's brand tokens (colors, radii, fonts) are declared in `@theme static` so they're always emitted as CSS variables — both Tailwind utilities and SCSS Modules read the same source. Full token table is in `specs/00-architecture.md` §14.
