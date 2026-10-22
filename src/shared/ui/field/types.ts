@@ -13,6 +13,8 @@ export const INPUT_MODE = {
   TEXT: "text",
   TEL: "tel",
   EMAIL: "email",
+  DECIMAL: "decimal",
+  NUMERIC: "numeric",
 } as const;
 
 export type InputMode = (typeof INPUT_MODE)[keyof typeof INPUT_MODE];
@@ -23,6 +25,7 @@ export const AUTO_COMPLETE = {
   EMAIL: "email",
   CURRENT_PASSWORD: "current-password",
   NEW_PASSWORD: "new-password",
+  OFF: "off",
 } as const;
 
 export type AutoComplete = (typeof AUTO_COMPLETE)[keyof typeof AUTO_COMPLETE];

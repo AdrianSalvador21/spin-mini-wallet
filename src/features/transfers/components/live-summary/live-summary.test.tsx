@@ -7,6 +7,7 @@ import { walletQueryKeys } from "@/shared/lib/api/wallet-queries";
 import { server } from "@/test/msw/server";
 import { renderWithProviders, screen, waitFor, within } from "@/test/render";
 import { EMPTY_DRAFT, useTransferDraft } from "../../draft/draft-store";
+import { useDraftPreview } from "../../draft/preview-store";
 import { TRANSFER_STEP } from "../../draft/types";
 import { LiveSummary } from "./live-summary";
 
@@ -18,6 +19,7 @@ const CARLOS = {
 
 beforeEach(() => {
   useTransferDraft.setState({ ...EMPTY_DRAFT, amountInCents: 35_000 as Cents, recipient: CARLOS });
+  useDraftPreview.setState({ amountInCents: undefined, recipient: undefined });
 });
 
 function termValues() {
@@ -43,6 +45,28 @@ describe("LiveSummary", () => {
     expect(termValues()).toEqual(["Para", "Cuenta", "Comisión", "Saldo después"]);
     expect(screen.getByText("Carlos Ruiz")).toBeInTheDocument();
     expect(screen.getByText("Celular •••• 6789")).toBeInTheDocument();
+  });
+
+  it("keeps the Saldo después row before any amount is typed so the summary does not jump", async () => {
+    useTransferDraft.setState({ ...EMPTY_DRAFT });
+
+    renderWithProviders(<LiveSummary step={TRANSFER_STEP.AMOUNT} />);
+
+    expect(termValues()).toEqual(["Comisión", "Saldo después"]);
+    expect(await screen.findByText("$12,450.80")).toBeInTheDocument();
+  });
+
+  it("prefers the in-progress preview over the stored draft", async () => {
+    useDraftPreview.setState({
+      amountInCents: 10_000 as Cents,
+      recipient: { ...CARLOS, contactId: "ctc_ana" as ContactId, name: "Ana Torres" },
+    });
+
+    renderWithProviders(<LiveSummary step={TRANSFER_STEP.RECIPIENT} />);
+
+    expect(screen.getByText("$100")).toBeInTheDocument();
+    expect(screen.getByText("Ana Torres")).toBeInTheDocument();
+    expect(await screen.findByText("$12,350.80")).toBeInTheDocument();
   });
 
   it("hides the balance after when the balance cannot load", async () => {

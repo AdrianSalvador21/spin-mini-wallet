@@ -37,6 +37,14 @@ export class ApiFailureError extends Error {
   }
 }
 
+export function getRequestId(error: unknown): string | undefined {
+  if (!(error instanceof ApiFailureError)) {
+    return undefined;
+  }
+
+  return error.failure.kind === API_FAILURE_KIND.NETWORK ? undefined : error.failure.requestId;
+}
+
 function isApiErrorBody(value: unknown): value is ApiErrorBody {
   return typeof value === "object" && value !== null && "error" in value && typeof value.error === "object";
 }

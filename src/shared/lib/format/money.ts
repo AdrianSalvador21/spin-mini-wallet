@@ -10,6 +10,14 @@ export function formatMoney(money: Money): string {
   );
 }
 
+export function formatWholeMoney(money: Money): string {
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: money.currency,
+    maximumFractionDigits: 0,
+  }).format(money.amountInCents / 100);
+}
+
 export function formatSignedMoney(money: Money, direction: MovementDirection): string {
   const formatted = formatMoney(money);
   return direction === MOVEMENT_DIRECTION.CREDIT ? `+${formatted}` : `${MINUS_SIGN}${formatted}`;

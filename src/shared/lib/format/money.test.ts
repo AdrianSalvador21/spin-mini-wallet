@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Cents } from "@/domain/money/money";
 import { toMoney } from "@/domain/money/money";
-import { formatMoney, formatSignedMoney, splitMoney } from "./money";
+import { formatMoney, formatSignedMoney, formatWholeMoney, splitMoney } from "./money";
 
 describe("formatMoney", () => {
   it("formats a positive amount with thousands separator and two decimals", () => {
@@ -14,6 +14,12 @@ describe("formatMoney", () => {
 
   it("formats a large amount", () => {
     expect(formatMoney(toMoney(99_999_999 as Cents))).toBe("$999,999.99");
+  });
+});
+
+describe("formatWholeMoney", () => {
+  it("formats an amount without decimals", () => {
+    expect(formatWholeMoney(toMoney(50_000 as Cents))).toBe("$500");
   });
 });
 

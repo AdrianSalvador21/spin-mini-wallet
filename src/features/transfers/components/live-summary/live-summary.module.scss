@@ -32,6 +32,10 @@
   font-size: var(--text-size-balance-cents);
 }
 
+.live-summary__value-skeleton {
+  margin-left: auto;
+}
+
 .live-summary__list {
   margin-top: var(--space-4);
 }

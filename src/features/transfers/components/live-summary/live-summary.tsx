@@ -8,10 +8,13 @@ import { useAccountLabel } from "@/shared/i18n/use-account-label";
 import { formatMoney, splitMoney } from "@/shared/lib/format/money";
 import { Alert } from "@/shared/ui/alert/alert";
 import { ALERT_TONE } from "@/shared/ui/alert/types";
+import { Skeleton } from "@/shared/ui/skeleton/skeleton";
+import { SKELETON_SHAPE, SKELETON_SIZE } from "@/shared/ui/skeleton/types";
 import { SummaryList, type SummaryListItem } from "@/shared/ui/summary-list/summary-list";
 import { useTransferDraft } from "../../draft/draft-store";
+import { useDraftPreview } from "../../draft/preview-store";
 import { TRANSFER_STEP, type TransferStep } from "../../draft/types";
-import { useTransferBalance } from "../../hooks/use-transfer-balance";
+import { computeBalanceAfter, useTransferBalance } from "../../hooks/use-transfer-balance";
 import styles from "./live-summary.module.scss";
 
 interface LiveSummaryProps {
@@ -22,10 +25,30 @@ export function LiveSummary({ step }: LiveSummaryProps) {
   const t = useTranslations("transfers");
   const titleId = useId();
   const accountLabel = useAccountLabel();
-  const amountInCents = useTransferDraft((draft) => draft.amountInCents);
-  const recipient = useTransferDraft((draft) => draft.recipient);
-  const { balanceAfter } = useTransferBalance();
-  const { whole, cents } = splitMoney(toMoney(amountInCents ?? (0 as Cents)));
+  const draftAmount = useTransferDraft((draft) => draft.amountInCents);
+  const draftRecipient = useTransferDraft((draft) => draft.recipient);
+  const previewAmount = useDraftPreview((preview) => preview.amountInCents);
+  const previewRecipient = useDraftPreview((preview) => preview.recipient);
+  const amountInCents = previewAmount === undefined ? draftAmount : previewAmount;
+  const recipient = previewRecipient === undefined ? draftRecipient : previewRecipient;
+  const { summary, balance } = useTransferBalance();
+  const shownAmount = amountInCents ?? (0 as Cents);
+  const { whole, cents } = splitMoney(toMoney(shownAmount));
+
+  function balanceAfterValue() {
+    if (balance) {
+      return formatMoney(computeBalanceAfter(balance, shownAmount));
+    }
+
+    return (
+      <Skeleton
+        shape={SKELETON_SHAPE.LINE}
+        size={SKELETON_SIZE.MD}
+        width="6em"
+        className={styles["live-summary__value-skeleton"]}
+      />
+    );
+  }
 
   const items: SummaryListItem[] = [];
 
@@ -38,8 +61,8 @@ export function LiveSummary({ step }: LiveSummaryProps) {
 
   items.push({ key: "fee", label: t("review.fee"), value: formatMoney(TRANSFER_FEE) });
 
-  if (balanceAfter) {
-    items.push({ key: "balanceAfter", label: t("review.balanceAfter"), value: formatMoney(balanceAfter) });
+  if (!summary.isError) {
+    items.push({ key: "balanceAfter", label: t("review.balanceAfter"), value: balanceAfterValue() });
   }
 
   return (

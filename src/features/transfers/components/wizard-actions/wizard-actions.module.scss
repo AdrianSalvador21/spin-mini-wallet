@@ -28,7 +28,7 @@
   }
 }
 
-.wizard-actions__back-button {
+.wizard-actions .wizard-actions__back .wizard-actions__back-button {
   width: 100%;
 
   @include bp.lg {

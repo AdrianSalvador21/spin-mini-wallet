@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { apiGet, apiPost } from "./api-client";
+import { ApiFailureError, apiGet, apiPost, getRequestId } from "./api-client";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -73,6 +73,20 @@ describe("apiGet", () => {
     const result = await apiGet("/api/v1/wallet/summary");
 
     expect(result).toEqual({ ok: false, error: { kind: "network" } });
+  });
+});
+
+describe("getRequestId", () => {
+  it("reads the reference of an api or unknown failure", () => {
+    expect(
+      getRequestId(new ApiFailureError({ kind: "api", status: 503, code: "UPSTREAM_UNAVAILABLE", requestId: "req-1" })),
+    ).toBe("req-1");
+    expect(getRequestId(new ApiFailureError({ kind: "unknown", status: 500, requestId: "req-2" }))).toBe("req-2");
+  });
+
+  it("has no reference for a network failure or another error", () => {
+    expect(getRequestId(new ApiFailureError({ kind: "network" }))).toBeUndefined();
+    expect(getRequestId(new Error("boom"))).toBeUndefined();
   });
 });
 
