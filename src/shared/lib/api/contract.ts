@@ -64,5 +64,12 @@ export const SCENARIO_COOKIE = {
   READ: "mock_read_scenario",
 } as const;
 
+export const HTTP_METHOD = {
+  GET: "GET",
+  POST: "POST",
+} as const;
+
+export const CONTENT_TYPE_HEADER = "Content-Type";
+export const JSON_CONTENT_TYPE = "application/json";
 export const REQUEST_ID_HEADER = "x-request-id";
 export const IDEMPOTENCY_KEY_HEADER = "Idempotency-Key";
