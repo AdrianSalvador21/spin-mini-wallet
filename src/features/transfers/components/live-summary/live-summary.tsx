@@ -15,6 +15,7 @@ import { useTransferDraft } from "../../draft/draft-store";
 import { useDraftPreview } from "../../draft/preview-store";
 import { TRANSFER_STEP, type TransferStep } from "../../draft/types";
 import { computeBalanceAfter, useTransferBalance } from "../../hooks/use-transfer-balance";
+import { WIZARD_SKELETON_WIDTH } from "../wizard-skeleton/types";
 import styles from "./live-summary.module.scss";
 
 interface LiveSummaryProps {
@@ -44,7 +45,7 @@ export function LiveSummary({ step }: LiveSummaryProps) {
       <Skeleton
         shape={SKELETON_SHAPE.LINE}
         size={SKELETON_SIZE.MD}
-        width="6em"
+        width={WIZARD_SKELETON_WIDTH.SUMMARY_VALUE}
         className={styles["live-summary__value-skeleton"]}
       />
     );

@@ -33,6 +33,7 @@ import { AmountInput } from "../amount-input/amount-input";
 import { RetryAlert } from "../retry-alert/retry-alert";
 import { WizardActions } from "../wizard-actions/wizard-actions";
 import { WizardSkeleton } from "../wizard-skeleton/wizard-skeleton";
+import { WIZARD_SKELETON_WIDTH } from "../wizard-skeleton/types";
 import styles from "./amount-step.module.scss";
 import { AMOUNT_STEP_ERROR, CONCEPT_MAX_LENGTH, QUICK_AMOUNTS_IN_CENTS } from "./types";
 
@@ -92,7 +93,7 @@ function AmountForm() {
 
   function balanceHint() {
     if (summary.isPending) {
-      return <Skeleton shape={SKELETON_SHAPE.LINE} width="40%" />;
+      return <Skeleton shape={SKELETON_SHAPE.LINE} width={WIZARD_SKELETON_WIDTH.HINT} />;
     }
 
     return balance ? t("amount.available", { amount: formatMoney(balance) }) : null;

@@ -4,9 +4,7 @@ import { useCallback, useLayoutEffect, useRef, type ChangeEvent, type ReactNode,
 import { formatAmountInput, sanitizeAmountInput } from "@/shared/lib/format/amount-input";
 import { AUTO_COMPLETE, INPUT_MODE, INPUT_TYPE } from "@/shared/ui/field/types";
 import styles from "./amount-input.module.scss";
-
-const CURRENCY_SYMBOL = "$";
-const EMPTY_PLACEHOLDER = "0";
+import { CURRENCY_SYMBOL, EMPTY_AMOUNT_PLACEHOLDER } from "./types";
 
 interface AmountInputProps {
   id: string;
@@ -26,6 +24,10 @@ function assignRef<T>(ref: Ref<T> | undefined, value: T | null) {
   } else if (ref) {
     ref.current = value;
   }
+}
+
+function describedBy(errorId: string | undefined, hintId: string | undefined): string | undefined {
+  return errorId ?? hintId;
 }
 
 export function AmountInput({ id, label, value, onChange, onBlur, name, hint, error, ref }: AmountInputProps) {
@@ -88,12 +90,12 @@ export function AmountInput({ id, label, value, onChange, onBlur, name, hint, er
           inputMode={INPUT_MODE.DECIMAL}
           autoComplete={AUTO_COMPLETE.OFF}
           value={value}
-          placeholder={EMPTY_PLACEHOLDER}
+          placeholder={EMPTY_AMOUNT_PLACEHOLDER}
           size={Math.max(value.length, 1)}
           onChange={handleChange}
           onBlur={onBlur}
           aria-invalid={hasError || undefined}
-          aria-describedby={hasError ? errorId : hint ? hintId : undefined}
+          aria-describedby={describedBy(hasError ? errorId : undefined, hint ? hintId : undefined)}
           className={styles["amount-input__field"]}
         />
       </div>

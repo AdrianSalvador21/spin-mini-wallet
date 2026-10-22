@@ -29,3 +29,6 @@ export interface NewRecipientValues {
   cardNumber: string;
   saveAsFavorite: boolean;
 }
+
+export const SERVER_ERROR_TYPE = "server";
+export const BAD_REQUEST_STATUS = 400;

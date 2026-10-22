@@ -24,15 +24,14 @@ import { RetryAlert } from "../retry-alert/retry-alert";
 import { WizardActions } from "../wizard-actions/wizard-actions";
 import styles from "./new-recipient-form.module.scss";
 import {
+  BAD_REQUEST_STATUS,
   BANK_PREFIX_LENGTH,
   CARD_LENGTH,
   CLABE_LENGTH,
   NEW_RECIPIENT_FIELD,
+  SERVER_ERROR_TYPE,
   type NewRecipientValues,
 } from "./types";
-
-const SERVER_ERROR_TYPE = "server";
-const BAD_REQUEST_STATUS = 400;
 
 function digitsOnly(value: string, maxLength: number): string {
   return value.replace(/\D/g, "").slice(0, maxLength);

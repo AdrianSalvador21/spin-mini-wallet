@@ -15,6 +15,7 @@ import { SKELETON_SHAPE, SKELETON_SIZE } from "@/shared/ui/skeleton/types";
 import { contactsQueryOptions } from "../../api/contact-queries";
 import { ContactRow } from "../contact-row/contact-row";
 import { WizardState } from "../wizard-state/wizard-state";
+import { WIZARD_SKELETON_WIDTH } from "../wizard-skeleton/types";
 import styles from "./contact-list.module.scss";
 import { CONTACT_LIST_STATE, CONTACT_SKELETON_ROWS, type ContactListState } from "./types";
 
@@ -62,8 +63,8 @@ export function ContactList({ selectedId, onSelect, onAdd, error }: ContactListP
               <div key={index} className={styles["contact-list__skeleton"]} data-testid="contact-skeleton">
                 <Skeleton shape={SKELETON_SHAPE.CIRCLE} size={SKELETON_SIZE.SM} />
                 <span className={styles["contact-list__skeleton-text"]}>
-                  <Skeleton shape={SKELETON_SHAPE.LINE} size={SKELETON_SIZE.MD} width="55%" />
-                  <Skeleton shape={SKELETON_SHAPE.LINE} size={SKELETON_SIZE.SM} width="35%" />
+                  <Skeleton shape={SKELETON_SHAPE.LINE} size={SKELETON_SIZE.MD} width={WIZARD_SKELETON_WIDTH.CONTACT_NAME} />
+                  <Skeleton shape={SKELETON_SHAPE.LINE} size={SKELETON_SIZE.SM} width={WIZARD_SKELETON_WIDTH.CONTACT_ACCOUNT} />
                 </span>
               </div>
             ))}
