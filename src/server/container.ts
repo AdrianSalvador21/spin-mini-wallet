@@ -1,0 +1,43 @@
+import "server-only";
+import { randomUUID } from "node:crypto";
+import { getEnv } from "@/shared/config/env";
+import { createJsonDatabase } from "./db/json-database";
+import { createSeed } from "./db/seed";
+import { createAuthService, type AuthService } from "./services/auth-service";
+import { createContactService, type ContactService } from "./services/contact-service";
+import { createTransferService, type TransferService } from "./services/transfer-service";
+import type { ServiceDependencies } from "./services/types";
+import { createWalletService, type WalletService } from "./services/wallet-service";
+
+export interface Services {
+  auth: AuthService;
+  wallet: WalletService;
+  contact: ContactService;
+  transfer: TransferService;
+}
+
+let cachedServices: Services | undefined;
+
+function createServices(): Services {
+  const deps: ServiceDependencies = {
+    db: createJsonDatabase(getEnv().MOCK_DB_PATH, () => createSeed(new Date())),
+    now: () => new Date(),
+    random: () => Math.random(),
+    createId: () => randomUUID(),
+  };
+
+  return {
+    auth: createAuthService(deps),
+    wallet: createWalletService(deps),
+    contact: createContactService(deps),
+    transfer: createTransferService(deps),
+  };
+}
+
+export function getServices(): Services {
+  if (!cachedServices) {
+    cachedServices = createServices();
+  }
+
+  return cachedServices;
+}

@@ -4,7 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Spin Mini Wallet is a take-home technical challenge for Spin by OXXO (FEMSA): a Next.js mini wallet web app (Login → Home → New transfer → Confirmation/Receipt) with a mocked backend. Full requirements, architecture, data model, API contracts and milestone breakdown live in `specs/` — read `specs/roadmap.md` first, then the spec for the milestone being worked on. `specs/00-architecture.md` is the global contract every milestone must respect.
+Spin Mini Wallet is a take-home technical challenge for Spin by OXXO (FEMSA): a Next.js mini wallet web app (Login → Home → New transfer → Confirmation/Receipt) with a mocked backend. Full requirements, architecture, data model, API contracts and milestone breakdown live in `specs/`. Before writing or implementing any spec, read in this order:
+
+1. `specs/challenge.md`: the original challenge brief (screens, business rules, deliverables, evaluation criteria, deadline) and the design reference, including where SPEC 00 overrides the design.
+2. `specs/roadmap.md`: which milestone is next.
+3. `specs/00-architecture.md`: the global contract every milestone must respect.
+4. The spec for the milestone being worked on.
+
+UI milestones must also follow `specs/design/mini-wallet-design.html`, the approved design: open it in a browser, or read the screens summary in `specs/challenge.md` §8. It is also published at https://claude.ai/artifact/LTCjdMCcyowCVxe9RZqSbr. Specs are self-contained on purpose: they run in separate sessions, so nothing a spec needs may live only in chat history.
 
 ## Next.js version caveat
 
@@ -83,6 +90,18 @@ Error codes are the only thing the domain says about a failure. `ValidationCode`
 Zod schemas (`schemas.ts` files) wrap the validators above through `fromValidator` (`src/domain/shared/validation.ts`): it turns a `(input: string) => Result<T, ValidationCode>` function into a Zod transform whose issue `message` is the `ValidationCode` itself, so a schema never invents its own error text. `toFieldErrors` (same file) turns a `z.ZodError` into `Record<string, ValidationCode[]>`, which is what Route Handlers and forms consume.
 
 `src/domain/**` has its own 100 % coverage threshold in `vitest.config.mts` (the rest of the app keeps 80 %) — a pure function with an untested branch is a bug waiting in a financial app, not an acceptable gap.
+
+### Server core (`src/server/`)
+
+Every file under `src/server/` starts with `import "server-only"`. Vitest runs `src/server/**` under the `node` project (see `vitest.config.mts`), where `server-only` is aliased to its empty module so these files can be imported from tests at all; everything else runs under the `dom` (jsdom) project.
+
+`db/json-database.ts` exposes a `Database` with `read`/`transaction`, backed by a single JSON file at `getEnv().MOCK_DB_PATH`. `transaction` re-reads the file, runs the callback against an in-memory snapshot, and writes it back atomically (temp file + `rename`); if the callback throws, nothing is written. A single process-wide lock (`Symbol.for` on `globalThis`) serializes transactions even if Next loads the module more than once. `repositories/*` are small synchronous objects (`findById`, `insert`, …) over that snapshot — `find`/`list` return live references into it, so a service can mutate a wallet's `balance` directly inside a `transaction` and the change gets persisted when it writes back. Services only ever see `Database`/`Repositories`, never the file path, so a real database could replace the JSON file without touching services or UI.
+
+Services (`services/*-service.ts`) are built by factories that take `ServiceDependencies = { db, now, random, createId }` (`services/types.ts`), so tests control time, randomness and IDs instead of mocking globals. They return `Result<View, ServiceError>` and never throw for an expected failure. The views in `services/views.ts` (`UserView`, `AccountView`, `ContactView`, `MovementView`, `TransferView`) are the only shapes that may leave `src/server/`: a full account number or password hash never does, whether the caller is a Server Component or (from SPEC 04 onward) a Route Handler.
+
+`session/password.ts` (`scrypt` + `timingSafeEqual`) and `session/token.ts` (HMAC-signed, pure, framework-free) back `session/session.ts`'s `getSession()`/`requireSession()`/`setSessionCookie()`/`clearSessionCookie()`. `requireSession()` is the only thing in this layer that throws (`UnauthorizedError`, `errors.ts`) — it is the single entry point SPEC 04's Route Handlers and SPEC 05's Server Actions use to protect themselves; `getSession()` returns `null` instead.
+
+`container.ts`'s `getServices()` builds the four services once, from `getEnv()`, `Date`, `Math.random` and `crypto.randomUUID`, and caches the result for the life of the process.
 
 ### Styling tokens (`src/app/globals.css`)
 

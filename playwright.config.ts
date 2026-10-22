@@ -29,5 +29,9 @@ export default defineConfig({
     url: baseURL,
     reuseExistingServer: !isCI,
     timeout: 120_000,
+    env: {
+      SESSION_SECRET: process.env.SESSION_SECRET ?? "playwright-session-secret-at-least-32-chars",
+      MOCK_DB_PATH: process.env.MOCK_DB_PATH ?? ".data/db.json",
+    },
   },
 });
