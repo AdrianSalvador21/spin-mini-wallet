@@ -44,3 +44,25 @@ describe("getServices", () => {
     expect(getServices()).toBe(getServices());
   });
 });
+
+describe("getHttpDependencies", () => {
+  it("builds the HTTP dependencies backed by the same services instance", async () => {
+    const { getServices, getHttpDependencies } = await import("./container");
+
+    expect(getHttpDependencies().services).toBe(getServices());
+  });
+
+  it("returns the same instance on repeated calls", async () => {
+    const { getHttpDependencies } = await import("./container");
+
+    expect(getHttpDependencies()).toBe(getHttpDependencies());
+  });
+
+  it("reads allowScenarioOverride from the environment", async () => {
+    process.env = { ...process.env, MOCK_ALLOW_SCENARIO_OVERRIDE: "true" };
+
+    const { getHttpDependencies } = await import("./container");
+
+    expect(getHttpDependencies().allowScenarioOverride).toBe(true);
+  });
+});

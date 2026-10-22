@@ -1,8 +1,11 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { getEnv } from "@/shared/config/env";
+import { getErrorReporter } from "@/shared/observability/error-reporter";
+import { logger } from "@/shared/observability/logger";
 import { createJsonDatabase } from "./db/json-database";
 import { createSeed } from "./db/seed";
+import type { HttpDependencies } from "./http/route-handler";
 import { createAuthService, type AuthService } from "./services/auth-service";
 import { createContactService, type ContactService } from "./services/contact-service";
 import { createTransferService, type TransferService } from "./services/transfer-service";
@@ -40,4 +43,22 @@ export function getServices(): Services {
   }
 
   return cachedServices;
+}
+
+let cachedHttpDependencies: HttpDependencies | undefined;
+
+export function getHttpDependencies(): HttpDependencies {
+  if (!cachedHttpDependencies) {
+    cachedHttpDependencies = {
+      services: getServices(),
+      random: () => Math.random(),
+      sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+      createRequestId: () => randomUUID(),
+      logger,
+      reporter: getErrorReporter(),
+      allowScenarioOverride: getEnv().MOCK_ALLOW_SCENARIO_OVERRIDE,
+    };
+  }
+
+  return cachedHttpDependencies;
 }

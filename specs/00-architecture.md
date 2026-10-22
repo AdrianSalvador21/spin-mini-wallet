@@ -221,14 +221,28 @@ Error envelope, identical on every endpoint:
 
 ```ts
 interface ApiErrorBody {
-  error: { code: ApiErrorCode; message: string; requestId: string; details?: Record<string, string[]> };
+  error: {
+    code: ApiErrorCode; message: string; requestId: string;
+    details?: Record<string, string[]>; balance?: Money;
+  };
 }
 type ApiErrorCode =
-  | "VALIDATION_ERROR" | "UNAUTHORIZED" | "NOT_FOUND" | "INSUFFICIENT_FUNDS"
+  | "VALIDATION_ERROR" | "UNAUTHORIZED" | "FORBIDDEN" | "NOT_FOUND" | "INSUFFICIENT_FUNDS"
   | "IDEMPOTENCY_CONFLICT" | "UPSTREAM_UNAVAILABLE" | "INTERNAL_ERROR";
 ```
 
-`message` is an i18n key, not final text. The UI translates it.
+`message` is an i18n key, not final text. The UI translates it. `balance` is present only on `INSUFFICIENT_FUNDS`, so the client reads the current balance as `Money` instead of parsing it out of a string. `FORBIDDEN` answers a CSRF check failure (SPEC 04): `403` for a bad `Origin`, `415` for a wrong `Content-Type`. Every response from `/api/v1/*`, success or error, carries `Cache-Control: no-store` — balances and receipts must never be served from a shared cache.
+
+| `ApiErrorCode` | Status | Meaning |
+| --- | --- | --- |
+| `VALIDATION_ERROR` | 400 | Invalid input; `details` lists the field codes |
+| `UNAUTHORIZED` | 401 | Missing or expired session |
+| `FORBIDDEN` | 403 / 415 | CSRF check failed (bad `Origin` or wrong `Content-Type`) |
+| `NOT_FOUND` | 404 | Resource does not exist for this user |
+| `INSUFFICIENT_FUNDS` | 422 | Real or simulated lack of balance; `balance` carries the current amount |
+| `IDEMPOTENCY_CONFLICT` | 409 | Same `Idempotency-Key`, different payload |
+| `UPSTREAM_UNAVAILABLE` | 503 | Simulated network failure or forced read error |
+| `INTERNAL_ERROR` | 500 | Unexpected server error or simulated unknown failure |
 
 Pagination: the cursor is opaque (base64url of `createdAt|id`). Ordering stays stable even if new movements are inserted while the user paginates.
 
@@ -250,6 +264,10 @@ Deterministic override:
 
 - The `mock_scenario` cookie forces a scenario. It is only honored when `MOCK_ALLOW_SCENARIO_OVERRIDE=true`.
 - The `mock_read_scenario` cookie (`ok`, `error`, `slow`) does the same for the read endpoints (`wallet/summary`, `wallet/movements`, `contacts`), so the Home loading and error states can be shown on demand. Reads without it respond after 300–800 ms.
+  - `ok`: wait 300–800 ms, then respond normally.
+  - `slow`: wait 3000 ms, then respond normally — long enough to see the loading skeleton.
+  - `error`: wait 300–800 ms, then `503 UPSTREAM_UNAVAILABLE` — makes the "Reintentar" button meaningful.
+  - An unknown cookie value is ignored and falls back to the random pick (transfer) or `ok` (read) instead of breaking the endpoint.
 - The DEV panel writes it. The panel only renders with `NEXT_PUBLIC_ENABLE_DEV_TOOLS=true`.
 - Playwright writes the cookie directly so every E2E is deterministic.
 
@@ -260,6 +278,8 @@ Idempotency:
 - Same key with the same payload returns the existing transfer (`201`, no double charge).
 - Same key with a different payload returns `409 IDEMPOTENCY_CONFLICT`.
 - Failed attempts are not stored, so the retry can complete.
+
+`POST /api/v1/transfers` runs its checks in this fixed order (SPEC 04): CSRF and content type → session → input validation (`Idempotency-Key` format, then payload schema) → idempotency replay (`findByIdempotencyKey`) → scenario pick and the behavior above. When the key already has a completed transfer, the handler skips the random scenario and latency entirely and calls `TransferService.create` directly: its own payload-hash check then decides the outcome, returning the stored transfer (`201`, matching payload) or `409 IDEMPOTENCY_CONFLICT` (different payload) with no further debit either way. Invalid input always gets a real `400` before any scenario applies, and a retry after a `timeout` never lands on a fake failure because the replay check runs before the random pick.
 
 ## 10. Simulated persistence
 
@@ -389,9 +409,9 @@ Approved tokens (extracted from spinbyoxxo.com.mx):
 | Random confirmation: 5 scenarios | Scenario engine + per-outcome UI | 04, 08 |
 | Justified SSR/CSR | Section 4 of this spec + `DECISIONS.md` | 09 |
 | Justified state management | Section 3 + `DECISIONS.md` | 08 |
-| API Routes with mocked data | `src/app/api/v1/*` | 03 |
+| API Routes with mocked data | `src/app/api/v1/*` | 04 |
 | Unit tests for validations, hooks and components | Vitest + MSW | 01–07 |
-| Justified E2E | Playwright | 01, 08 |
+| Justified E2E | Playwright | 01, 05, 08 |
 | README, DECISIONS, AI_USAGE, time spent | Final documentation | 08 |
 
 ## 18. Decisions
