@@ -73,6 +73,16 @@ test.describe("home", () => {
     await expect(page.getByRole("heading", { name: "Hoy" })).toBeVisible();
   });
 
+  test("the error scenario fails both blocks without falling into error.tsx", async ({ page, context }) => {
+    await loginAs(page, MARIANA);
+    await setReadScenario(context, READ_SCENARIO.ERROR);
+    await page.reload();
+
+    await expect(page.getByText("No pudimos cargar tu saldo")).toBeVisible();
+    await expect(page.getByText("No pudimos cargar tus movimientos")).toBeVisible();
+    await expect(page.getByText("Algo salió mal")).toBeHidden();
+  });
+
   test("shows the Home skeleton before the balance when the read is slow", async ({ page, context }) => {
     await loginAs(page, MARIANA);
     await setReadScenario(context, READ_SCENARIO.SLOW);
