@@ -91,6 +91,18 @@ Zod schemas (`schemas.ts` files) wrap the validators above through `fromValidato
 
 `src/domain/**` has its own 100 % coverage threshold in `vitest.config.mts` (the rest of the app keeps 80 %) — a pure function with an untested branch is a bug waiting in a financial app, not an acceptable gap.
 
+### Server core (`src/server/`)
+
+Every file under `src/server/` starts with `import "server-only"`. Vitest runs `src/server/**` under the `node` project (see `vitest.config.mts`), where `server-only` is aliased to its empty module so these files can be imported from tests at all; everything else runs under the `dom` (jsdom) project.
+
+`db/json-database.ts` exposes a `Database` with `read`/`transaction`, backed by a single JSON file at `getEnv().MOCK_DB_PATH`. `transaction` re-reads the file, runs the callback against an in-memory snapshot, and writes it back atomically (temp file + `rename`); if the callback throws, nothing is written. A single process-wide lock (`Symbol.for` on `globalThis`) serializes transactions even if Next loads the module more than once. `repositories/*` are small synchronous objects (`findById`, `insert`, …) over that snapshot — `find`/`list` return live references into it, so a service can mutate a wallet's `balance` directly inside a `transaction` and the change gets persisted when it writes back. Services only ever see `Database`/`Repositories`, never the file path, so a real database could replace the JSON file without touching services or UI.
+
+Services (`services/*-service.ts`) are built by factories that take `ServiceDependencies = { db, now, random, createId }` (`services/types.ts`), so tests control time, randomness and IDs instead of mocking globals. They return `Result<View, ServiceError>` and never throw for an expected failure. The views in `services/views.ts` (`UserView`, `AccountView`, `ContactView`, `MovementView`, `TransferView`) are the only shapes that may leave `src/server/`: a full account number or password hash never does, whether the caller is a Server Component or (from SPEC 04 onward) a Route Handler.
+
+`session/password.ts` (`scrypt` + `timingSafeEqual`) and `session/token.ts` (HMAC-signed, pure, framework-free) back `session/session.ts`'s `getSession()`/`requireSession()`/`setSessionCookie()`/`clearSessionCookie()`. `requireSession()` is the only thing in this layer that throws (`UnauthorizedError`, `errors.ts`) — it is the single entry point SPEC 04's Route Handlers and SPEC 05's Server Actions use to protect themselves; `getSession()` returns `null` instead.
+
+`container.ts`'s `getServices()` builds the four services once, from `getEnv()`, `Date`, `Math.random` and `crypto.randomUUID`, and caches the result for the life of the process.
+
 ### Styling tokens (`src/app/globals.css`)
 
 Spin's brand tokens (colors, radii, fonts) are declared in `@theme static` so they're always emitted as CSS variables — both Tailwind utilities and SCSS Modules read the same source. Full token table is in `specs/00-architecture.md` §14.
