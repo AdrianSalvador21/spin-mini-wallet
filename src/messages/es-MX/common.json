@@ -7,6 +7,10 @@
     "metadata": {
       "description": "Envía dinero y consulta tu saldo y movimientos con Spin by OXXO."
     },
+    "password": {
+      "show": "Mostrar contraseña",
+      "hide": "Ocultar contraseña"
+    },
     "home": {
       "title": "Tu dinero, tan fácil como suena",
       "subtitle": "Base del proyecto lista"
