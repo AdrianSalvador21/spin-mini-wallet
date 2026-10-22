@@ -1,6 +1,6 @@
 # SPEC 06 — Home: private shell, balance and movements
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 00, SPEC 02, SPEC 03, SPEC 04, SPEC 05
 > **Date:** 2026-10-22
 > **Objective:** Build PDF screen 2 (balance, name, recent movements with loading, empty and error states, and the "Enviar dinero" CTA) inside the responsive private shell, with SSR streaming hydrated into TanStack Query and cursor pagination on the client.
@@ -391,37 +391,37 @@ Each step leaves lint, typecheck and tests green and is committed on its own. Be
 
 ## Acceptance criteria
 
-- [ ] `package.json` lists `@tanstack/react-query` 5.x under `dependencies`.
-- [ ] SPEC 00 §8, §9, §12 and §14 and `challenge.md` §8.4 describe the decisions of this spec.
-- [ ] `maskPhone("5512345678")` returns `"55 •••• 5678"` and `validateMovementDirection("x")` returns `DIRECTION_INVALID`, with 100 % coverage on `src/domain/**`.
-- [ ] `GET /api/v1/wallet/summary` for Mariana answers `user.maskedPhone: "55 •••• 5678"` and `user.email: "mariana@spin.test"`, and no response contains a full phone number.
-- [ ] `GET /api/v1/wallet/movements?direction=credit` returns only `credit` items, and `?direction=x` answers `400` with `details.direction: ["DIRECTION_INVALID"]`.
-- [ ] Every `transfer_out` movement in the seed has a `counterpartyAccount` whose `masked` value contains at most 4 digits.
-- [ ] Paginating with `direction=credit` from a cursor returns no item twice and skips none.
-- [ ] With `mock_read_scenario=movements_error`, the movements endpoint answers `503` and the summary and contacts endpoints answer `200`.
-- [ ] `getHomeLoader().loadMovements` under `movements_error` returns `unavailable`, and `loadSummary` under the same cookie returns the summary.
-- [ ] `getDateGroup` puts a movement from 00:05 Mexico City time today in `today` and one from 23:55 yesterday in `yesterday`, at any server time zone.
-- [ ] `apiGet` turns a rejected `fetch` into `{ kind: "network" }` and a `503` envelope into `{ kind: "api", code: "UPSTREAM_UNAVAILABLE", requestId }`.
-- [ ] `avatar`, `skeleton`, `bottom-sheet`, `side-nav` and `block-error-boundary` live in `src/shared/ui/` with `.tsx`, `.test.tsx`, `.module.scss` where they have styles and `types.ts` where they declare constants, and no SCSS file has a hex value or a loose measured value.
-- [ ] `/home` for Mariana shows her name, "$12,450.80" and 10 movements under date-group headings, and "Ver más movimientos" loads 10 more each time until 25, when it disappears.
-- [ ] While the next page loads, the button is in `loading` and 3 skeleton rows follow the list.
-- [ ] Choosing "Recibidos" changes the URL to `?direction=credit` without a full page load, every visible amount starts with `+`, and a reload keeps "Recibidos" selected.
-- [ ] `/home` for Diego shows "$500.00" and "Aún no tienes movimientos".
-- [ ] With `mock_read_scenario=slow`, the Home skeleton is visible before the balance appears.
-- [ ] With `mock_read_scenario=movements_error`, the balance stays visible and the movements block shows "No pudimos cargar tus movimientos", "Reintentar" and "Referencia: …".
-- [ ] With `mock_read_scenario=error`, both blocks show their own error state and the page does not fall into `error.tsx`.
-- [ ] Hiding the balance replaces the amount with "$ •••••", sets `aria-pressed="true"`, and survives a reload with no visible flash of the amount.
-- [ ] Credits show a `+` sign and debits a `−` sign, so color never carries the meaning alone.
-- [ ] Below 1024 px, the avatar is a 44 × 44 button that opens a modal "Mi cuenta" dialog with the masked phone and email, Esc closes it and returns focus to the avatar, and "Cerrar sesión" inside it lands on `/login`.
-- [ ] From 1024 to 1279 px the navigation is a 72 px icon rail; from 1280 px it is a 240 px sidebar with labels; in both, "Inicio" has `aria-current="page"` on `/home`.
-- [ ] From 1024 px, the balance card sits in the aside (320 px at `lg`, 340 px from `xl`) and stays visible while the page scrolls, and the content never exceeds 1040 px.
-- [ ] "Enviar dinero" is the only orange element on Home and links to `/transfers/new/amount`.
-- [ ] No text on Home is smaller than 12 px.
-- [ ] An error thrown while rendering one Home block leaves the other block visible.
-- [ ] `npm run test:e2e` passes on the `mobile` and `desktop` projects.
-- [ ] `npm run lint`, `npm run typecheck`, `npm run test:coverage` (100 % on `src/domain/**`, 80 % on `src/server/**`, `src/shared/lib/**` and `src/shared/observability/**`) and `npm run build` finish with no errors.
-- [ ] No component or page contains user-facing text outside `src/messages/es-MX/`.
-- [ ] There are no comments in any file created or modified in this milestone.
+- [x] `package.json` lists `@tanstack/react-query` 5.x under `dependencies`.
+- [x] SPEC 00 §8, §9, §12 and §14 and `challenge.md` §8.4 describe the decisions of this spec.
+- [x] `maskPhone("5512345678")` returns `"55 •••• 5678"` and `validateMovementDirection("x")` returns `DIRECTION_INVALID`, with 100 % coverage on `src/domain/**`.
+- [x] `GET /api/v1/wallet/summary` for Mariana answers `user.maskedPhone: "55 •••• 5678"` and `user.email: "mariana@spin.test"`, and no response contains a full phone number.
+- [x] `GET /api/v1/wallet/movements?direction=credit` returns only `credit` items, and `?direction=x` answers `400` with `details.direction: ["DIRECTION_INVALID"]`.
+- [x] Every `transfer_out` movement in the seed has a `counterpartyAccount` whose `masked` value contains at most 4 digits.
+- [x] Paginating with `direction=credit` from a cursor returns no item twice and skips none.
+- [x] With `mock_read_scenario=movements_error`, the movements endpoint answers `503` and the summary and contacts endpoints answer `200`.
+- [x] `getHomeLoader().loadMovements` under `movements_error` returns `unavailable`, and `loadSummary` under the same cookie returns the summary.
+- [x] `getDateGroup` puts a movement from 00:05 Mexico City time today in `today` and one from 23:55 yesterday in `yesterday`, at any server time zone.
+- [x] `apiGet` turns a rejected `fetch` into `{ kind: "network" }` and a `503` envelope into `{ kind: "api", code: "UPSTREAM_UNAVAILABLE", requestId }`.
+- [x] `avatar`, `skeleton`, `bottom-sheet`, `side-nav` and `block-error-boundary` live in `src/shared/ui/` with `.tsx`, `.test.tsx`, `.module.scss` where they have styles and `types.ts` where they declare constants, and no SCSS file has a hex value or a loose measured value.
+- [x] `/home` for Mariana shows her name, "$12,450.80" and 10 movements under date-group headings, and "Ver más movimientos" loads 10 more each time until 25, when it disappears.
+- [x] While the next page loads, the button is in `loading` and 3 skeleton rows follow the list.
+- [x] Choosing "Recibidos" changes the URL to `?direction=credit` without a full page load, every visible amount starts with `+`, and a reload keeps "Recibidos" selected.
+- [x] `/home` for Diego shows "$500.00" and "Aún no tienes movimientos".
+- [x] With `mock_read_scenario=slow`, the Home skeleton is visible before the balance appears.
+- [x] With `mock_read_scenario=movements_error`, the balance stays visible and the movements block shows "No pudimos cargar tus movimientos", "Reintentar" and "Referencia: …".
+- [x] With `mock_read_scenario=error`, both blocks show their own error state and the page does not fall into `error.tsx`.
+- [x] Hiding the balance replaces the amount with "$ •••••", sets `aria-pressed="true"`, and survives a reload with no visible flash of the amount.
+- [x] Credits show a `+` sign and debits a `−` sign, so color never carries the meaning alone.
+- [x] Below 1024 px, the avatar is a 44 × 44 button that opens a modal "Mi cuenta" dialog with the masked phone and email, Esc closes it and returns focus to the avatar, and "Cerrar sesión" inside it lands on `/login`.
+- [x] From 1024 to 1279 px the navigation is a 72 px icon rail; from 1280 px it is a 240 px sidebar with labels; in both, "Inicio" has `aria-current="page"` on `/home`.
+- [x] From 1024 px, the balance card sits in the aside (320 px at `lg`, 340 px from `xl`) and stays visible while the page scrolls, and the content never exceeds 1040 px.
+- [x] "Enviar dinero" is the only orange element on Home and links to `/transfers/new/amount`.
+- [x] No text on Home is smaller than 12 px.
+- [x] An error thrown while rendering one Home block leaves the other block visible.
+- [x] `npm run test:e2e` passes on the `mobile` and `desktop` projects.
+- [x] `npm run lint`, `npm run typecheck`, `npm run test:coverage` (100 % on `src/domain/**`, 80 % on `src/server/**`, `src/shared/lib/**` and `src/shared/observability/**`) and `npm run build` finish with no errors.
+- [x] No component or page contains user-facing text outside `src/messages/es-MX/`.
+- [x] There are no comments in any file created or modified in this milestone.
 
 ## Decisions
 
