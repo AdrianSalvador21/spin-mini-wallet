@@ -14,17 +14,27 @@ export interface ValidTransfer {
   recipient: TransferRecipientInput;
 }
 
+export function validateTransferAmount(
+  amount: Money,
+  availableBalance: Money,
+): Result<Money, TransferRuleViolation[]> {
+  if (amount.amountInCents <= 0) {
+    return err(["AMOUNT_NOT_POSITIVE"]);
+  }
+
+  if (compareMoney(amount, availableBalance) > 0) {
+    return err(["INSUFFICIENT_FUNDS"]);
+  }
+
+  return ok(amount);
+}
+
 export function validateTransfer(
   draft: TransferDraft,
   availableBalance: Money,
 ): Result<ValidTransfer, TransferRuleViolation[]> {
-  const violations: TransferRuleViolation[] = [];
-
-  if (draft.amount.amountInCents <= 0) {
-    violations.push("AMOUNT_NOT_POSITIVE");
-  } else if (compareMoney(draft.amount, availableBalance) > 0) {
-    violations.push("INSUFFICIENT_FUNDS");
-  }
+  const amountResult = validateTransferAmount(draft.amount, availableBalance);
+  const violations: TransferRuleViolation[] = amountResult.ok ? [] : [...amountResult.error];
 
   if (draft.recipient === null) {
     violations.push("RECIPIENT_REQUIRED");
