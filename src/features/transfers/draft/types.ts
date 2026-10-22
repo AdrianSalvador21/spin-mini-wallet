@@ -40,3 +40,10 @@ export interface TransferDraftActions {
 }
 
 export type TransferDraftStore = TransferDraftState & TransferDraftActions;
+
+export interface ValidTransferDraft {
+  amountInCents: Cents;
+  concept: string;
+  recipient: DraftRecipient;
+  idempotencyKey: string;
+}
