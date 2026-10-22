@@ -1,0 +1,10 @@
+@use "../../shared/styles/breakpoints" as bp;
+
+.public-layout__column {
+  background: var(--color-white);
+
+  @include bp.md {
+    overflow: hidden;
+    border-radius: var(--radius-l);
+  }
+}

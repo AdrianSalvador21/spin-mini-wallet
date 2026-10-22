@@ -1,3 +1,5 @@
+export const PHONE_COUNTRY_PREFIX = "+52";
+
 const PHONE_DIGITS = 10;
 const GROUP_BOUNDARIES = [2, 6] as const;
 

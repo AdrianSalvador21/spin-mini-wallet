@@ -87,13 +87,15 @@ Scale tokens, added with the first primitives so no SCSS file carries a loose me
 | CSS token | Value |
 | --- | --- |
 | `--space-1/2/3/4/5/6/8` | `4px` / `8px` / `12px` / `16px` / `20px` / `24px` / `32px` |
-| `--text-size-xs/sm/md/lg` | `12px` / `13px` / `14px` / `15px` |
+| `--text-size-xs/sm/md/lg/xl` | `12px` / `13px` / `14px` / `15px` / `21px` |
+| `--radius-xl` | `28px` |
 | `--size-control` | `50px` |
 | `--size-icon-sm/md` | `16px` / `18px` |
 | `--size-icon-button` | `32px` |
 | `--border-width-thin` / `--border-width` | `1.5px` / `2px` |
 | `--focus-ring-width` / `--focus-ring-offset` / `--focus-halo` | `3px` / `2px` / `4px` |
 | `--duration-fast` / `--duration-spin` | `150ms` / `1s` |
+| `--container-auth` | `420px` |
 
 ### UI primitives (`src/shared/ui/`)
 
@@ -106,7 +108,7 @@ Scale tokens, added with the first primitives so no SCSS file carries a loose me
 | `Alert` | `tone: "danger" \| "warning" \| "success" \| "info"`, `role?`, `children` | Tone background and icon (`alert`, `clock`, `check`, `alert`). `ALERT_TONE` is an `as const` object, and the tone → icon mapping is an exhaustive `switch` |
 | `AppBar` | `title`, `backHref` | Lavender round back link (`Icon` `back`, labeled "Regresar") and the title. SPEC 07 adds the step counter |
 
-Each primitive folder has a `types.ts` with its closed-set constants and unions (`ICON_NAME`, `BUTTON_VARIANT`, `BUTTON_TYPE`, `ALERT_TONE`); the `XProps` interface stays in the component file. `BUTTON_TYPE = { BUTTON: "button", SUBMIT: "submit", RESET: "reset" }` replaces any raw `type` literal (user decision). Every component consumes only CSS variables (colors and scale tokens) and the `_typography.scss` mixins. Focus is visible (`--color-lavender-500` outline). The spinner respects `prefers-reduced-motion`. Texts come from the caller or from `common.json`, never inline.
+Each primitive folder has a `types.ts` with its closed-set constants and unions (`ICON_NAME`, `ICON_SIZE`, `BUTTON_VARIANT`, `BUTTON_TYPE`, `INPUT_TYPE`, `INPUT_MODE`, `AUTO_COMPLETE`, `ALERT_TONE`, `ALERT_ROLE`); the `XProps` interface stays in the component file. `BUTTON_TYPE = { BUTTON: "button", SUBMIT: "submit", RESET: "reset" }` replaces any raw `type` literal (user decision). Every component consumes only CSS variables (colors and scale tokens) and the `_typography.scss` mixins. Focus is visible (`--color-lavender-500` outline). The spinner respects `prefers-reduced-motion`. Texts come from the caller or from `common.json`, never inline.
 
 ### Auth form contract (`src/shared/lib/auth/form-state.ts`)
 
@@ -188,6 +190,8 @@ In both, a thrown error is logged with `logger.error`, sent to `reporter.capture
 `redirect()` is called outside any `try`/`catch`, because it works by throwing. Next's built-in origin check covers CSRF for Server Actions (SPEC 00 §11). The server always re-parses the input. Client validation is only UX.
 
 ### Forms (`src/features/auth/components/`)
+
+One folder per component (user decision): `login-form/`, `register-form/`, `auth-failure-alert/` and `logout-button/`, each with its `.tsx`, `.test.tsx` and, when it has styles, `.module.scss`.
 
 - `login-form.tsx`: React Hook Form with `zodResolver(loginSchema)` and the action through `useActionState`, dispatched inside `startTransition` from `handleSubmit` (user decision). The method defaults to `phone`. The link "Iniciar sesión con email" / "con celular" switches the same form without changing route. It clears the identifier and any server error, keeps the password, and moves focus to the new field. The phone field uses `prefix="+52"`, `inputMode="tel"`, `autoComplete="tel-national"` and `formatPhoneInput`. The email field uses `inputMode="email"` and `autoComplete="email"`.
 - `register-form.tsx`: the same wiring with `registerSchema`. Fields: full name, mobile (same mask), email, password with the policy hint, and confirmation. `autoComplete` is `name`, `tel-national`, `email`, `new-password` and `new-password`.
@@ -292,7 +296,7 @@ Each step leaves lint, typecheck and tests green and is committed on its own. Be
 9. **Server Actions and messages.** Create `src/features/auth/actions.ts`, plus `auth.json`, `home.json` and the new `common.json` keys, aggregated in `index.ts`. Add a test that mocks `next/headers` and `next/navigation`: success sets the cookie and redirects to `/home`, failure returns the state and does not redirect, and logout clears the cookie and redirects to `/login`.
    - Why: thin bindings between the factories, the cookie and navigation.
 
-10. **Home placeholder and logout.** Create `src/features/auth/components/logout-button.tsx` with a test, and `src/app/(private)/home/page.tsx`. Manual check: with a cookie set from step 9, `/home` shows the greeting, and logout returns to `/login` (404 until step 11).
+10. **Home placeholder and logout.** Create `src/features/auth/components/logout-button/logout-button.tsx` with a test, and `src/app/(private)/home/page.tsx`. Manual check: with a cookie set from step 9, `/home` shows the greeting, and logout returns to `/login` (404 until step 11).
     - Why: login needs a real destination, so the full flow can be tested end to end.
 
 11. **Login page.** Create `src/app/(public)/layout.tsx`, `(public)/login/page.tsx`, `login-form.tsx` and `auth-failure-alert.tsx`, with tests that replace `../actions` with `vi.mock`. Cover: the phone default with `+52` and the mask, the switch to email that moves focus and clears the identifier, inline field errors on submit with no action call, the three alert kinds with `role="alert"`, the alert's `default` branch with an invalid kind, and the loading state on submit.

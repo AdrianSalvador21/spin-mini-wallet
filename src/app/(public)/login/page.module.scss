@@ -1,0 +1,39 @@
+@use "../../../shared/styles/typography" as type;
+
+.login-page__hero {
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  background: linear-gradient(90deg, var(--color-brand-purple) 40%, var(--color-brand-purple-2) 100%);
+}
+
+.login-page__title {
+  @include type.display(var(--text-size-xl));
+  color: var(--color-white);
+}
+
+.login-page__subtitle {
+  @include type.body(var(--text-size-sm));
+  color: color-mix(in srgb, var(--color-white) 85%, transparent);
+}
+
+.login-page__footer {
+  @include type.body(var(--text-size-sm));
+  text-align: center;
+  color: var(--color-ink-500);
+}
+
+.login-page__register-link {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--color-brand-orange);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    border-radius: var(--radius-s);
+    outline: var(--focus-ring-width) solid var(--color-lavender-500);
+    outline-offset: var(--focus-ring-offset);
+  }
+}

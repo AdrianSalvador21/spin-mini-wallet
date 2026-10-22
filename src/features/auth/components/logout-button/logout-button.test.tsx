@@ -6,7 +6,7 @@ import { LogoutButton } from "./logout-button";
 
 const mocks = vi.hoisted(() => ({ logoutAction: vi.fn() }));
 
-vi.mock("../actions", () => ({ logoutAction: mocks.logoutAction }));
+vi.mock("../../actions", () => ({ logoutAction: mocks.logoutAction }));
 
 beforeEach(() => {
   mocks.logoutAction.mockReset();
@@ -20,7 +20,8 @@ describe("LogoutButton", () => {
   });
 
   it("calls the logout action and shows the loading state while it runs", async () => {
-    mocks.logoutAction.mockReturnValue(new Promise(() => {}));
+    const pending = Promise.withResolvers<void>();
+    mocks.logoutAction.mockReturnValue(pending.promise);
     renderWithProviders(<LogoutButton />);
 
     await userEvent.click(screen.getByRole("button", { name: "Cerrar sesión" }));
@@ -29,5 +30,8 @@ describe("LogoutButton", () => {
     const button = await screen.findByRole("button", { name: "Cerrando sesión…" });
     expect(button).toBeDisabled();
     expect(button).toHaveAttribute("aria-busy", "true");
+
+    pending.resolve();
+    expect(await screen.findByRole("button", { name: "Cerrar sesión" })).toBeEnabled();
   });
 });

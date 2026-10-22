@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { useFormStatus } from "react-dom";
 import { Button } from "@/shared/ui/button/button";
 import { BUTTON_TYPE, BUTTON_VARIANT } from "@/shared/ui/button/types";
-import { logoutAction } from "../actions";
+import { logoutAction } from "../../actions";
 
 function LogoutSubmit() {
   const t = useTranslations("auth.logout");

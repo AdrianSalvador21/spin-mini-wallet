@@ -30,6 +30,7 @@
   --radius-s: 10px;
   --radius-m: 16px;
   --radius-l: 24px;
+  --radius-xl: 28px;
   --radius-pill: 999px;
 
   --space-1: 4px;
@@ -44,6 +45,7 @@
   --text-size-sm: 13px;
   --text-size-md: 14px;
   --text-size-lg: 15px;
+  --text-size-xl: 21px;
 
   --size-control: 50px;
   --size-icon-sm: 16px;
@@ -59,6 +61,8 @@
 
   --duration-fast: 150ms;
   --duration-spin: 1s;
+
+  --container-auth: 420px;
 
   --font-display: var(--font-montserrat), system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
   --font-body: var(--font-open-sans), system-ui, -apple-system, "Segoe UI", Arial, sans-serif;

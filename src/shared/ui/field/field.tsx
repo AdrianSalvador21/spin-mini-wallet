@@ -1,11 +1,14 @@
 import type { ComponentProps, ReactNode } from "react";
 import styles from "./field.module.scss";
-import { INPUT_TYPE, type InputType } from "./types";
+import { INPUT_TYPE, type AutoComplete, type InputMode, type InputType } from "./types";
 
-export interface FieldProps extends Omit<ComponentProps<"input">, "id" | "prefix" | "type"> {
+export interface FieldProps
+  extends Omit<ComponentProps<"input">, "id" | "prefix" | "type" | "inputMode" | "autoComplete"> {
   label: ReactNode;
   id: string;
   type?: InputType;
+  inputMode?: InputMode;
+  autoComplete?: AutoComplete;
   prefix?: ReactNode;
   suffix?: ReactNode;
   hint?: ReactNode;

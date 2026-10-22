@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
-import { LogoutButton } from "@/features/auth/components/logout-button";
+import { LogoutButton } from "@/features/auth/components/logout-button/logout-button";
 import { getServices } from "@/server/container";
 import { getSession } from "@/server/session/session";
 import { ROUTES } from "@/shared/lib/routes";
