@@ -1,0 +1,16 @@
+.icon {
+  display: inline-block;
+  flex: none;
+  color: inherit;
+  vertical-align: middle;
+}
+
+.icon--sm {
+  width: var(--size-icon-sm);
+  height: var(--size-icon-sm);
+}
+
+.icon--md {
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
+}
