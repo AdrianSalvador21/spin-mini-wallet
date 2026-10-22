@@ -16,7 +16,7 @@ interface NewContactBody {
 }
 
 function isPhone(account: RecipientAccount, phone: string): boolean {
-  return account.type === RECIPIENT_ACCOUNT_TYPE.PHONE && account.phone === phone;
+  return account.type === RECIPIENT_ACCOUNT_TYPE.PHONE && account.phone.replace(/\D/g, "") === phone;
 }
 
 function toMockContactView({ name, account, saveAsFavorite }: NewContactBody): ContactView {

@@ -8,9 +8,11 @@ import { EMPTY_DRAFT, selectDraftState, useTransferDraft } from "../../draft/dra
 import { WizardShell } from "./wizard-shell";
 
 const pathnameMock = vi.fn(() => "/transfers/new/amount");
+const searchParamsMock = vi.fn(() => new URLSearchParams());
 
 vi.mock("next/navigation", () => ({
   usePathname: () => pathnameMock(),
+  useSearchParams: () => searchParamsMock(),
 }));
 
 function renderShell() {
@@ -23,6 +25,7 @@ function renderShell() {
 
 beforeEach(() => {
   pathnameMock.mockReturnValue("/transfers/new/amount");
+  searchParamsMock.mockReturnValue(new URLSearchParams());
   useTransferDraft.setState(EMPTY_DRAFT);
 });
 
@@ -40,6 +43,32 @@ describe("WizardShell", () => {
     expect(within(appBar).getByRole("heading", { level: 1 })).toHaveTextContent(title);
     expect(within(appBar).getByText(counter)).toBeInTheDocument();
     expect(within(appBar).getByRole("link", { name: "Regresar" })).toHaveAttribute("href", backHref);
+  });
+
+  it("titles the new-recipient form and goes back to the list from it", () => {
+    pathnameMock.mockReturnValue("/transfers/new/recipient");
+    searchParamsMock.mockReturnValue(new URLSearchParams("mode=new"));
+
+    renderShell();
+
+    const appBar = screen.getByRole("banner");
+    expect(within(appBar).getByRole("heading", { level: 1 })).toHaveTextContent("Nuevo destinatario");
+    expect(within(appBar).getByRole("link", { name: "Regresar" })).toHaveAttribute("href", "/transfers/new/recipient");
+    expect(screen.getByRole("heading", { level: 2, name: "Nuevo destinatario" })).toBeInTheDocument();
+  });
+
+  it("moves focus to the heading when the new-recipient form opens", () => {
+    pathnameMock.mockReturnValue("/transfers/new/recipient");
+    const { rerender } = renderShell();
+
+    searchParamsMock.mockReturnValue(new URLSearchParams("mode=new"));
+    rerender(
+      <WizardShell>
+        <p>Contenido del paso</p>
+      </WizardShell>,
+    );
+
+    expect(screen.getByRole("heading", { level: 2, name: "Nuevo destinatario" })).toHaveFocus();
   });
 
   it("exposes the progress of the current step", () => {

@@ -1,0 +1,73 @@
+.contact-row {
+  --contact-radio-dot: 6px;
+
+  position: relative;
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  min-height: var(--size-contact-row);
+  padding: 0 var(--space-4);
+  border: var(--border-width-thin) solid var(--color-lavender-300);
+  border-radius: var(--radius-m);
+  background: var(--color-white);
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast),
+    box-shadow var(--duration-fast);
+
+  &:has(:focus-visible) {
+    outline: var(--focus-ring-width) solid var(--color-lavender-500);
+    outline-offset: var(--focus-ring-offset);
+  }
+}
+
+.contact-row--checked {
+  border-color: var(--color-brand-purple);
+  box-shadow: 0 0 0 var(--focus-halo) var(--color-lavender-200);
+}
+
+.contact-row__input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.contact-row__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.contact-row__name {
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--text-size-md);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-ink-900);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contact-row__account {
+  font-size: var(--text-size-sm);
+  color: var(--color-ink-500);
+  font-variant-numeric: tabular-nums;
+}
+
+.contact-row__radio {
+  flex: none;
+  width: var(--size-checkbox);
+  height: var(--size-checkbox);
+  border: var(--border-width) solid var(--color-ink-300);
+  border-radius: 50%;
+  transition: border var(--duration-fast);
+}
+
+.contact-row--checked .contact-row__radio {
+  border: var(--contact-radio-dot) solid var(--color-brand-purple);
+}

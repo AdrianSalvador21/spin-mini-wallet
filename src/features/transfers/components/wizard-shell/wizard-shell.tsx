@@ -1,9 +1,10 @@
 "use client";
 
+import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { Suspense, useEffect, useId, useRef, type ReactNode } from "react";
 import { ROUTES } from "@/shared/lib/routes";
 import { AppBar } from "@/shared/ui/app-bar/app-bar";
 import { Icon } from "@/shared/ui/icon/icon";
@@ -13,8 +14,9 @@ import { Stepper, type StepperStep } from "@/shared/ui/stepper/stepper";
 import { STEP_STATE, type StepState } from "@/shared/ui/stepper/types";
 import { useTransferDraft } from "../../draft/draft-store";
 import { previousStepRoute, stepFromPathname, TRANSFER_STEP_ROUTE } from "../../draft/step-guard";
-import { TRANSFER_STEP, TRANSFER_STEP_ORDER } from "../../draft/types";
+import { TRANSFER_STEP, TRANSFER_STEP_ORDER, type TransferStep } from "../../draft/types";
 import { useDraftHydration } from "../../draft/use-draft-hydration";
+import { useNewRecipientMode } from "../../hooks/use-new-recipient-mode";
 import { useTransferBalance } from "../../hooks/use-transfer-balance";
 import { LiveSummary } from "../live-summary/live-summary";
 import styles from "./wizard-shell.module.scss";
@@ -27,6 +29,64 @@ function stepState(index: number, currentIndex: number): StepState {
   return index === currentIndex ? STEP_STATE.CURRENT : STEP_STATE.UPCOMING;
 }
 
+const NEW_RECIPIENT_TITLE = "newRecipient";
+
+type StepTitleKey = TransferStep | typeof NEW_RECIPIENT_TITLE;
+
+function titleKeyFor(step: TransferStep, isNew: boolean): StepTitleKey {
+  return step === TRANSFER_STEP.RECIPIENT && isNew ? NEW_RECIPIENT_TITLE : step;
+}
+
+function backRouteFor(step: TransferStep, isNew: boolean): Route {
+  return step === TRANSFER_STEP.RECIPIENT && isNew ? ROUTES.TRANSFER_RECIPIENT : previousStepRoute(step);
+}
+
+function WithRecipientMode({ render }: { render: (isNew: boolean) => ReactNode }) {
+  const { isNew } = useNewRecipientMode();
+
+  return render(isNew);
+}
+
+function ModeAware({ render }: { render: (isNew: boolean) => ReactNode }) {
+  return (
+    <Suspense fallback={render(false)}>
+      <WithRecipientMode render={render} />
+    </Suspense>
+  );
+}
+
+interface StepHeadingProps {
+  id: string;
+  titleKey: StepTitleKey;
+  visuallyHidden: boolean;
+}
+
+function StepHeading({ id, titleKey, visuallyHidden }: StepHeadingProps) {
+  const t = useTranslations("transfers.titles");
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const previousKey = useRef(titleKey);
+
+  useEffect(() => {
+    if (previousKey.current !== titleKey) {
+      previousKey.current = titleKey;
+      headingRef.current?.focus();
+    }
+  }, [titleKey]);
+
+  return (
+    <h2
+      id={id}
+      ref={headingRef}
+      tabIndex={-1}
+      className={[styles["wizard-shell__title"], visuallyHidden && styles["wizard-shell__title--hidden"]]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      {t(titleKey)}
+    </h2>
+  );
+}
+
 interface WizardShellProps {
   children: ReactNode;
 }
@@ -37,10 +97,7 @@ export function WizardShell({ children }: WizardShellProps) {
   const step = stepFromPathname(pathname);
   const currentIndex = TRANSFER_STEP_ORDER.indexOf(step);
   const total = TRANSFER_STEP_ORDER.length;
-  const title = t(`titles.${step}`);
   const headingId = useId();
-  const headingRef = useRef<HTMLHeadingElement>(null);
-  const previousStep = useRef(step);
   const hydrated = useDraftHydration();
   const claim = useTransferDraft((draft) => draft.claim);
   const reset = useTransferDraft((draft) => draft.reset);
@@ -53,13 +110,6 @@ export function WizardShell({ children }: WizardShellProps) {
     }
   }, [claim, hydrated, ownerId]);
 
-  useEffect(() => {
-    if (previousStep.current !== step) {
-      previousStep.current = step;
-      headingRef.current?.focus();
-    }
-  }, [step]);
-
   const stepperSteps: StepperStep[] = TRANSFER_STEP_ORDER.map((item, index) => ({
     label: t(`steps.${item}`),
     state: stepState(index, currentIndex),
@@ -69,7 +119,15 @@ export function WizardShell({ children }: WizardShellProps) {
   return (
     <div className={styles["wizard-shell"]}>
       <div className={styles["wizard-shell__mobile-top"]}>
-        <AppBar title={title} backHref={previousStepRoute(step)} step={{ current: currentIndex + 1, total }} />
+        <ModeAware
+          render={(isNew) => (
+            <AppBar
+              title={t(`titles.${titleKeyFor(step, isNew)}`)}
+              backHref={backRouteFor(step, isNew)}
+              step={{ current: currentIndex + 1, total }}
+            />
+          )}
+        />
         <div className={styles["wizard-shell__progress"]}>
           <ProgressSteps current={currentIndex + 1} total={total} label={t("steps.label")} />
         </div>
@@ -93,19 +151,15 @@ export function WizardShell({ children }: WizardShellProps) {
       >
         <section aria-labelledby={headingId} className={styles["wizard-shell__card"]}>
           <div className={styles["wizard-shell__card-head"]}>
-            <h2
-              id={headingId}
-              ref={headingRef}
-              tabIndex={-1}
-              className={[
-                styles["wizard-shell__title"],
-                step === TRANSFER_STEP.AMOUNT && styles["wizard-shell__title--hidden"],
-              ]
-                .filter(Boolean)
-                .join(" ")}
-            >
-              {title}
-            </h2>
+            <ModeAware
+              render={(isNew) => (
+                <StepHeading
+                  id={headingId}
+                  titleKey={titleKeyFor(step, isNew)}
+                  visuallyHidden={step === TRANSFER_STEP.AMOUNT}
+                />
+              )}
+            />
             <Link href={ROUTES.HOME} onClick={reset} className={styles["wizard-shell__cancel"]}>
               {t("actions.cancel")}
             </Link>
