@@ -1,11 +1,12 @@
 import "server-only";
 import { describe, expect, it } from "vitest";
-import { READ_SCENARIO, TRANSFER_SCENARIO } from "@/shared/lib/api/contract";
+import { READ_OUTCOME, READ_RESOURCE, READ_SCENARIO, TRANSFER_SCENARIO, type ReadScenario } from "@/shared/lib/api/contract";
 import {
   READ_LATENCY_MS,
   TRANSFER_LATENCY_MS,
   latencyMs,
   pickScenario,
+  readOutcome,
   resolveReadScenario,
   resolveTransferScenario,
 } from "./scenarios";
@@ -61,6 +62,30 @@ describe("resolveReadScenario", () => {
 
   it("falls back to ok when the cookie value is unknown", () => {
     expect(resolveReadScenario("typo", true)).toBe(READ_SCENARIO.OK);
+  });
+});
+
+describe("readOutcome", () => {
+  it.each([
+    [READ_SCENARIO.OK, READ_RESOURCE.SUMMARY, READ_OUTCOME.OK],
+    [READ_SCENARIO.OK, READ_RESOURCE.MOVEMENTS, READ_OUTCOME.OK],
+    [READ_SCENARIO.OK, READ_RESOURCE.CONTACTS, READ_OUTCOME.OK],
+    [READ_SCENARIO.SLOW, READ_RESOURCE.SUMMARY, READ_OUTCOME.SLOW],
+    [READ_SCENARIO.SLOW, READ_RESOURCE.MOVEMENTS, READ_OUTCOME.SLOW],
+    [READ_SCENARIO.SLOW, READ_RESOURCE.CONTACTS, READ_OUTCOME.SLOW],
+    [READ_SCENARIO.ERROR, READ_RESOURCE.SUMMARY, READ_OUTCOME.ERROR],
+    [READ_SCENARIO.ERROR, READ_RESOURCE.MOVEMENTS, READ_OUTCOME.ERROR],
+    [READ_SCENARIO.ERROR, READ_RESOURCE.CONTACTS, READ_OUTCOME.ERROR],
+    [READ_SCENARIO.MOVEMENTS_ERROR, READ_RESOURCE.SUMMARY, READ_OUTCOME.OK],
+    [READ_SCENARIO.MOVEMENTS_ERROR, READ_RESOURCE.MOVEMENTS, READ_OUTCOME.ERROR],
+    [READ_SCENARIO.MOVEMENTS_ERROR, READ_RESOURCE.CONTACTS, READ_OUTCOME.OK],
+  ])("maps %s / %s to %s", (scenario, resource, expected) => {
+    expect(readOutcome(scenario, resource)).toBe(expected);
+  });
+
+  it("throws for a scenario outside the union", () => {
+    const invalid = "unknown" as unknown as ReadScenario;
+    expect(() => readOutcome(invalid, READ_RESOURCE.SUMMARY)).toThrow();
   });
 });
 

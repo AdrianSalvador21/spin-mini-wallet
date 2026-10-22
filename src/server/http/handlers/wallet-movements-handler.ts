@@ -1,5 +1,6 @@
 import "server-only";
-import { API_ERROR_CODE } from "@/shared/lib/api/contract";
+import { validateMovementDirection } from "@/domain/wallet/validators";
+import { API_ERROR_CODE, READ_RESOURCE } from "@/shared/lib/api/contract";
 import { errorResponse, toApiError } from "../api-error";
 import { json } from "../json";
 import { createRouteHandler, type HttpDependencies } from "../route-handler";
@@ -9,7 +10,7 @@ const LIMIT_PATTERN = /^\d+$/;
 
 export function createWalletMovementsHandler(deps: HttpDependencies) {
   return createRouteHandler(deps, {}, (ctx) =>
-    runWithReadScenario(ctx, deps, async () => {
+    runWithReadScenario(ctx, deps, READ_RESOURCE.MOVEMENTS, async () => {
       const searchParams = ctx.request.nextUrl.searchParams;
       const limitParam = searchParams.get("limit");
 
@@ -24,9 +25,24 @@ export function createWalletMovementsHandler(deps: HttpDependencies) {
         );
       }
 
+      const directionParam = searchParams.get("direction");
+      const direction = directionParam !== null ? validateMovementDirection(directionParam) : undefined;
+
+      if (direction && !direction.ok) {
+        return errorResponse(
+          {
+            status: 400,
+            code: API_ERROR_CODE.VALIDATION_ERROR,
+            details: { direction: [direction.error] },
+          },
+          ctx.requestId,
+        );
+      }
+
       const result = await deps.services.wallet.listMovements(ctx.session.userId, {
         cursor: searchParams.get("cursor") ?? undefined,
         limit: limitParam !== null ? Number(limitParam) : undefined,
+        direction: direction?.ok ? direction.value : undefined,
       });
 
       if (!result.ok) {

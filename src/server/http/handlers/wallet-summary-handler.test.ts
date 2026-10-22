@@ -124,6 +124,9 @@ describe("createWalletSummaryHandler", () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.user.fullName).toBe("Mariana López");
+    expect(body.user.maskedPhone).toBe("55 •••• 5678");
+    expect(body.user.email).toBe("mariana@spin.test");
+    expect(JSON.stringify(body)).not.toContain("5512345678");
     expect(sleepCalls).toHaveLength(1);
   });
 
@@ -149,6 +152,17 @@ describe("createWalletSummaryHandler", () => {
 
     expect(response.status).toBe(503);
     expect((await response.json()).error.code).toBe("UPSTREAM_UNAVAILABLE");
+  });
+
+  it("answers 200 under the movements_error scenario, since it only fails the movements resource", async () => {
+    await signIn(marianaId);
+    const handler = createWalletSummaryHandler(buildHttpDeps());
+
+    const response = await handler(buildRequest("mock_read_scenario=movements_error"), {
+      params: Promise.resolve({}),
+    });
+
+    expect(response.status).toBe(200);
   });
 
   it("ignores the read scenario cookie when the override is not allowed", async () => {
