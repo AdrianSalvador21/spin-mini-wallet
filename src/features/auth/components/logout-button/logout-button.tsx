@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useFormStatus } from "react-dom";
+import { clearClientSession } from "@/shared/lib/session-storage/client-session";
 import { BUTTON_TYPE } from "@/shared/ui/button/types";
 import { Icon } from "@/shared/ui/icon/icon";
 import { ICON_NAME, ICON_SIZE } from "@/shared/ui/icon/types";
@@ -36,7 +37,7 @@ interface LogoutButtonProps {
 
 export function LogoutButton({ variant }: LogoutButtonProps) {
   return (
-    <form action={logoutAction}>
+    <form action={logoutAction} onSubmit={clearClientSession}>
       <LogoutSubmit variant={variant} />
     </form>
   );

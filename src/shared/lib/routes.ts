@@ -4,6 +4,9 @@ export const ROUTES = {
   REGISTER: "/register",
   HOME: "/home",
   TRANSFERS: "/transfers",
+  TRANSFER_AMOUNT: "/transfers/new/amount",
+  TRANSFER_RECIPIENT: "/transfers/new/recipient",
+  TRANSFER_REVIEW: "/transfers/new/review",
 } as const;
 
 export const ROUTE_ACCESS = {
