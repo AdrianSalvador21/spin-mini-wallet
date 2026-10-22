@@ -33,7 +33,21 @@
       "CONCEPT_INVALID_CHARACTERS": "El concepto solo puede contener letras, números, espacios, comas, puntos y guiones.",
       "PHONE_ALREADY_REGISTERED": "Este número celular ya tiene una cuenta. Inicia sesión.",
       "EMAIL_ALREADY_REGISTERED": "Este email ya tiene una cuenta. Inicia sesión.",
-      "RECIPIENT_IS_SELF": "No puedes enviarte dinero a ti mismo."
+      "RECIPIENT_IS_SELF": "No puedes enviarte dinero a ti mismo.",
+      "IDEMPOTENCY_KEY_REQUIRED": "No pudimos identificar este envío. Vuelve a intentarlo.",
+      "IDEMPOTENCY_KEY_INVALID": "No pudimos identificar este envío. Vuelve a intentarlo.",
+      "BODY_INVALID_JSON": "No pudimos leer la solicitud. Intenta de nuevo.",
+      "LIMIT_INVALID": "El número de movimientos solicitado no es válido."
+    },
+    "api": {
+      "VALIDATION_ERROR": "Revisa los datos e intenta de nuevo.",
+      "UNAUTHORIZED": "Tu sesión terminó. Inicia sesión de nuevo.",
+      "FORBIDDEN": "No pudimos verificar tu solicitud.",
+      "NOT_FOUND": "No encontramos lo que buscas.",
+      "INSUFFICIENT_FUNDS": "No tienes saldo suficiente para esta transferencia.",
+      "IDEMPOTENCY_CONFLICT": "Este envío ya se procesó con otros datos.",
+      "UPSTREAM_UNAVAILABLE": "Se perdió la conexión. No se hizo ningún cargo.",
+      "INTERNAL_ERROR": "Algo salió mal. Intenta más tarde."
     }
   }
 }

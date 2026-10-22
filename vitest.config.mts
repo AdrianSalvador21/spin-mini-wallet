@@ -14,7 +14,7 @@ export default defineConfig({
     setupFiles: [path.resolve(dirname, "src/test/setup.ts")],
     coverage: {
       provider: "v8",
-      include: ["src/domain/**", "src/server/**", "src/shared/lib/**"],
+      include: ["src/domain/**", "src/server/**", "src/shared/lib/**", "src/shared/observability/**"],
       thresholds: {
         lines: 80,
         statements: 80,
