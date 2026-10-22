@@ -1,0 +1,16 @@
+.progress-steps {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.progress-steps__bar {
+  flex: 1;
+  height: var(--size-progress-bar);
+  border-radius: var(--radius-pill);
+  background: var(--color-lavender-300);
+  transition: background-color var(--duration-fast);
+}
+
+.progress-steps__bar--done {
+  background: var(--color-brand-purple);
+}

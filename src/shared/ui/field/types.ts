@@ -4,6 +4,7 @@ export const INPUT_TYPE = {
   EMAIL: "email",
   TEL: "tel",
   RADIO: "radio",
+  CHECKBOX: "checkbox",
 } as const;
 
 export type InputType = (typeof INPUT_TYPE)[keyof typeof INPUT_TYPE];

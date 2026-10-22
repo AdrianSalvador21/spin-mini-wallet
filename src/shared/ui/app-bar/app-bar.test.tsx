@@ -15,4 +15,16 @@ describe("AppBar", () => {
 
     expect(screen.getByRole("heading", { level: 1, name: "Crea tu cuenta" })).toBeInTheDocument();
   });
+
+  it("renders the step counter when a step is given", () => {
+    renderWithProviders(<AppBar title="Enviar dinero" backHref={ROUTES.HOME} step={{ current: 1, total: 3 }} />);
+
+    expect(screen.getByText("1 de 3")).toBeInTheDocument();
+  });
+
+  it("renders no counter without a step", () => {
+    renderWithProviders(<AppBar title="Crea tu cuenta" backHref={ROUTES.LOGIN} />);
+
+    expect(screen.queryByText(/ de /)).not.toBeInTheDocument();
+  });
 });

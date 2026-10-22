@@ -8,9 +8,10 @@ import styles from "./app-bar.module.scss";
 interface AppBarProps {
   title: ReactNode;
   backHref: ComponentProps<typeof Link>["href"];
+  step?: { current: number; total: number };
 }
 
-export function AppBar({ title, backHref }: AppBarProps) {
+export function AppBar({ title, backHref, step }: AppBarProps) {
   const t = useTranslations("common.appBar");
 
   return (
@@ -22,6 +23,7 @@ export function AppBar({ title, backHref }: AppBarProps) {
         <span className={styles["app-bar__back-label"]}>{t("back")}</span>
       </Link>
       <h1 className={styles["app-bar__title"]}>{title}</h1>
+      {step ? <span className={styles["app-bar__step"]}>{t("step", step)}</span> : null}
     </header>
   );
 }

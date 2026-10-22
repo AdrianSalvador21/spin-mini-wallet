@@ -12,7 +12,8 @@
       "hide": "Ocultar contraseña"
     },
     "appBar": {
-      "back": "Regresar"
+      "back": "Regresar",
+      "step": "{current} de {total}"
     },
     "account": {
       "phone": "Celular",

@@ -1,0 +1,35 @@
+.summary-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: var(--space-1) var(--space-4);
+  border-radius: var(--radius-m);
+  background: var(--color-lavender-100);
+}
+
+.summary-list__row {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+  justify-content: space-between;
+  padding: var(--space-3) 0;
+  border-bottom: 1px dashed var(--color-lavender-300);
+  font-size: var(--text-size-md);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.summary-list__label {
+  color: var(--color-ink-500);
+}
+
+.summary-list__value {
+  margin: 0;
+  font-weight: 700;
+  text-align: right;
+  color: var(--color-ink-900);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
