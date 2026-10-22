@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { LogoutButton } from "@/features/auth/components/logout-button/logout-button";
+import { LOGOUT_BUTTON_VARIANT } from "@/features/auth/components/logout-button/types";
 import { getServices } from "@/server/container";
 import { getSession } from "@/server/session/session";
 import { ROUTES } from "@/shared/lib/routes";
@@ -25,7 +26,7 @@ async function Greeting() {
   return (
     <div className="flex flex-col items-start gap-6">
       <h1 className={styles["home-placeholder__greeting"]}>{t("greeting", { name: summary.value.user.fullName })}</h1>
-      <LogoutButton />
+      <LogoutButton variant={LOGOUT_BUTTON_VARIANT.MENU_ITEM} />
     </div>
   );
 }
