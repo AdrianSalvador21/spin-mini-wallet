@@ -1,0 +1,44 @@
+.bottom-sheet {
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+  max-height: none;
+  border: none;
+  padding: 0;
+  background: transparent;
+}
+
+.bottom-sheet::backdrop {
+  background: color-mix(in srgb, var(--color-ink-900) 45%, transparent);
+}
+
+.bottom-sheet__panel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5) calc(var(--space-6) + env(safe-area-inset-bottom));
+  background: var(--color-white);
+  border-radius: var(--radius-l) var(--radius-l) 0 0;
+}
+
+.bottom-sheet__handle {
+  align-self: center;
+  width: var(--space-10);
+  height: var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--color-lavender-300);
+}
+
+.bottom-sheet__close {
+  align-self: center;
+  color: var(--color-brand-purple);
+  font-size: var(--text-size-md);
+  font-weight: 600;
+  text-decoration: underline;
+}
