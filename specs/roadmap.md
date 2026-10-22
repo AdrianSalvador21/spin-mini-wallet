@@ -66,15 +66,16 @@ Repo base: branches, Node 24, `src/`, Sass and Spin tokens, fonts, next-intl, ES
 
 ### 05 — Authentication
 
-- UI primitives: Button, Field, Alert and PasswordInput, with BEM and tests.
-- Login with mobile number by default and a toggle to email; registration with name, mobile, email and password.
+- UI primitives: Button, Field, Alert, PasswordInput, Icon, AppBar and Segmented, with BEM and tests.
+- Login with mobile number by default and a segmented selector to email; registration with name, mobile, email and password; 50/50 split screen with a brand panel from 1024 px (approved design, 2026-10-22).
 - Server Actions for login, registration and logout, using the session primitives from 03.
 - Route guard in `proxy.ts`, login rate limit and security headers.
 - Covers: PDF screen 1 in full.
 
 ### 06 — Home
 
-- Responsive private shell (mobile top bar and desktop side navigation).
+- Responsive private shell: mobile top bar with the avatar that opens "Mi cuenta" (logout), 72 px icon rail at `lg`, 240 px sidebar at `xl`, 1040 px content and a sticky aside (approved desktop proposal and mobile review).
+- Movements grouped by "Hoy / Ayer / Esta semana".
 - Balance and name with SSR streaming; money and date formatting in `src/shared/lib`.
 - Movements with cursor pagination ("Ver más") using TanStack Query with prefetch and hydration.
 - Loading (skeleton), empty and per-block error states with retry, demonstrable through `mock_read_scenario`.
@@ -85,7 +86,8 @@ Repo base: branches, Node 24, `src/`, Sass and Spin tokens, fonts, next-intl, ES
 
 - `amount` → `recipient` → `review` wizard with a Zustand draft persisted to `sessionStorage` and guards between steps.
 - Amount input with a mask over cents.
-- Favorites and contact creation by mobile, CLABE or card, with bank detection and save to favorites.
+- Favorites and contact creation by mobile, CLABE or card, with bank detection and save to favorites; recents row, search and a vertical contact list (mobile review).
+- Optional concept with a 0/40 counter in step 1, "Continuar" always enabled, and the desktop wizard card with a live summary.
 - Pre-confirmation summary with the three rules applied on the client.
 - Covers: PDF screen 3 up to just before confirming.
 
@@ -95,6 +97,7 @@ Repo base: branches, Node 24, `src/`, Sass and Spin tokens, fonts, next-intl, ES
 - UI for the five outcomes: success, network error with retry, insufficient funds, timeout with status lookup, and unknown.
 - Receipt at `/transfers/[transferId]`.
 - DEV scenario panel and Home cache invalidation.
+- 520 px focus column on desktop and a "Copiar" button next to the support reference.
 - Covers: PDF screen 4 and the end of screen 3.
 
 ### 09 — Final quality, deploy and documentation

@@ -11,7 +11,9 @@
 
 SPEC 03 built the session primitives and `AuthService`, and SPEC 04 protected every `/api/v1/*` endpoint with `requireSession()`. Nothing can create a session yet. This milestone is the only way into the app, so it also owns the guard that keeps private pages out of reach and the first E2E run against a real login. SPEC 04 deferred that run to this milestone.
 
-It is also the first UI milestone. The primitives built here (Button, Field, PasswordInput, Alert, Icon, AppBar) are reused by SPEC 06–08, so they follow the approved design (`specs/design/mini-wallet-design.html`, summarized in `challenge.md` §8) and the BEM + CSS-variable convention from the start.
+It is also the first UI milestone. The primitives built here (Button, Field, PasswordInput, Alert, Icon, AppBar, Segmented) are reused by SPEC 06–08, so they follow the approved design (`specs/design/mini-wallet-design.html`, summarized in `challenge.md` §8) and the BEM + CSS-variable convention from the start.
+
+**Design update (2026-10-22, user decision).** While step 11 was in review, the design gained two approved sections: the *mobile review* and the *desktop proposal*. This spec adopts everything in them that touches authentication and the primitives (see "Approved design alignment" below and step 12). What they define for the private shell, Home, the wizard and the results is recorded in `challenge.md` §8.4 for SPEC 06–08.
 
 Server Actions follow the same pattern as the SPEC 04 handlers (user decision). The logic lives in factories under `src/server/auth/` that receive their dependencies and return a `Result`. `src/features/auth/actions.ts` only binds them, writes the cookie and calls `redirect()`. Tests inject a fake clock and fake services instead of mocking Next modules.
 
@@ -24,7 +26,8 @@ Server Actions follow the same pattern as the SPEC 04 handlers (user decision). 
 - `--color-info` and `--color-info-bg` tokens, with the design's values.
 - `src/shared/lib/routes.ts`: route constants and the pure route-access rule the proxy applies.
 - `src/shared/lib/format/phone.ts`: the `55 1234 5678` input mask.
-- UI primitives in `src/shared/ui/`: `icon`, `button`, `field`, `password-input`, `alert`, `app-bar`, each with `.tsx`, `.module.scss` (BEM) and `.test.tsx`.
+- UI primitives in `src/shared/ui/`: `icon`, `button`, `field`, `password-input`, `alert`, `app-bar` and `segmented`, each with `.tsx`, `.module.scss` (BEM) and `.test.tsx`.
+- The approved mobile review and desktop proposal for auth: segmented method selector, CTA label in `ink-900`, 16 px inputs, 44 px touch targets, purple links, the bottom action bar with `interactiveWidget: "resizes-content"`, and the 50/50 split screen with a brand panel from `lg` for login and registration.
 - The auth form contract in `src/shared/lib/auth/form-state.ts`.
 - A login rate limiter and the auth action factories in `src/server/auth/`, plus `getAuthActions()` in the container.
 - Server Actions `loginAction`, `registerAction` and `logoutAction` in `src/features/auth/actions.ts`.
@@ -38,7 +41,8 @@ Server Actions follow the same pattern as the SPEC 04 handlers (user decision). 
 **Out of scope (for future specs):**
 
 - The private shell (top bar, side navigation), the real Home, `error.tsx` and `global-error.tsx` (SPEC 06).
-- Segmented control, skeletons and the transfer wizard (SPEC 06–07).
+- Skeletons and the transfer wizard (SPEC 06–07). The segmented control moved into this spec with the mobile review.
+- The rest of the mobile review and the desktop proposal: the "Mi cuenta" bottom sheet, the icon rail and `xl` sidebar, the 1040 px container, the wizard and result layouts (SPEC 06–08, `challenge.md` §8.4).
 - Remembering the requested page across login with `?next=` (user decision: always `/home`).
 - An E2E test for the rate limit. Unit tests cover it (user decision).
 - Password recovery, OTP, MFA and "remember me" (out of the project, SPEC 00 §2).
@@ -97,16 +101,32 @@ Scale tokens, added with the first primitives so no SCSS file carries a loose me
 | `--duration-fast` / `--duration-spin` | `150ms` / `1s` |
 | `--container-auth` | `420px` |
 
+Tokens from the approved mobile review and desktop proposal (2026-10-22), also in SPEC 00 §14:
+
+| CSS token | Value |
+| --- | --- |
+| `--color-on-brand-orange` | `var(--color-ink-900)` |
+| `--color-success-strong` | `#0E6B4C` |
+| `--radius-icon` | `12px` |
+| `--space-10/12/14` | `40px` / `48px` / `56px` |
+| `--text-size-input` | `16px` |
+| `--text-size-lead` / `-2xl` / `-3xl` / `-hero` | `17px` / `28px` / `32px` / `44px` |
+| `--size-touch` | `44px` |
+| `--size-button-desktop` / `--size-button-min-width` | `48px` / `200px` |
+| `--size-icon-tile` / `--size-logo-lg` | `36px` / `104px` |
+| `--container-form` | `400px` |
+
 ### UI primitives (`src/shared/ui/`)
 
 | Component | Props | Behavior |
 | --- | --- | --- |
-| `Icon` | `name: IconName`, `size?: IconSize` (`ICON_SIZE` `sm` / `md`, the `--size-icon-*` tokens, default `md`), `label?` | Inline SVG copied from the design's symbols: `alert`, `check`, `clock`, `eye`, `eye-off`, `back`. `ICON_NAME` is an `as const` object. Without `label` it is `aria-hidden`. With `label` it is `role="img"` with `aria-label` |
-| `Button` | `variant: "primary" \| "secondary" \| "ghost"`, `block?`, `loading?`, `loadingLabel?`, native button props | Pill shape. `loading` shows the spinner, sets `aria-busy`, replaces the text with `loadingLabel` and disables the button so it cannot submit twice. `type` defaults to `"button"`. `BUTTON_VARIANT` is an `as const` object |
-| `Field` | `label`, `id`, `prefix?`, `hint?`, `error?`, input props, `ref` | Label above a 50 px control, optional prefix (`+52`), hint and inline error. With `error`, the control gets the error ring, the input gets `aria-invalid="true"`, and `aria-describedby` points to the error (or the hint). Works with RHF's `register` through the React 19 `ref` prop |
-| `PasswordInput` | `Field` props without `type` | A `Field` with `type="password"` and a trailing toggle button (`eye` / `eye-off`), labeled "Mostrar contraseña" / "Ocultar contraseña", with `aria-pressed` |
-| `Alert` | `tone: "danger" \| "warning" \| "success" \| "info"`, `role?`, `children` | Tone background and icon (`alert`, `clock`, `check`, `alert`). `ALERT_TONE` is an `as const` object, and the tone → icon mapping is an exhaustive `switch` |
-| `AppBar` | `title`, `backHref` | Lavender round back link (`Icon` `back`, labeled "Regresar") and the title. SPEC 07 adds the step counter |
+| `Icon` | `name: IconName`, `size?: IconSize` (`ICON_SIZE` `sm` / `md`, the `--size-icon-*` tokens, default `md`), `label?` | Inline SVG copied from the design's symbols: `alert`, `check`, `clock`, `eye`, `eye-off`, `back`, plus `phone`, `receipt` and `shield` for the brand panel. `ICON_NAME` is an `as const` object. Without `label` it is `aria-hidden`. With `label` it is `role="img"` with `aria-label` |
+| `Button` | `variant: ButtonVariant`, `type?: ButtonType`, `block?`, `loading?`, `loadingLabel?`, native button props | Pill shape, at least `--size-control` (50 px) tall on mobile. The primary label is `--color-on-brand-orange` (`ink-900`). From `lg` it is `--size-button-desktop` (48 px) tall and, unless `block`, at least `--size-button-min-width` (200 px) wide. `loading` shows the spinner, sets `aria-busy`, replaces the text with `loadingLabel` and disables the button so it cannot submit twice. `type` defaults to `BUTTON_TYPE.BUTTON` |
+| `Field` | `label`, `id`, `type?: InputType`, `inputMode?: InputMode`, `autoComplete?: AutoComplete`, `prefix?`, `suffix?`, `hint?`, `error?`, input props, `ref` | Label above a 50 px control, input text at `--text-size-input` (16 px), optional prefix (`+52`), an optional trailing `suffix` slot, hint and inline error. With `error`, the control gets the error ring, the input gets `aria-invalid="true"`, and `aria-describedby` points to the error (or the hint). Works with RHF's `register` through the React 19 `ref` prop |
+| `PasswordInput` | `Field` props without `type` and `suffix` | A `Field` with `type="password"` and a trailing toggle button (`eye` / `eye-off`) with a 44 × 44 hit area, labeled "Mostrar contraseña" / "Ocultar contraseña", with `aria-pressed` |
+| `Alert` | `tone: AlertTone`, `role?: AlertRole`, `children` | Tone background and icon (`alert`, `clock`, `check`, `alert`). The success tone uses `--color-success-strong` for text. `ALERT_TONE` and `ALERT_ROLE` are `as const` objects, and the tone → icon mapping is an exhaustive `switch` |
+| `AppBar` | `title`, `backHref` | Back link with a 44 × 44 hit area around the 32 px lavender circle (`Icon` `back`, labeled "Regresar") and the title. From `lg` it becomes a purple "Regresar" text link above a 32 px title, as in the desktop register mock. SPEC 07 adds the step counter |
+| `Segmented` | `label`, `name`, `options: { value, label }[]`, `value`, `onChange` | Pill track on `lavender-200` with 44 px options; the selected one is white with a soft shadow. Built on native `<input type="radio">` inside a `role="radiogroup"` labeled by `label`, so arrow keys move the selection and the focus stays in the group |
 
 Each primitive folder has a `types.ts` with its closed-set constants and unions (`ICON_NAME`, `ICON_SIZE`, `BUTTON_VARIANT`, `BUTTON_TYPE`, `INPUT_TYPE`, `INPUT_MODE`, `AUTO_COMPLETE`, `ALERT_TONE`, `ALERT_ROLE`); the `XProps` interface stays in the component file. `BUTTON_TYPE = { BUTTON: "button", SUBMIT: "submit", RESET: "reset" }` replaces any raw `type` literal (user decision). Every component consumes only CSS variables (colors and scale tokens) and the `_typography.scss` mixins. Focus is visible (`--color-lavender-500` outline). The spinner respects `prefers-reduced-motion`. Texts come from the caller or from `common.json`, never inline.
 
@@ -191,22 +211,24 @@ In both, a thrown error is logged with `logger.error`, sent to `reporter.capture
 
 ### Forms (`src/features/auth/components/`)
 
-One folder per component (user decision): `login-form/`, `register-form/`, `auth-failure-alert/` and `logout-button/`, each with its `.tsx`, `.test.tsx` and, when it has styles, `.module.scss`.
+One folder per component (user decision): `login-form/`, `register-form/`, `auth-failure-alert/`, `auth-brand-panel/` and `logout-button/`, each with its `.tsx`, `.test.tsx` and, when it has styles, `.module.scss`.
 
-- `login-form.tsx`: React Hook Form with `zodResolver(loginSchema)` and the action through `useActionState`, dispatched inside `startTransition` from `handleSubmit` (user decision). The method defaults to `phone`. The link "Iniciar sesión con email" / "con celular" switches the same form without changing route. It clears the identifier and any server error, keeps the password, and moves focus to the new field. The phone field uses `prefix="+52"`, `inputMode="tel"`, `autoComplete="tel-national"` and `formatPhoneInput`. The email field uses `inputMode="email"` and `autoComplete="email"`.
+- `login-form.tsx`: React Hook Form with `zodResolver(loginSchema)` and the action through `useActionState`, dispatched inside `startTransition` from `handleSubmit` (user decision). The method defaults to `phone`. A `Segmented` "Celular / Email" above the fields (mobile review; it replaces the original "Iniciar sesión con email" link) switches the same form without changing route. It clears the identifier and any server error and keeps the password. Focus stays on the selector, as a radio group expects, instead of jumping to the new field. The phone field uses `prefix="+52"`, `inputMode="tel"`, `autoComplete="tel-national"` and `formatPhoneInput`. The email field uses `inputMode="email"` and `autoComplete="email"`.
 - `register-form.tsx`: the same wiring with `registerSchema`. Fields: full name, mobile (same mask), email, password with the policy hint, and confirmation. `autoComplete` is `name`, `tel-national`, `email`, `new-password` and `new-password`.
 - `auth-failure-alert.tsx`: renders an `AuthFailure` with an exhaustive `switch` on `kind` and `assertUnreachable`. `validation` renders nothing, because its codes go to the fields through RHF's `setError`. The other three render a `danger` `Alert` with `role="alert"` above the form. `unexpected` adds "Referencia: {requestId}".
 - `logout-button.tsx`: a `<form action={logoutAction}>` with a `secondary` `Button` whose `loading` comes from `useFormStatus`.
 
-Field errors are `ValidationCode`s translated with `t(\`errors.validation.${code}\`)`. The submit button shows `loading` while the action is pending.
+Field errors are `ValidationCode`s translated with `useValidationMessage()` (`src/shared/i18n/`). The submit button shows `loading` while the action is pending. On mobile the submit button (and, on login, the "Regístrate" link) sits in a bottom action bar, `position: sticky` with `env(safe-area-inset-bottom)`; from `lg` the bar is static and follows the last field.
 
 ### Pages (`src/app/`)
 
 | File | Rendering | Content |
 | --- | --- | --- |
-| `(public)/layout.tsx` | Static | Mobile-first column. From `md` up, a centered column of 420 px max on the lavender background |
-| `(public)/login/page.tsx` | Static shell + client form | Purple gradient header with `BrandLogo onDark`, "Hola de nuevo" and the subtitle, then `LoginForm`, then "¿No tienes cuenta? Regístrate" linking to `/register`. Metadata title "Iniciar sesión" |
-| `(public)/register/page.tsx` | Static shell + client form | `AppBar` "Crea tu cuenta" back to `/login`, then `RegisterForm`. Metadata title "Crea tu cuenta" |
+| `(public)/layout.tsx` | Static | Mobile-first column. At `md`, a centered white card of `--container-auth` (420 px) on the lavender background. From `lg`, a 50/50 grid: `AuthBrandPanel` on the left and the page on the right, with its content capped at `--container-form` (400 px) and aligned to the top |
+| `AuthBrandPanel` (`src/features/auth/components/auth-brand-panel/`) | Static | Hidden below `lg`. Diagonal purple gradient, the orange ring, `BrandLogo` at `--size-logo-lg`, the headline "Envía dinero en segundos" (`--text-size-hero`), the lead, three perks with `phone`, `receipt` and `shield` icons in 36 px tiles, and "Spin by OXXO · Mini Wallet" at the bottom |
+| `(public)/login/page.tsx` | Static shell + client form | Below `lg`: purple gradient header with `BrandLogo onDark`, "Hola de nuevo" and the subtitle. From `lg`: no header background or logo, and the title is ink at `--text-size-3xl`. Then `LoginForm`, whose action bar holds "¿No tienes cuenta? Regístrate" (purple, underlined) linking to `/register`; from `lg` it is separated from the form by a hairline. Metadata title "Iniciar sesión" |
+| `(public)/register/page.tsx` | Static shell + client form | `AppBar` "Crea tu cuenta" back to `/login` (a "Regresar" link above a 32 px title from `lg`), then `RegisterForm`. Metadata title "Crea tu cuenta" |
+| `src/app/layout.tsx` | — | Exports `viewport` with `interactiveWidget: "resizes-content"`, so the on-screen keyboard shrinks the layout and the action bar stays visible above it |
 | `(private)/home/page.tsx` | Static shell + `<Suspense>` | Placeholder: a Server Component inside `<Suspense>` reads `getSession()`, calls `redirect(ROUTES.LOGIN)` without one (defense in depth), and shows "Hola, {name}" from `WalletService.getSummary` and the `LogoutButton` |
 
 `src/app/page.tsx` and `src/app/page.module.scss` (the SPEC 01 landing page) are deleted, along with the `common.home` messages. The proxy answers `/`.
@@ -238,7 +260,11 @@ New `auth.json` (namespace `auth`), aggregated in `index.ts`:
 | `auth.login.subtitle` | "Entra a tu cuenta para enviar dinero." |
 | `auth.login.phoneLabel` / `emailLabel` / `passwordLabel` | "Número celular" / "Email" / "Contraseña" |
 | `auth.login.submit` / `submitting` | "Iniciar sesión" / "Iniciando sesión…" |
-| `auth.login.switchToEmail` / `switchToPhone` | "Iniciar sesión con email" / "Iniciar sesión con celular" |
+| `auth.login.methodLabel` / `methodPhone` / `methodEmail` | "Método de acceso" / "Celular" / "Email" |
+| `auth.brand.headline` | "Envía dinero en segundos" |
+| `auth.brand.lead` | "A un celular, una CLABE o una tarjeta, con tu comprobante al instante." |
+| `auth.brand.perks.transfers` / `receipt` / `security` | "Envíos a celular, CLABE o tarjeta" / "Comprobante con folio y clave de rastreo" / "Tu sesión protegida en cada envío" |
+| `auth.brand.legal` | "Spin by OXXO · Mini Wallet" |
 | `auth.login.noAccount` / `registerLink` | "¿No tienes cuenta?" / "Regístrate" |
 | `auth.register.metaTitle` / `title` | "Crea tu cuenta" |
 | `auth.register.fullNameLabel` | "Nombre completo" |
@@ -301,17 +327,29 @@ Each step leaves lint, typecheck and tests green and is committed on its own. Be
 
 11. **Login page.** Create `src/app/(public)/layout.tsx`, `(public)/login/page.tsx`, `login-form.tsx` and `auth-failure-alert.tsx`, with tests that replace `../actions` with `vi.mock`. Cover: the phone default with `+52` and the mask, the switch to email that moves focus and clears the identifier, inline field errors on submit with no action call, the three alert kinds with `role="alert"`, the alert's `default` branch with an invalid kind, and the loading state on submit.
     - Why: PDF screen 1, login part, following the design.
+    - Note: implemented before the 2026-10-22 design approvals. Step 12 replaces the switch link and the focus move with the segmented selector.
 
-12. **Register page.** Create `(public)/register/page.tsx` and `register-form.tsx` with tests: the password hint, `PASSWORD_MISMATCH` inline, a server `PHONE_ALREADY_REGISTERED` shown on the phone field, and the loading state.
+12. **Approved design alignment.** Update `specs/design/mini-wallet-design.html` (tokens in its `:root`, the approved Pantalla 1 mocks, the segmented selector in the desktop login mock, a new "Registro · pantalla dividida" mock and the "Implementación" snippet), `challenge.md` §8, SPEC 00 §14 and this spec. Then, in code:
+    - `globals.css`: the review and desktop tokens.
+    - `Button`: `ink-900` primary label, 50 px minimum height on mobile, 48 px and a 200 px minimum width (unless `block`) from `lg`.
+    - `Field`: 16 px input text. `PasswordInput`: 44 px toggle hit area. `AppBar`: 44 px back hit area, and the "Regresar" + 32 px title layout from `lg`. `Alert`: `success-strong` text.
+    - `Icon`: `phone`, `receipt` and `shield`.
+    - New `Segmented` primitive with tests: options render as radios inside a labeled `radiogroup`, the selected value is checked, clicking or pressing an arrow key calls `onChange`, and each option is at least `--size-touch` tall.
+    - `LoginForm`: the segmented selector replaces the switch link; the submit button and the "Regístrate" link move into the action bar. Tests: switching to email clears the identifier and the server error and keeps the password.
+    - `(public)/layout.tsx` with the `md` card and the `lg` split, the new `AuthBrandPanel` with a test, the login page's `lg` header, purple underlined links, and `viewport` with `interactiveWidget: "resizes-content"` in `src/app/layout.tsx`.
+    - `auth.json`: `methodLabel` / `methodPhone` / `methodEmail` and the `brand` keys replace `switchToEmail` / `switchToPhone`.
+    - Why: the design changed after steps 4–6 and 11 were built. Aligning now means registration (step 13) and SPEC 06–08 start from the approved primitives.
+
+13. **Register page.** Create `(public)/register/page.tsx` and `register-form/register-form.tsx` with tests: the password hint, `PASSWORD_MISMATCH` inline, a server `PHONE_ALREADY_REGISTERED` shown on the phone field, and the loading state. It is built directly on the step 12 layout, action bar and AppBar.
     - Why: PDF screen 1, registration part.
 
-13. **Proxy guard, `/` and headers.** Extend `src/proxy.ts` and its tests. Move `src/proxy.test.ts` to the Vitest `node` project, because `token.ts` imports `server-only`. Cover: `/home` without a cookie → 307 to `/login` with `x-request-id`; `/login` with a valid cookie → `/home`; a tampered or expired cookie counts as none; `/` in both cases; `/api/v1/wallet/summary` without a session passes through. Create `security-headers.ts` with tests and wire it in `next.config.ts`. Delete `src/app/page.tsx`, `page.module.scss` and `common.home`, and update `e2e/smoke.spec.ts` so `/` lands on `/login`.
+14. **Proxy guard, `/` and headers.** Extend `src/proxy.ts` and its tests. Move `src/proxy.test.ts` to the Vitest `node` project, because `token.ts` imports `server-only`. Cover: `/home` without a cookie → 307 to `/login` with `x-request-id`; `/login` with a valid cookie → `/home`; a tampered or expired cookie counts as none; `/` in both cases; `/api/v1/wallet/summary` without a session passes through. Create `security-headers.ts` with tests and wire it in `next.config.ts`. Delete `src/app/page.tsx`, `page.module.scss` and `common.home`, and update `e2e/smoke.spec.ts` so `/` lands on `/login`.
     - Why: the first barrier in front of private pages (SPEC 00 §11). Handlers and the page itself keep re-checking the session.
 
-14. **E2E.** Update `playwright.config.ts` (port 3100, `.data/e2e-db.json`, `globalSetup`) and add `e2e/global-setup.ts`, `e2e/fixtures/auth.ts` and `e2e/auth.spec.ts`. The specs cover: login by phone, login by email after the switch, invalid credentials with an unregistered phone, inline field errors, registration with a unique phone and email landing on `/home`, the guard redirects, and logout. They also cover the API smoke test: after login, `page.request.get("/api/v1/wallet/summary")` answers `200`, has `x-request-id` and contains `"Mariana López"`. Finally, the security headers on `/login`.
+15. **E2E.** Update `playwright.config.ts` (port 3100, `.data/e2e-db.json`, `globalSetup`) and add `e2e/global-setup.ts`, `e2e/fixtures/auth.ts` and `e2e/auth.spec.ts`. The specs cover: login by phone, login by email after the switch, invalid credentials with an unregistered phone, inline field errors, registration with a unique phone and email landing on `/home`, the guard redirects, and logout. They also cover the API smoke test: after login, `page.request.get("/api/v1/wallet/summary")` answers `200`, has `x-request-id` and contains `"Mariana López"`. Finally, the security headers on `/login`.
     - Why: proves the session works across proxy, pages, Server Actions and Route Handlers in a real browser, on mobile and desktop.
 
-15. **Docs.** Add an "Authentication" section to `CLAUDE.md`: the action factories with injected dependencies and thin `actions.ts`, the `AuthFormState` contract in `src/shared/lib/auth/`, RHF + `useActionState`, the rate-limit rule, `resolveRouteAccess` in the proxy, `/api/**` never redirected, the UI primitives and their props, and the E2E port and database. Mark SPEC 05 as `Implemented` in `roadmap.md` once the criteria pass.
+16. **Docs.** Add an "Authentication" section to `CLAUDE.md`: the action factories with injected dependencies and thin `actions.ts`, the `AuthFormState` contract in `src/shared/lib/auth/`, RHF + `useActionState`, the rate-limit rule, `resolveRouteAccess` in the proxy, `/api/**` never redirected, the UI primitives and their props (including `Segmented`), the public layout (md card, lg split with `AuthBrandPanel`), the bottom action bar and `interactiveWidget`, and the E2E port and database. Mark SPEC 05 as `Implemented` in `roadmap.md` once the criteria pass.
     - Why: SPEC 06–08 build on these primitives and conventions from other sessions.
 
 ## Acceptance criteria
@@ -323,14 +361,14 @@ Each step leaves lint, typecheck and tests green and is committed on its own. Be
 - [ ] A `Button` with `loading` is disabled, has `aria-busy="true"` and does not call `onClick`.
 - [ ] A `Field` with `error` has `aria-invalid="true"` and an `aria-describedby` that points to the element holding the error text.
 - [ ] The `PasswordInput` toggle switches the input between `password` and `text` and updates its accessible name.
-- [ ] `Alert` renders the four tones, and `alert`, `button`, `field`, `password-input`, `icon` and `app-bar` live in `src/shared/ui/` with `.tsx`, `.module.scss`, `.test.tsx` and, where they declare closed-set constants, `types.ts`, with no hex value and no loose measured value in any SCSS file.
+- [ ] `Alert` renders the four tones, and `alert`, `button`, `field`, `password-input`, `icon`, `app-bar` and `segmented` live in `src/shared/ui/` with `.tsx`, `.module.scss`, `.test.tsx` and, where they declare closed-set constants, `types.ts`, with no hex value and no loose measured value in any SCSS file.
 - [ ] Five failed logins for one phone make the 6th attempt answer `rate_limited`, even with the right password, and `verifyCredentials` is not called for it.
 - [ ] A successful login resets the counter, and after 15 minutes (fake clock) the same phone may try again.
 - [ ] `login` with `{ method: "phone", phone: "55 1234 5678", password: "Spin2026" }` returns Mariana's `UserView`.
 - [ ] `register` with an existing phone returns `validation` with `phone: ["PHONE_ALREADY_REGISTERED"]`.
 - [ ] A throwing `AuthService` makes `login` return `unexpected` with the request id and calls `reporter.captureException` once with `source: "server-action"`.
 - [ ] No logger call in `src/server/auth/` receives the password or the identifier.
-- [ ] `/login` shows the phone field with `+52` by default, and "Iniciar sesión con email" switches it to an email field on the same URL.
+- [ ] `/login` shows the phone field with `+52` by default, and choosing "Email" in the segmented selector switches it to an email field on the same URL.
 - [ ] Submitting the login form empty shows "Escribe tu número celular." and "Escribe tu contraseña." inline and does not call the action.
 - [ ] A wrong password shows the method's invalid-credentials message in an element with `role="alert"`.
 - [ ] Registering with a new phone and email lands on `/home` with "Hola, {name}" and a `smw_session` cookie.
@@ -342,6 +380,11 @@ Each step leaves lint, typecheck and tests green and is committed on its own. Be
 - [ ] `npm run test:e2e` passes on the `mobile` and `desktop` projects against `.data/e2e-db.json`, and leaves `.data/db.json` untouched.
 - [ ] `npm run lint`, `npm run typecheck`, `npm run test:coverage` (100 % on `src/domain/**`, 80 % on `src/server/**`, `src/shared/lib/**` and `src/shared/observability/**`) and `npm run build` finish with no errors.
 - [ ] No component or page contains user-facing text outside `src/messages/es-MX/`.
+- [ ] The primary button label uses `--color-on-brand-orange`, inputs use `--text-size-input` (16 px), and the segmented options, the AppBar back link and the password toggle have a hit area of at least 44 × 44 px.
+- [ ] Links on the auth screens are purple and underlined; no text is orange.
+- [ ] On a mobile viewport the login and register CTAs sit in the bottom action bar, and `src/app/layout.tsx` exports `viewport.interactiveWidget = "resizes-content"`.
+- [ ] From 1024 px, `/login` and `/register` show the brand panel on the left and a form of at most 400 px aligned to the top on the right; below 1024 px the panel is not rendered visibly.
+- [ ] `specs/design/mini-wallet-design.html`, `challenge.md` §8 and SPEC 00 §14 describe the approved mobile review and desktop proposal, including the "Registro · pantalla dividida" mock.
 - [ ] There are no comments in any file created or modified in this milestone.
 
 ## Decisions
@@ -373,6 +416,13 @@ Each step leaves lint, typecheck and tests green and is committed on its own. Be
 - **Yes:** the invalid-credentials E2E uses an unregistered phone. Failures on Mariana's identifier could block her login in parallel tests.
 - **Yes:** security headers built by a pure function in `src/shared/config/`. They can be tested without starting Next, and HSTS only applies in production.
 - **No:** a Content Security Policy in this milestone. SPEC 00 does not require one, and a nonce-based CSP interacts with Cache Components prerendering.
+- **Yes:** adopt the mobile review and desktop proposal approved on 2026-10-22 for everything auth touches, inside this milestone (user decision). Shipping auth with the old CTA contrast, 15 px inputs and a floating mobile card on desktop, and fixing it in SPEC 06, would rework the same files twice.
+- **Yes:** the CTA keeps `#FF6600` with an `ink-900` label (option A). White on orange is 2.9:1 and fails AA; a darker orange drifts from the brand.
+- **Yes:** the `Segmented` primitive is built here, on native radio inputs. The login needs it now, SPEC 07 reuses it for Celular / CLABE / Tarjeta, and native radios give arrow-key navigation for free.
+- **No:** moving focus to the identifier field when the method changes. With a radio group, arrow keys change the selection; stealing focus on each change would break keyboard use.
+- **Yes:** registration on desktop uses the same split screen as login (user decision). The design had no desktop register mock; one was added to the design document for it.
+- **Yes:** the brand panel lives in `(public)/layout.tsx` through `AuthBrandPanel`, so login and registration share it and it is not remounted when moving between them.
+- **Yes:** spacing tokens snap to the 4 px grid, while dimensions and type sizes keep the design's exact values (user decision). Differences of 1–2 px in padding are invisible; in sizes they are not.
 
 ## Risks
 
@@ -389,7 +439,8 @@ Each step leaves lint, typecheck and tests green and is committed on its own. Be
 ## What is **not** in this spec
 
 - The private shell, the real Home, `error.tsx` and `global-error.tsx` (SPEC 06).
-- The segmented control, skeletons and the transfer wizard (SPEC 06–07).
+- Skeletons and the transfer wizard (SPEC 06–07).
+- The rest of the mobile review and the desktop proposal: the "Mi cuenta" sheet, the icon rail and `xl` sidebar, the 1040 px container, and the wizard and result layouts (SPEC 06–08).
 - `?next=` return paths.
 - An E2E test for the rate limit.
 - Password recovery, OTP, MFA and "remember me".

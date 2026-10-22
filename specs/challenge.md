@@ -124,14 +124,16 @@ These criteria are the yardstick for every spec decision. When two options are e
 
 ## 8. Design reference
 
-Approved on 2026-10-21, before SPEC 00 was written. Tokens were taken from the production CSS of spinbyoxxo.com.mx. Mobile-first, light theme, es-MX copy.
+Approved on 2026-10-21, before SPEC 00 was written. Tokens were taken from the production CSS of spinbyoxxo.com.mx. Mobile-first, light theme, es-MX copy. On 2026-10-22 two more sections of the design were approved, the **mobile review** and the **desktop proposal**; where they differ from the original screens, they win. The rows below already reflect them.
 
 ### 8.1 Foundations
 
 - Tokens, typography, radii and breakpoints are in SPEC 00 §14 and already live in `src/app/globals.css`.
-- One orange (`brand-orange`) button per screen: it marks the main action. Purple carries structure and navigation.
+- One orange (`brand-orange`) button per screen: it marks the main action, with an `ink-900` label (option A of the mobile review, 5.1:1; white on orange fails AA). Purple carries structure and navigation, and links are purple and underlined, never orange.
 - Pill buttons (`radius-pill`) in the variants `primary`, `secondary` (outlined purple), `ghost` and a disabled state. The loading state shows a spinner and blocks double submission.
-- Fields: label above, 50 px control, optional prefix (`+52`), hint and inline error; focus ring in lavender and error ring in red.
+- Fields: label above, 50 px control, input text at 16 px (no iOS zoom), optional prefix (`+52`), hint and inline error; focus ring in lavender and error ring in red.
+- Touch targets of at least 44 × 44 px. When the drawing must stay smaller (the 32 px back circle, an 18 px eye icon), the hit area grows with padding, not the drawing.
+- On mobile the main CTA sits in an action bar at the bottom edge (with `safe-area-inset-bottom`), and the viewport uses `interactiveWidget: "resizes-content"` so the keyboard never covers it.
 - Segmented control for exclusive choices (Celular / CLABE / Tarjeta, phone / email).
 - Alerts in four tones: `danger`, `warning`, `success` and `info`, each with an icon.
 - Skeletons shaped like the real content, so the layout does not jump (CLS).
@@ -141,8 +143,8 @@ Approved on 2026-10-21, before SPEC 00 was written. Tokens were taken from the p
 
 | Screen | Key elements |
 | --- | --- |
-| Login | Purple gradient header with logo, "Hola de nuevo"; phone with `+52` prefix and `inputMode="tel"` by default; a link switches the same form to email without changing route; server error above the form with `role="alert"`; field errors inline; "¿No tienes cuenta? Regístrate" footer |
-| Register | App bar with back button, "Crea tu cuenta"; full name, phone, email, password (policy hint) and confirmation; one "Crear cuenta" CTA |
+| Login | Purple gradient header with logo, "Hola de nuevo"; a 44 px segmented control "Celular / Email" above the fields switches the same form without changing route; phone with `+52` prefix and `inputMode="tel"` by default; server error above the form with `role="alert"`; field errors inline; CTA and "¿No tienes cuenta? Regístrate" (purple link) in the bottom action bar. From 1024 px: split screen 50/50, brand panel on the left (gradient, orange ring, "Envía dinero en segundos", three perks) and a 400 px form aligned to the top on the right |
+| Register | App bar with a 44 px back button, "Crea tu cuenta"; full name, phone, email, password (policy hint) and confirmation; one "Crear cuenta" CTA in the bottom action bar. From 1024 px: the same split screen as login, with "Regresar" above the title |
 | Home | Gradient header with "Hola," and name plus initials avatar; floating balance card with an **eye icon to hide the balance**, "Enviar dinero" CTA; "Movimientos recientes" list with icon per type, title, relative date and signed amount; "Ver más movimientos" pill |
 | Home states | Loading skeleton for header, balance and list; empty state "Aún no tienes movimientos" (Diego); partial error "No pudimos cargar tus movimientos" with "Reintentar" and a "Referencia" request id, while the balance stays visible |
 | Transfer 1/3 · Amount | App bar "Enviar dinero" with step counter and three-segment progress bar; large centered amount; available balance below; **quick chips `$100`, `$200`, `$500`, `Todo`**; inline danger alert when a rule fails and a disabled "Continuar" |
@@ -155,7 +157,7 @@ Approved on 2026-10-21, before SPEC 00 was written. Tokens were taken from the p
 | Insufficient funds | "Saldo insuficiente", explains the balance changed, shows current balance and transfer amount; "Cambiar monto" + "Volver al inicio" |
 | Timeout | Warning tone, "Está tardando más de lo normal"; asks to check before retrying; "Revisar estado del envío" + "Volver al inicio"; reference id |
 | Unknown error | "Algo salió mal", share the reference with support; "Volver al inicio"; reference id |
-| Desktop (≥ 1024 px) | Three zones: purple side navigation (Inicio, Enviar dinero, Contactos, Cerrar sesión at the bottom), main column with greeting and movements, right column with balance, "Enviar dinero" and favorites |
+| Desktop (≥ 1024 px) | Desktop proposal: content capped at 1040 px; 72 px icon rail from 1024 to 1279 px and a 240 px labeled sidebar from 1280 px (`xl`); a 340 px sticky aside (320 at `lg`) with balance and "Enviar dinero"; desktop H1 28 px, body 15 px, primary buttons 48 px tall with auto width (min 200 px) except inside forms up to 400 px; the wizard in a 560 px card with a live summary; results in a 520 px focus column |
 
 ### 8.3 Where SPEC 00 overrides the design
 
@@ -180,3 +182,9 @@ The design shows them, but SPEC 00 does not mention them. The spec of the listed
 | Quick amount chips (`$100`, `$200`, `$500`, `Todo`) | 07 |
 | "Comisión $0.00" and "Saldo después" rows in the review | 07 |
 | "Compartir comprobante" on the receipt | 08 |
+| Mobile review: avatar button that opens the "Mi cuenta" bottom sheet with logout; movements grouped by "Hoy / Ayer / Esta semana" | 06 |
+| Desktop proposal: icon rail, `xl` sidebar, 1040 px container and sticky aside | 06 |
+| Mobile review: optional "Concepto" field with a 0/40 counter in step 1, "Continuar" always enabled, recents row plus search and a vertical contact list in step 2 | 07 |
+| Desktop proposal: wizard card with stepper and live summary | 07 |
+| Mobile review: "Copiar" button next to the support reference; text never under 12 px | 08 |
+| Desktop proposal: 520 px focus column for results and the receipt | 08 |

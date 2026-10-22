@@ -358,30 +358,41 @@ Approved tokens (extracted from spinbyoxxo.com.mx):
 | `--color-danger` / `-bg` | `#C62828` / `#FDECEC` | Errors |
 | `--color-warning` / `-bg` | `#A15C00` / `#FFF3DF` | Timeout |
 | `--color-info` / `-bg` | `#3D1199` / `#EEE8FA` | Info alerts (processing) |
+| `--color-success-strong` | `#0E6B4C` | Text on `success-bg` (5.8:1); `success` stays for amounts on white |
+| `--color-on-brand-orange` | `var(--color-ink-900)` | Label on the orange CTA (option A, 5.1:1). White on orange fails AA and is not used |
 | `--radius-s/m/l/xl/pill` | `10px` / `16px` / `24px` / `28px` / `999px` | Inputs, cards, purple headers, buttons |
+| `--radius-icon` | `12px` | Icon tiles (brand panel perks, movement icons) |
 
 Scale tokens (SPEC 05). Spacing follows the same 4 px grid as Tailwind's spacing utilities, so page layout and components share one scale. Dimensions and type sizes keep the design's exact values:
 
 | CSS token | Value | Usage |
 | --- | --- | --- |
-| `--space-1/2/3/4/5/6/8` | `4px` / `8px` / `12px` / `16px` / `20px` / `24px` / `32px` | Padding, gaps and margins |
-| `--text-size-xs/sm/md/lg/xl` | `12px` / `13px` / `14px` / `15px` / `21px` | Hints and errors, labels and alerts, prefixes, body and buttons, auth titles |
-| `--size-control` | `50px` | Input and button height |
+| `--space-1/2/3/4/5/6/8/10/12/14` | `4px` / `8px` / `12px` / `16px` / `20px` / `24px` / `32px` / `40px` / `48px` / `56px` | Padding, gaps and margins |
+| `--text-size-xs/sm/md/lg/xl` | `12px` / `13px` / `14px` / `15px` / `21px` | Hints and errors, labels and alerts, prefixes, body and buttons, mobile auth titles |
+| `--text-size-input` | `16px` | Text inside inputs; below 16 px iOS Safari zooms on focus |
+| `--text-size-lead` / `-2xl` / `-3xl` / `-hero` | `17px` / `28px` / `32px` / `44px` | Desktop lead text, desktop page H1, desktop auth title, brand panel headline |
+| `--size-control` | `50px` | Input height, and the minimum button height on mobile |
+| `--size-touch` | `44px` | Minimum touch target (segmented options, back link, eye toggle) |
+| `--size-button-desktop` / `--size-button-min-width` | `48px` / `200px` | Button height from `lg`, and the minimum width of a non-block button from `lg` |
+| `--size-icon-tile` / `--size-logo-lg` | `36px` / `104px` | Brand panel perk tiles and the desktop logo |
 | `--size-icon-sm/md` | `16px` / `18px` | Spinner and inline icons, alert and field icons |
 | `--size-icon-button` | `32px` | Round icon-only buttons (app bar back link) |
 | `--border-width-thin` / `--border-width` | `1.5px` / `2px` | Field control border, secondary button and spinner |
 | `--focus-ring-width` / `--focus-ring-offset` / `--focus-halo` | `3px` / `2px` / `4px` | Focus outline and the field's focus and error halo |
 | `--duration-fast` / `--duration-spin` | `150ms` / `1s` | Hover and focus transitions, one spinner turn |
-| `--container-auth` | `420px` | Max width of the public (login/register) column; Tailwind `max-w-auth` |
+| `--container-auth` | `420px` | Max width of the public card at `md`; Tailwind `max-w-auth` |
+| `--container-form` | `400px` | Max width of the auth form at `lg`; Tailwind `max-w-form` |
 
 - Typography: Montserrat (400–900) for headings and amounts, Open Sans (400–700) for body, both through `next/font/google`. Amounts use `tabular-nums`.
 - Tokens live as CSS variables in `src/app/globals.css` and are exposed to Tailwind with `@theme`.
-- Every custom component has `name.module.scss` with BEM (`.button`, `.button__spinner`, `.button--primary`) and consumes only CSS variables. No loose measured values: padding, gaps, sizes, borders, type sizes and durations come from the scale tokens above. A value used once that no token describes (a percentage, `1px` hairline, `999px`) is the only exception.
+- Every custom component has `name.module.scss` with BEM (`.button`, `.button__spinner`, `.button--primary`) and consumes only CSS variables. No loose measured values: padding, gaps, sizes, borders, type sizes and durations come from the scale tokens above. A value no token describes is allowed only for a percentage or ratio, a `1px` hairline, `999px`, and decorative geometry used once (the brand panel's orange ring), which is declared as a named custom property at the top of its block.
 - A component's closed-set constants (`BUTTON_VARIANT`, `ICON_NAME`, …) and their unions live in a `types.ts` next to it; its `XProps` interface stays in the component file.
 - Tailwind only handles page layout: flex, grid, gap, padding and breakpoints.
-- Mobile-first. Breakpoints `md` 768 px and `lg` 1024 px. At `lg` the private layout switches to three zones: navigation, content and balance column.
+- Mobile-first. Breakpoints `md` 768 px, `lg` 1024 px and, from SPEC 06, `xl` 1280 px (approved desktop proposal, 2026-10-22). Below `md` one column with a top bar; at `md` one centered column, with login in a rounded card; from `lg` login and registration become a 50/50 split with a brand panel, and the private layout gets a 72 px icon rail, content and a 320 px aside; from `xl` a 240 px labeled sidebar, content capped at 1040 px and a 340 px sticky aside. The private-layout tokens (`--container-content`, aside, rail and sidebar widths) are added by SPEC 06.
+- Buttons: 50 px tall and full width on mobile; from `lg`, 48 px tall with auto width (min 200 px), full width only inside forms up to 400 px or cards up to 340 px.
+- On mobile the main CTA of a form sits in a bottom action bar with `env(safe-area-inset-bottom)`, and the root `viewport` sets `interactiveWidget: "resizes-content"` so the keyboard never covers it.
 - Light theme only.
-- Accessibility: AA contrast, visible focus, `aria-describedby` on field errors, `role="alert"` on server errors and respect for `prefers-reduced-motion`.
+- Accessibility: AA contrast (links are purple and underlined, never orange), visible focus, touch targets of at least 44 × 44 px, `aria-describedby` on field errors, `role="alert"` on server errors, no text under 12 px and respect for `prefers-reduced-motion`.
 - Logo: `public/assets/shared/spin-oxxo-logo.svg`.
 
 ## 15. Testing strategy
