@@ -1,8 +1,11 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
+import { getFirstName } from "../../src/shared/lib/format/name";
 import { ROUTES } from "../../src/shared/lib/routes";
 
 export const SESSION_COOKIE = "smw_session";
 export const PASSWORD = "Spin2026";
+export const MOBILE_PROJECT = "mobile";
+export const DESKTOP_PROJECT = "desktop";
 
 export const LOGIN_METHOD = {
   PHONE: "phone",
@@ -57,4 +60,22 @@ export async function loginAs(page: Page, user: SeedUser, method: LoginMethod = 
   await page.getByLabel("Contraseña", { exact: true }).fill(user.password);
   await page.getByRole("button", { name: "Iniciar sesión" }).click();
   await expect(page).toHaveURL(new RegExp(`${ROUTES.HOME}$`));
+}
+
+export function greetingOf(user: Pick<SeedUser, "fullName">): string {
+  return `Hola, ${getFirstName(user.fullName)}`;
+}
+
+export function greetingLocator(page: Page, user: Pick<SeedUser, "fullName">, options: { mobile: boolean }): Locator {
+  const text = greetingOf(user);
+
+  return options.mobile ? page.locator("p", { hasText: text }) : page.getByRole("heading", { name: text });
+}
+
+export async function logout(page: Page, options: { mobile: boolean }): Promise<void> {
+  if (options.mobile) {
+    await page.getByRole("button", { name: "Abrir mi cuenta" }).click();
+  }
+
+  await page.getByRole("button", { name: "Cerrar sesión" }).click();
 }

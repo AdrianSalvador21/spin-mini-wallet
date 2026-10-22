@@ -34,6 +34,7 @@ export default defineConfig({
     env: {
       SESSION_SECRET: process.env.SESSION_SECRET ?? "playwright-session-secret-at-least-32-chars",
       MOCK_DB_PATH: E2E_DB_PATH,
+      MOCK_ALLOW_SCENARIO_OVERRIDE: "true",
     },
   },
 });

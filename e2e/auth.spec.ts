@@ -2,16 +2,18 @@ import { expect, test } from "@playwright/test";
 import { ROUTES } from "../src/shared/lib/routes";
 import {
   DIEGO,
+  greetingLocator,
   LOGIN_METHOD,
   loginAs,
+  logout,
   MARIANA,
+  MOBILE_PROJECT,
   PASSWORD,
   SESSION_COOKIE,
   uniqueEmail,
   uniquePhone,
 } from "./fixtures/auth";
 
-const MOBILE_PROJECT = "mobile";
 const MIN_TOUCH_TARGET_PX = 44;
 const SUMMARY_PATH = "/api/v1/wallet/summary";
 const REQUEST_ID_HEADER = "x-request-id";
@@ -24,16 +26,16 @@ function urlOf(path: string): RegExp {
 }
 
 test.describe("login", () => {
-  test("logs in by phone and lands on home", async ({ page }) => {
+  test("logs in by phone and lands on home", async ({ page }, testInfo) => {
     await loginAs(page, MARIANA);
 
-    await expect(page.getByRole("heading", { name: `Hola, ${MARIANA.fullName}` })).toBeVisible();
+    await expect(greetingLocator(page, MARIANA, { mobile: testInfo.project.name === MOBILE_PROJECT })).toBeVisible();
   });
 
-  test("logs in by email after switching the method", async ({ page }) => {
+  test("logs in by email after switching the method", async ({ page }, testInfo) => {
     await loginAs(page, DIEGO, LOGIN_METHOD.EMAIL);
 
-    await expect(page.getByRole("heading", { name: `Hola, ${DIEGO.fullName}` })).toBeVisible();
+    await expect(greetingLocator(page, DIEGO, { mobile: testInfo.project.name === MOBILE_PROJECT })).toBeVisible();
   });
 
   test("shows the phone invalid-credentials message for an unregistered phone", async ({ page }) => {
@@ -61,7 +63,7 @@ test.describe("login", () => {
 });
 
 test.describe("registration", () => {
-  test("registers a new user and lands on home with a session", async ({ page, context }) => {
+  test("registers a new user and lands on home with a session", async ({ page, context }, testInfo) => {
     const fullName = "Usuaria Prueba";
 
     await page.goto(ROUTES.REGISTER);
@@ -73,7 +75,9 @@ test.describe("registration", () => {
     await page.getByRole("button", { name: "Crear cuenta" }).click();
 
     await expect(page).toHaveURL(urlOf(ROUTES.HOME));
-    await expect(page.getByRole("heading", { name: `Hola, ${fullName}` })).toBeVisible();
+    await expect(
+      greetingLocator(page, { fullName }, { mobile: testInfo.project.name === MOBILE_PROJECT }),
+    ).toBeVisible();
     const cookies = await context.cookies();
     expect(cookies.some((cookie) => cookie.name === SESSION_COOKIE)).toBe(true);
   });
@@ -107,10 +111,10 @@ test.describe("route guard", () => {
 });
 
 test.describe("logout", () => {
-  test("clears the session and keeps /home behind the guard", async ({ page, context }) => {
+  test("clears the session and keeps /home behind the guard", async ({ page, context }, testInfo) => {
     await loginAs(page, MARIANA);
 
-    await page.getByRole("button", { name: "Cerrar sesión" }).click();
+    await logout(page, { mobile: testInfo.project.name === MOBILE_PROJECT });
 
     await expect(page).toHaveURL(urlOf(ROUTES.LOGIN));
     const cookies = await context.cookies();
