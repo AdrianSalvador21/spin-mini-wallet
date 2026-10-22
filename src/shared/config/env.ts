@@ -15,6 +15,14 @@ const envSchema = z.object({
 
 export type Env = z.infer<typeof envSchema>;
 
+export const NODE_ENV = {
+  PRODUCTION: "production",
+} as const;
+
+export function isProduction(): boolean {
+  return process.env.NODE_ENV === NODE_ENV.PRODUCTION;
+}
+
 let cachedEnv: Env | undefined;
 
 export function getEnv(): Env {

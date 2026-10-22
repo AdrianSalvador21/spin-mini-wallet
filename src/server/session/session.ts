@@ -2,7 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { connection } from "next/server";
 import type { UserId } from "@/domain/user/types";
-import { getEnv } from "@/shared/config/env";
+import { getEnv, isProduction } from "@/shared/config/env";
 import { UnauthorizedError } from "../errors";
 import { signSessionToken, verifySessionToken, type SessionPayload } from "./token";
 
@@ -48,7 +48,7 @@ export async function setSessionCookie(userId: UserId): Promise<void> {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
-    secure: process.env.NODE_ENV === "production",
+    secure: isProduction(),
     maxAge: SESSION_TTL_SECONDS,
   });
 }

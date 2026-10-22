@@ -35,7 +35,7 @@ export default defineConfig({
           name: "dom",
           environment: "jsdom",
           include: ["src/**/*.test.{ts,tsx}"],
-          exclude: ["**/node_modules/**", "**/.git/**", "src/server/**"],
+          exclude: ["**/node_modules/**", "**/.git/**", "src/server/**", "src/proxy.test.ts"],
         },
       },
       {
@@ -49,7 +49,7 @@ export default defineConfig({
           name: "node",
           environment: "node",
           setupFiles: [path.resolve(dirname, "src/test/server-setup.ts")],
-          include: ["src/server/**/*.test.{ts,tsx}"],
+          include: ["src/server/**/*.test.{ts,tsx}", "src/proxy.test.ts"],
         },
       },
     ],
