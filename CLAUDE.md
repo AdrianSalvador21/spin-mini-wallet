@@ -101,7 +101,17 @@ Services (`services/*-service.ts`) are built by factories that take `ServiceDepe
 
 `session/password.ts` (`scrypt` + `timingSafeEqual`) and `session/token.ts` (HMAC-signed, pure, framework-free) back `session/session.ts`'s `getSession()`/`requireSession()`/`setSessionCookie()`/`clearSessionCookie()`. `requireSession()` is the only thing in this layer that throws (`UnauthorizedError`, `errors.ts`) — it is the single entry point SPEC 04's Route Handlers and SPEC 05's Server Actions use to protect themselves; `getSession()` returns `null` instead.
 
-`container.ts`'s `getServices()` builds the four services once, from `getEnv()`, `Date`, `Math.random` and `crypto.randomUUID`, and caches the result for the life of the process.
+`container.ts`'s `getServices()` builds the four services once, from `getEnv()`, `Date`, `Math.random` and `crypto.randomUUID`, and caches the result for the life of the process. `getHttpDependencies()` builds on top of it once more, adding `Math.random`, a `setTimeout`-based `sleep`, `crypto.randomUUID`, the logger, `getErrorReporter()` and `getEnv().MOCK_ALLOW_SCENARIO_OVERRIDE`.
+
+### HTTP layer (`src/server/http/`, `src/app/api/v1/`)
+
+Every `route.ts` under `src/app/api/v1/` is one line per method, binding a handler factory from `src/server/http/handlers/` to `getHttpDependencies()`: `export const GET = createWalletSummaryHandler(getHttpDependencies());`. `src/app/` keeps no logic; factories are tested directly with injected `sleep`/`random`/`logger`/`reporter` instead of mocking modules.
+
+`http/route-handler.ts`'s `createRouteHandler<P>(deps, { mutating? }, handle)` is what every factory wraps `handle` in. In order it: reads `x-request-id` or generates one; when `mutating`, runs `csrf.ts`'s `checkMutationRequest` (`415` for a non-`application/json` `Content-Type`, `403` for a missing/foreign `Origin`) before the session check; calls `requireSession()` (`401` on `UnauthorizedError`); runs `handle`, mapping any other thrown error to `500 INTERNAL_ERROR` logged and reported with `source: "route-handler"`; sets `x-request-id` and `Cache-Control: no-store` on every response; and writes one `logger.info("api_request", …)` line with `method`, `path`, `status`, `durationMs` and, when the handler called `ctx.reportScenario(...)`, `scenario` — never the body.
+
+The HTTP contract lives in `src/shared/lib/api/contract.ts`: `API_ERROR_CODE`, `ApiErrorBody`, `TRANSFER_SCENARIO`/`READ_SCENARIO`, the `SCENARIO_COOKIE` names (`mock_scenario`, `mock_read_scenario`) and the `x-request-id`/`Idempotency-Key` header names. It has no server dependency, so SPEC 06+ client code imports it too. `http/api-error.ts`'s `toApiError` maps a `ServiceError` to `{ status, code, details?, balance? }` through an exhaustive `switch`; `errorResponse` turns that into the `ApiErrorBody` envelope, whose `message` is always the i18n key `errors.api.<CODE>` (`src/messages/es-MX/errors.json`, gated by `errors.test.ts`).
+
+`server/mock/scenarios.ts`'s `pickScenario`/`resolveTransferScenario`/`resolveReadScenario`/`latencyMs` are pure functions over an injected `random`, so the weighted transfer outcomes (60/10/10/10/10) and the read-scenario cookie overrides are deterministic in tests. Overrides only apply when `MOCK_ALLOW_SCENARIO_OVERRIDE=true`; an unknown cookie value is ignored rather than failing the request.
 
 ### Styling tokens (`src/app/globals.css`)
 
