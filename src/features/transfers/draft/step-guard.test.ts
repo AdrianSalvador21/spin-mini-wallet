@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { RECIPIENT_ACCOUNT_TYPE, type ContactId } from "@/domain/contact/types";
 import type { Cents } from "@/domain/money/money";
 import { EMPTY_DRAFT } from "./draft-store";
-import { resolveStepAccess } from "./step-guard";
+import { previousStepRoute, resolveStepAccess, stepFromPathname } from "./step-guard";
 import { TRANSFER_STEP, type TransferDraftState, type TransferStep } from "./types";
 
 const WITH_AMOUNT: TransferDraftState = { ...EMPTY_DRAFT, amountInCents: 5_000 as Cents };
@@ -32,5 +32,30 @@ describe("resolveStepAccess", () => {
 
   it("throws for an unknown step", () => {
     expect(() => resolveStepAccess("confirm" as unknown as TransferStep, COMPLETE)).toThrow();
+  });
+});
+
+describe("stepFromPathname", () => {
+  it.each([
+    ["/transfers/new/amount", TRANSFER_STEP.AMOUNT],
+    ["/transfers/new/recipient", TRANSFER_STEP.RECIPIENT],
+    ["/transfers/new/review", TRANSFER_STEP.REVIEW],
+    ["/transfers/new", TRANSFER_STEP.AMOUNT],
+  ])("maps %s to %s", (pathname, expected) => {
+    expect(stepFromPathname(pathname)).toBe(expected);
+  });
+});
+
+describe("previousStepRoute", () => {
+  it.each([
+    [TRANSFER_STEP.AMOUNT, "/home"],
+    [TRANSFER_STEP.RECIPIENT, "/transfers/new/amount"],
+    [TRANSFER_STEP.REVIEW, "/transfers/new/recipient"],
+  ])("goes back from %s to %s", (step, expected) => {
+    expect(previousStepRoute(step)).toBe(expected);
+  });
+
+  it("throws for an unknown step", () => {
+    expect(() => previousStepRoute("confirm" as unknown as TransferStep)).toThrow();
   });
 });

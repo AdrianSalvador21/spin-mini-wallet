@@ -1,0 +1,41 @@
+.live-summary {
+  padding: var(--space-6);
+  border-radius: var(--radius-l);
+  background: var(--color-white);
+  box-shadow: var(--shadow-card);
+}
+
+.live-summary__title {
+  font-family: var(--font-display);
+  font-size: var(--text-size-lg);
+  font-weight: 700;
+  color: var(--color-ink-900);
+}
+
+.live-summary__label {
+  margin-top: var(--space-3);
+  font-size: var(--text-size-sm);
+  color: var(--color-ink-500);
+}
+
+.live-summary__amount {
+  margin-top: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--text-size-3xl);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--color-ink-900);
+  font-variant-numeric: tabular-nums;
+}
+
+.live-summary__cents {
+  font-size: var(--text-size-balance-cents);
+}
+
+.live-summary__list {
+  margin-top: var(--space-4);
+}
+
+.live-summary__note {
+  margin-top: var(--space-4);
+}

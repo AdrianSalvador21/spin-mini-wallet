@@ -11,6 +11,12 @@ export const TRANSFER_STEP = {
 
 export type TransferStep = (typeof TRANSFER_STEP)[keyof typeof TRANSFER_STEP];
 
+export const TRANSFER_STEP_ORDER: readonly TransferStep[] = [
+  TRANSFER_STEP.AMOUNT,
+  TRANSFER_STEP.RECIPIENT,
+  TRANSFER_STEP.REVIEW,
+];
+
 export interface DraftRecipient {
   contactId: ContactId;
   name: string;
