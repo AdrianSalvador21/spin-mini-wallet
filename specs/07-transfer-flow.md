@@ -482,38 +482,38 @@ Each step leaves lint, typecheck and tests green and is committed on its own. Be
 
 ## Acceptance criteria
 
-- [ ] `package.json` lists `zustand` 5.x under `dependencies`.
-- [ ] SPEC 00 §4, §5, §8, §12 and §14 and `challenge.md` §8.4 describe the decisions of this spec.
-- [ ] `validateTransferAmount` returns `AMOUNT_NOT_POSITIVE` for 0 and `INSUFFICIENT_FUNDS` for one cent over the balance, with 100 % coverage on `src/domain/**`.
-- [ ] `POST /api/v1/contacts` answers `201` for a new account, `200` with the same `id` for an existing one, and `400` with `details.account: ["RECIPIENT_IS_SELF"]` for the user's own phone.
-- [ ] A contact created with `saveAsFavorite: false` is not returned by `GET /api/v1/contacts`.
-- [ ] No response from `/api/v1/contacts` contains more than 4 digits of an account.
-- [ ] After any wizard step, `sessionStorage["smw.transfer-draft"]` contains no phone, CLABE or card number with more than 4 digits.
-- [ ] "Enviar dinero" on Home opens `/transfers/new/amount`, which shows "1 de 3" on mobile and the `Stepper` with "Monto" current on desktop.
-- [ ] Typing `12450.8` shows `12,450.8`, and the draft stores `1245080` cents.
-- [ ] "Continuar" is always enabled. With `0` it shows the minimum-amount error, and with more than the balance it shows "El monto supera tu saldo disponible…".
-- [ ] "Todo" fills the whole available balance, and the concept counter stops at `40/40`.
-- [ ] Reloading any step keeps the amount, concept and recipient.
-- [ ] Opening `/transfers/new/review` with an empty draft lands on `/transfers/new/amount`, and opening it with only an amount lands on `/transfers/new/recipient`.
-- [ ] Mariana sees Ana, Carlos, Diego and Luis under "Tus favoritos", and Diego sees the empty contacts state.
-- [ ] "Continuar" with no recipient shows the recipient-required error, and choosing Carlos turns the mobile CTA into "Continuar con Carlos".
-- [ ] "Agregar nuevo destinatario" changes the URL to `?mode=new` without a full page load, and the browser's back button returns to the list.
-- [ ] A valid CLABE starting with `002` shows "Banco detectado: Banamex", and saving it with "Guardar en favoritos" adds it to the favorites.
-- [ ] Saving Mariana's own phone shows the self-transfer error on the phone field.
-- [ ] With `mock_read_scenario=error`, the recipient step shows "No pudimos cargar tus contactos" with "Reintentar" and "Referencia: …", and the amount step shows the balance error.
-- [ ] The review shows "Para", "Cuenta", "Concepto" (when set), "Comisión $0.00", and "Saldo después" equal to the balance minus the amount.
-- [ ] Entering the review stores one idempotency key that survives a reload, and changing the amount and returning stores a different one.
-- [ ] "Confirmar envío" is the only orange element on the review, and it is disabled with its note.
-- [ ] "Editar datos" opens the amount step with the previous amount and concept.
-- [ ] From 1024 px, steps 1 and 2 show a 560 px card beside a 340 px sticky summary, step 3 shows the card alone, and completed steps in the `Stepper` are links.
-- [ ] Below 1024 px the step's CTA sits in the bottom action bar.
-- [ ] After logging out and logging in again in the same tab, the amount step starts empty.
-- [ ] Every touch target in the wizard is at least 44 × 44 px, and no text is smaller than 12 px.
-- [ ] `chip`, `checkbox`, `summary-list`, `progress-steps` and `stepper` live in `src/shared/ui/` with `.tsx`, `.test.tsx`, `.module.scss` where they have styles and `types.ts` where they declare constants, and no SCSS file has a hex value or a loose measured value.
-- [ ] `npm run test:e2e` passes on the `mobile` and `desktop` projects.
-- [ ] `npm run lint`, `npm run typecheck`, `npm run test:coverage` (100 % on `src/domain/**`, 80 % on `src/server/**`, `src/shared/lib/**` and `src/shared/observability/**`) and `npm run build` finish with no errors.
-- [ ] No component or page contains user-facing text outside `src/messages/es-MX/`.
-- [ ] There are no comments in any file created or modified in this milestone.
+- [x] `package.json` lists `zustand` 5.x under `dependencies`.
+- [x] SPEC 00 §4, §5, §8, §12 and §14 and `challenge.md` §8.4 describe the decisions of this spec.
+- [x] `validateTransferAmount` returns `AMOUNT_NOT_POSITIVE` for 0 and `INSUFFICIENT_FUNDS` for one cent over the balance, with 100 % coverage on `src/domain/**`.
+- [x] `POST /api/v1/contacts` answers `201` for a new account, `200` with the same `id` for an existing one, and `400` with `details.account: ["RECIPIENT_IS_SELF"]` for the user's own phone.
+- [x] A contact created with `saveAsFavorite: false` is not returned by `GET /api/v1/contacts`.
+- [x] No response from `/api/v1/contacts` contains more than 4 digits of an account.
+- [x] After any wizard step, `sessionStorage["smw.transfer-draft"]` contains no phone, CLABE or card number with more than 4 digits.
+- [x] "Enviar dinero" on Home opens `/transfers/new/amount`, which shows "1 de 3" on mobile and the `Stepper` with "Monto" current on desktop.
+- [x] Typing `12450.8` shows `12,450.8`, and the draft stores `1245080` cents.
+- [x] "Continuar" is always enabled. With `0` it shows the minimum-amount error, and with more than the balance it shows "El monto supera tu saldo disponible…".
+- [x] "Todo" fills the whole available balance, and the concept counter stops at `40/40`.
+- [x] Reloading any step keeps the amount, concept and recipient.
+- [x] Opening `/transfers/new/review` with an empty draft lands on `/transfers/new/amount`, and opening it with only an amount lands on `/transfers/new/recipient`.
+- [x] Mariana sees Ana, Carlos, Diego and Luis under "Tus favoritos", and Diego sees the empty contacts state.
+- [x] "Continuar" with no recipient shows the recipient-required error, and choosing Carlos turns the mobile CTA into "Continuar con Carlos".
+- [x] "Agregar nuevo destinatario" changes the URL to `?mode=new` without a full page load, and the browser's back button returns to the list.
+- [x] A valid CLABE starting with `002` shows "Banco detectado: Banamex", and saving it with "Guardar en favoritos" adds it to the favorites.
+- [x] Saving Mariana's own phone shows the self-transfer error on the phone field.
+- [x] With `mock_read_scenario=error`, the recipient step shows "No pudimos cargar tus contactos" with "Reintentar" and "Referencia: …", and the amount step shows the balance error.
+- [x] The review shows "Para", "Cuenta", "Concepto" (when set), "Comisión $0.00", and "Saldo después" equal to the balance minus the amount.
+- [x] Entering the review stores one idempotency key that survives a reload, and changing the amount and returning stores a different one.
+- [x] "Confirmar envío" is the only orange element on the review, and it is disabled with its note.
+- [x] "Editar datos" opens the amount step with the previous amount and concept.
+- [x] From 1024 px, steps 1 and 2 show a 560 px card beside a 340 px sticky summary, step 3 shows the card alone, and completed steps in the `Stepper` are links.
+- [x] Below 1024 px the step's CTA sits in the bottom action bar.
+- [x] After logging out and logging in again in the same tab, the amount step starts empty.
+- [x] Every touch target in the wizard is at least 44 × 44 px, and no text is smaller than 12 px.
+- [x] `chip`, `checkbox`, `summary-list`, `progress-steps` and `stepper` live in `src/shared/ui/` with `.tsx`, `.test.tsx`, `.module.scss` where they have styles and `types.ts` where they declare constants, and no SCSS file has a hex value or a loose measured value.
+- [x] `npm run test:e2e` passes on the `mobile` and `desktop` projects.
+- [x] `npm run lint`, `npm run typecheck`, `npm run test:coverage` (100 % on `src/domain/**`, 80 % on `src/server/**`, `src/shared/lib/**` and `src/shared/observability/**`) and `npm run build` finish with no errors.
+- [x] No component or page contains user-facing text outside `src/messages/es-MX/`.
+- [x] There are no comments in any file created or modified in this milestone.
 
 ## Decisions
 
