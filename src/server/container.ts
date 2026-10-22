@@ -13,6 +13,7 @@ import { createContactService, type ContactService } from "./services/contact-se
 import { createTransferService, type TransferService } from "./services/transfer-service";
 import type { ServiceDependencies } from "./services/types";
 import { createWalletService, type WalletService } from "./services/wallet-service";
+import { createHomeLoader, type HomeLoader } from "./wallet/home-loader";
 
 export interface Services {
   auth: AuthService;
@@ -63,6 +64,22 @@ export function getHttpDependencies(): HttpDependencies {
   }
 
   return cachedHttpDependencies;
+}
+
+let cachedHomeLoader: HomeLoader | undefined;
+
+export function getHomeLoader(): HomeLoader {
+  if (!cachedHomeLoader) {
+    cachedHomeLoader = createHomeLoader({
+      services: getServices(),
+      random: () => Math.random(),
+      sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+      logger,
+      allowScenarioOverride: getEnv().MOCK_ALLOW_SCENARIO_OVERRIDE,
+    });
+  }
+
+  return cachedHomeLoader;
 }
 
 let cachedAuthActions: AuthActions | undefined;
