@@ -358,9 +358,22 @@ Approved tokens (extracted from spinbyoxxo.com.mx):
 | `--color-info` / `-bg` | `#3D1199` / `#EEE8FA` | Info alerts (processing) |
 | `--radius-s/m/l/pill` | `10px` / `16px` / `24px` / `999px` | Inputs, cards, buttons |
 
+Scale tokens (SPEC 05). Spacing follows the same 4 px grid as Tailwind's spacing utilities, so page layout and components share one scale. Dimensions and type sizes keep the design's exact values:
+
+| CSS token | Value | Usage |
+| --- | --- | --- |
+| `--space-1/2/3/4/5/6/8` | `4px` / `8px` / `12px` / `16px` / `20px` / `24px` / `32px` | Padding, gaps and margins |
+| `--text-size-xs/sm/md/lg` | `12px` / `13px` / `14px` / `15px` | Hints and errors, labels and alerts, prefixes, body and buttons |
+| `--size-control` | `50px` | Input and button height |
+| `--size-icon-sm/md` | `16px` / `18px` | Spinner and inline icons, alert and field icons |
+| `--border-width-thin` / `--border-width` | `1.5px` / `2px` | Field control border, secondary button and spinner |
+| `--focus-ring-width` / `--focus-ring-offset` / `--focus-halo` | `3px` / `2px` / `4px` | Focus outline and the field's focus and error halo |
+| `--duration-fast` / `--duration-spin` | `150ms` / `1s` | Hover and focus transitions, one spinner turn |
+
 - Typography: Montserrat (400–900) for headings and amounts, Open Sans (400–700) for body, both through `next/font/google`. Amounts use `tabular-nums`.
 - Tokens live as CSS variables in `src/app/globals.css` and are exposed to Tailwind with `@theme`.
-- Every custom component has `name.module.scss` with BEM (`.button`, `.button__spinner`, `.button--primary`) and consumes only CSS variables.
+- Every custom component has `name.module.scss` with BEM (`.button`, `.button__spinner`, `.button--primary`) and consumes only CSS variables. No loose measured values: padding, gaps, sizes, borders, type sizes and durations come from the scale tokens above. A value used once that no token describes (a percentage, `1px` hairline, `999px`) is the only exception.
+- A component's closed-set constants (`BUTTON_VARIANT`, `ICON_NAME`, …) and their unions live in a `types.ts` next to it; its `XProps` interface stays in the component file.
 - Tailwind only handles page layout: flex, grid, gap, padding and breakpoints.
 - Mobile-first. Breakpoints `md` 768 px and `lg` 1024 px. At `lg` the private layout switches to three zones: navigation, content and balance column.
 - Light theme only.

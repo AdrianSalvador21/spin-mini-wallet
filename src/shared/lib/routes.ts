@@ -3,6 +3,7 @@ export const ROUTES = {
   LOGIN: "/login",
   REGISTER: "/register",
   HOME: "/home",
+  TRANSFERS: "/transfers",
 } as const;
 
 export const ROUTE_ACCESS = {
@@ -15,7 +16,7 @@ export type RouteAccess =
   | { action: typeof ROUTE_ACCESS.REDIRECT; to: string };
 
 const PUBLIC_ONLY_PATHS: readonly string[] = [ROUTES.LOGIN, ROUTES.REGISTER];
-const PRIVATE_PATH_PREFIXES: readonly string[] = [ROUTES.HOME, "/transfers"];
+const PRIVATE_PATH_PREFIXES: readonly string[] = [ROUTES.HOME, ROUTES.TRANSFERS];
 
 function isWithin(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);

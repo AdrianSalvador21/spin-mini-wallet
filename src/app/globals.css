@@ -32,6 +32,33 @@
   --radius-l: 24px;
   --radius-pill: 999px;
 
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  --text-size-xs: 12px;
+  --text-size-sm: 13px;
+  --text-size-md: 14px;
+  --text-size-lg: 15px;
+
+  --size-control: 50px;
+  --size-icon-sm: 16px;
+  --size-icon-md: 18px;
+
+  --border-width-thin: 1.5px;
+  --border-width: 2px;
+
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 2px;
+  --focus-halo: 4px;
+
+  --duration-fast: 150ms;
+  --duration-spin: 1s;
+
   --font-display: var(--font-montserrat), system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
   --font-body: var(--font-open-sans), system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
 }

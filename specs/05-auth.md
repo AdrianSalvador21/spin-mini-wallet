@@ -50,7 +50,9 @@ Server Actions follow the same pattern as the SPEC 04 handlers (user decision). 
 ### Route constants and access rule (`src/shared/lib/routes.ts`)
 
 ```ts
-export const ROUTES = { ROOT: "/", LOGIN: "/login", REGISTER: "/register", HOME: "/home" } as const;
+export const ROUTES = {
+  ROOT: "/", LOGIN: "/login", REGISTER: "/register", HOME: "/home", TRANSFERS: "/transfers",
+} as const;
 
 export const ROUTE_ACCESS = { NEXT: "next", REDIRECT: "redirect" } as const;
 export type RouteAccess =
@@ -80,18 +82,30 @@ export function resolveRouteAccess(pathname: string, hasSession: boolean): Route
 | `--color-info` | `#3D1199` | Info alert text and icon |
 | `--color-info-bg` | `#EEE8FA` | Info alert background |
 
+Scale tokens, added with the first primitives so no SCSS file carries a loose measured value (user decision). Spacing follows Tailwind's 4 px grid; the design's 15/26 px button padding becomes 16/24, its 6 and 10 px gaps become 8, and its 14 px field padding becomes 16. Dimensions and type sizes keep the design's exact values:
+
+| CSS token | Value |
+| --- | --- |
+| `--space-1/2/3/4/5/6/8` | `4px` / `8px` / `12px` / `16px` / `20px` / `24px` / `32px` |
+| `--text-size-xs/sm/md/lg` | `12px` / `13px` / `14px` / `15px` |
+| `--size-control` | `50px` |
+| `--size-icon-sm/md` | `16px` / `18px` |
+| `--border-width-thin` / `--border-width` | `1.5px` / `2px` |
+| `--focus-ring-width` / `--focus-ring-offset` / `--focus-halo` | `3px` / `2px` / `4px` |
+| `--duration-fast` / `--duration-spin` | `150ms` / `1s` |
+
 ### UI primitives (`src/shared/ui/`)
 
 | Component | Props | Behavior |
 | --- | --- | --- |
-| `Icon` | `name: IconName`, `size?`, `label?` | Inline SVG copied from the design's symbols: `alert`, `check`, `clock`, `eye`, `eye-off`, `back`. `ICON_NAME` is an `as const` object. Without `label` it is `aria-hidden`. With `label` it is `role="img"` with `aria-label` |
+| `Icon` | `name: IconName`, `size?: IconSize` (`ICON_SIZE` `sm` / `md`, the `--size-icon-*` tokens, default `md`), `label?` | Inline SVG copied from the design's symbols: `alert`, `check`, `clock`, `eye`, `eye-off`, `back`. `ICON_NAME` is an `as const` object. Without `label` it is `aria-hidden`. With `label` it is `role="img"` with `aria-label` |
 | `Button` | `variant: "primary" \| "secondary" \| "ghost"`, `block?`, `loading?`, `loadingLabel?`, native button props | Pill shape. `loading` shows the spinner, sets `aria-busy`, replaces the text with `loadingLabel` and disables the button so it cannot submit twice. `type` defaults to `"button"`. `BUTTON_VARIANT` is an `as const` object |
 | `Field` | `label`, `id`, `prefix?`, `hint?`, `error?`, input props, `ref` | Label above a 50 px control, optional prefix (`+52`), hint and inline error. With `error`, the control gets the error ring, the input gets `aria-invalid="true"`, and `aria-describedby` points to the error (or the hint). Works with RHF's `register` through the React 19 `ref` prop |
 | `PasswordInput` | `Field` props without `type` | A `Field` with `type="password"` and a trailing toggle button (`eye` / `eye-off`), labeled "Mostrar contraseña" / "Ocultar contraseña", with `aria-pressed` |
 | `Alert` | `tone: "danger" \| "warning" \| "success" \| "info"`, `role?`, `children` | Tone background and icon (`alert`, `clock`, `check`, `alert`). `ALERT_TONE` is an `as const` object, and the tone → icon mapping is an exhaustive `switch` |
 | `AppBar` | `title`, `backHref` | Lavender round back link (`Icon` `back`, labeled "Regresar") and the title. SPEC 07 adds the step counter |
 
-Every component consumes only CSS variables and the `_typography.scss` mixins. Focus is visible (`--color-lavender-500` outline). The spinner respects `prefers-reduced-motion`. Texts come from the caller or from `common.json`, never inline.
+Each primitive folder has a `types.ts` with its closed-set constants and unions (`ICON_NAME`, `BUTTON_VARIANT`, `BUTTON_TYPE`, `ALERT_TONE`); the `XProps` interface stays in the component file. `BUTTON_TYPE = { BUTTON: "button", SUBMIT: "submit", RESET: "reset" }` replaces any raw `type` literal (user decision). Every component consumes only CSS variables (colors and scale tokens) and the `_typography.scss` mixins. Focus is visible (`--color-lavender-500` outline). The spinner respects `prefers-reduced-motion`. Texts come from the caller or from `common.json`, never inline.
 
 ### Auth form contract (`src/shared/lib/auth/form-state.ts`)
 
@@ -253,7 +267,7 @@ Each step leaves lint, typecheck and tests green and is committed on its own. Be
 1. **Branch and docs.** Pull `develop` (it must include PR #4) and create `feature/05-auth`. In SPEC 00 §11, record the rate-limit semantics (fixed 15-minute window from the first failure, blocks even a correct password, resets on success). Also record that `/api/**` is never redirected. In §14, add `--color-info` and `--color-info-bg`. In §15, record the E2E port 3100 and `.data/e2e-db.json`. Link this spec from `roadmap.md` and mark 05 as in progress.
    - Why: other sessions read these files, not this chat.
 
-2. **Dependencies and tokens.** `npm install zod react-hook-form @hookform/resolvers`, with `zod` pinned to the major already resolved (4.x). Add the two info tokens to `@theme static` in `globals.css`.
+2. **Dependencies and tokens.** `npm install zod react-hook-form @hookform/resolvers`, with `zod` pinned to the major already resolved (4.x) and `@hookform/resolvers` on `^5.9.2` (6.0.0 fails `npm install` with an `ERESOLVE` between its own optional peers; user decision). Add the two info tokens and the scale tokens to `@theme static` in `globals.css`.
    - Why: the domain imports `zod` without declaring it. A change in ESLint's dependencies would break the build.
 
 3. **Routes and phone mask.** Create `src/shared/lib/routes.ts` and `src/shared/lib/format/phone.ts` with tests. Cover every row of the access table, including `/home/x`, `/transfers/new/amount`, `/api/v1/wallet/summary` and `/favicon.ico`. For the mask, cover empty input, letters, 3 digits, 10 digits and 12 digits.
@@ -304,7 +318,7 @@ Each step leaves lint, typecheck and tests green and is committed on its own. Be
 - [ ] A `Button` with `loading` is disabled, has `aria-busy="true"` and does not call `onClick`.
 - [ ] A `Field` with `error` has `aria-invalid="true"` and an `aria-describedby` that points to the element holding the error text.
 - [ ] The `PasswordInput` toggle switches the input between `password` and `text` and updates its accessible name.
-- [ ] `Alert` renders the four tones, and `alert`, `button`, `field`, `password-input`, `icon` and `app-bar` live in `src/shared/ui/` with `.tsx`, `.module.scss` and `.test.tsx`, with no hex value in any SCSS file.
+- [ ] `Alert` renders the four tones, and `alert`, `button`, `field`, `password-input`, `icon` and `app-bar` live in `src/shared/ui/` with `.tsx`, `.module.scss`, `.test.tsx` and, where they declare closed-set constants, `types.ts`, with no hex value and no loose measured value in any SCSS file.
 - [ ] Five failed logins for one phone make the 6th attempt answer `rate_limited`, even with the right password, and `verifyCredentials` is not called for it.
 - [ ] A successful login resets the counter, and after 15 minutes (fake clock) the same phone may try again.
 - [ ] `login` with `{ method: "phone", phone: "55 1234 5678", password: "Spin2026" }` returns Mariana's `UserView`.
