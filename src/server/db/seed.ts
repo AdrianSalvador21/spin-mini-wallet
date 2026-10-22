@@ -1,5 +1,5 @@
 import "server-only";
-import { RECIPIENT_ACCOUNT_TYPE, type Contact, type ContactId } from "@/domain/contact/types";
+import { RECIPIENT_ACCOUNT_TYPE, type Contact, type ContactId, type RecipientAccount } from "@/domain/contact/types";
 import { toMoney, type Cents } from "@/domain/money/money";
 import type { User, UserId } from "@/domain/user/types";
 import {
@@ -23,9 +23,21 @@ const SEED_MOVEMENT_DIRECTION: Record<MovementType, (typeof MOVEMENT_DIRECTION)[
   [MOVEMENT_TYPE.QR_PAYMENT]: MOVEMENT_DIRECTION.DEBIT,
 };
 
-const SEED_MOVEMENT_DETAIL: Record<MovementType, { counterpartyName?: string; merchantName?: string }> = {
-  [MOVEMENT_TYPE.TRANSFER_OUT]: { counterpartyName: "Carlos Ruiz" },
-  [MOVEMENT_TYPE.TRANSFER_IN]: { counterpartyName: "Diego Ramírez" },
+const CARLOS_PHONE = "5523456789";
+const DIEGO_PHONE = "5587654321";
+
+const SEED_MOVEMENT_DETAIL: Record<
+  MovementType,
+  { counterpartyName?: string; merchantName?: string; counterpartyAccount?: RecipientAccount }
+> = {
+  [MOVEMENT_TYPE.TRANSFER_OUT]: {
+    counterpartyName: "Carlos Ruiz",
+    counterpartyAccount: { type: RECIPIENT_ACCOUNT_TYPE.PHONE, phone: CARLOS_PHONE },
+  },
+  [MOVEMENT_TYPE.TRANSFER_IN]: {
+    counterpartyName: "Diego Ramírez",
+    counterpartyAccount: { type: RECIPIENT_ACCOUNT_TYPE.PHONE, phone: DIEGO_PHONE },
+  },
   [MOVEMENT_TYPE.CASH_DEPOSIT]: { merchantName: "OXXO Insurgentes" },
   [MOVEMENT_TYPE.QR_PAYMENT]: { merchantName: "OXXO Reforma" },
 };
@@ -58,7 +70,7 @@ function buildFavorites(ownerId: UserId, now: Date): Contact[] {
       id: "ctc_carlos" as ContactId,
       ownerId,
       name: "Carlos Ruiz",
-      account: { type: RECIPIENT_ACCOUNT_TYPE.PHONE, phone: "5523456789" },
+      account: { type: RECIPIENT_ACCOUNT_TYPE.PHONE, phone: CARLOS_PHONE },
       isFavorite: true,
       createdAt: daysAgo(now, 45),
     },
@@ -82,7 +94,7 @@ function buildFavorites(ownerId: UserId, now: Date): Contact[] {
       id: "ctc_diego" as ContactId,
       ownerId,
       name: "Diego Ramírez",
-      account: { type: RECIPIENT_ACCOUNT_TYPE.PHONE, phone: "5587654321" },
+      account: { type: RECIPIENT_ACCOUNT_TYPE.PHONE, phone: DIEGO_PHONE },
       isFavorite: true,
       createdAt: daysAgo(now, 30),
     },

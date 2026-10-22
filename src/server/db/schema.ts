@@ -4,7 +4,7 @@ import type { Transfer, TransferId } from "@/domain/transfer/types";
 import type { User, UserId } from "@/domain/user/types";
 import type { Movement, Wallet } from "@/domain/wallet/types";
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export interface IdempotencyRecord {
   key: string;

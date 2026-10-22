@@ -1,30 +1,21 @@
 import "server-only";
-import type { Money } from "@/domain/money/money";
 import { err, ok, type Result } from "@/domain/shared/result";
 import type { ValidationCode } from "@/domain/shared/validation-codes";
+import { maskPhone } from "@/domain/user/mask";
 import type { UserId } from "@/domain/user/types";
-import { decodeCursor, encodeCursor } from "@/domain/wallet/cursor";
-import type { Movement } from "@/domain/wallet/types";
+import { decodeCursor, encodeCursor, type MovementCursor } from "@/domain/wallet/cursor";
+import type { Movement, MovementDirection } from "@/domain/wallet/types";
 import { SERVICE_ERROR_CODE, type ServiceDependencies, type ServiceError } from "./types";
-import { toMovementView, type MovementView } from "./views";
+import { toMovementView, type MovementsPage, type WalletSummary } from "./views";
 
 const DEFAULT_LIMIT = 10;
 const MIN_LIMIT = 1;
 const MAX_LIMIT = 50;
 
-export interface WalletSummary {
-  user: { id: UserId; fullName: string };
-  balance: Money;
-}
-
-export interface MovementsPage {
-  items: MovementView[];
-  nextCursor: string | null;
-}
-
 export interface ListMovementsOptions {
   cursor?: string;
   limit?: number;
+  direction?: MovementDirection;
 }
 
 export interface WalletService {
@@ -44,6 +35,14 @@ function compareMovementsDesc(a: Movement, b: Movement): number {
   return a.id < b.id ? 1 : -1;
 }
 
+function isAfterCursor(movement: Movement, cursor: MovementCursor): boolean {
+  if (movement.createdAt !== cursor.createdAt) {
+    return movement.createdAt < cursor.createdAt;
+  }
+
+  return movement.id < cursor.id;
+}
+
 export function createWalletService({ db }: ServiceDependencies): WalletService {
   return {
     async getSummary(userId) {
@@ -56,12 +55,15 @@ export function createWalletService({ db }: ServiceDependencies): WalletService 
         return err({ code: SERVICE_ERROR_CODE.NOT_FOUND });
       }
 
-      return ok({ user: { id: user.id, fullName: user.fullName }, balance: wallet.balance });
+      return ok({
+        user: { id: user.id, fullName: user.fullName, maskedPhone: maskPhone(user.phone), email: user.email },
+        balance: wallet.balance,
+      });
     },
 
     async listMovements(userId, options = {}) {
       const limit = clamp(options.limit ?? DEFAULT_LIMIT, MIN_LIMIT, MAX_LIMIT);
-      let after: { createdAt: string; id: string } | null = null;
+      let after: MovementCursor | null = null;
 
       if (options.cursor) {
         const decoded = decodeCursor(options.cursor);
@@ -77,9 +79,16 @@ export function createWalletService({ db }: ServiceDependencies): WalletService 
       }
 
       const movements = await db.read((repositories) => repositories.movements.listByUserId(userId));
-      const sorted = [...movements].sort(compareMovementsDesc);
-      const startIndex = after
-        ? sorted.findIndex((movement) => movement.createdAt === after?.createdAt && movement.id === after?.id) + 1
+      const filtered = options.direction
+        ? movements.filter((movement) => movement.direction === options.direction)
+        : movements;
+      const sorted = [...filtered].sort(compareMovementsDesc);
+      const afterCursor = after;
+      const startIndex = afterCursor
+        ? (() => {
+            const index = sorted.findIndex((movement) => isAfterCursor(movement, afterCursor));
+            return index === -1 ? sorted.length : index;
+          })()
         : 0;
       const page = sorted.slice(startIndex, startIndex + limit);
       const hasMore = startIndex + limit < sorted.length;

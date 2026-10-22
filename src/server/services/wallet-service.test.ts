@@ -39,13 +39,18 @@ afterEach(async () => {
 });
 
 describe("getSummary", () => {
-  it("returns Mariana's balance and name", async () => {
+  it("returns Mariana's balance, name, masked phone and email", async () => {
     const result = await service.getSummary(marianaId);
 
     expect(result).toEqual({
       ok: true,
       value: {
-        user: { id: marianaId, fullName: "Mariana López" },
+        user: {
+          id: marianaId,
+          fullName: "Mariana López",
+          maskedPhone: "55 •••• 5678",
+          email: "mariana@spin.test",
+        },
         balance: { amountInCents: 1245080, currency: "MXN" },
       },
     });
@@ -103,5 +108,61 @@ describe("listMovements", () => {
     const result = await service.listMovements(diegoId);
 
     expect(result).toEqual({ ok: true, value: { items: [], nextCursor: null } });
+  });
+
+  it("returns only credit movements when filtering by direction", async () => {
+    const seen = new Set<string>();
+    let cursor: string | undefined;
+    let total = 0;
+
+    for (let page = 0; page < 5; page++) {
+      const result = await service.listMovements(marianaId, { cursor, direction: "credit", limit: 10 });
+
+      expect(result.ok).toBe(true);
+      if (!result.ok) {
+        break;
+      }
+
+      for (const item of result.value.items) {
+        expect(item.direction).toBe("credit");
+        expect(seen.has(item.id)).toBe(false);
+        seen.add(item.id);
+      }
+
+      total += result.value.items.length;
+
+      if (!result.value.nextCursor) {
+        break;
+      }
+
+      cursor = result.value.nextCursor;
+    }
+
+    expect(total).toBe(12);
+  });
+
+  it("keeps paginating with no duplicates when a cursor from the unfiltered list is reused with a direction filter", async () => {
+    const firstPage = await service.listMovements(marianaId, { limit: 10 });
+    expect(firstPage.ok).toBe(true);
+    if (!firstPage.ok || !firstPage.value.nextCursor) {
+      return;
+    }
+
+    const seenInFirstPage = new Set(firstPage.value.items.map((item) => item.id));
+
+    const filteredPage = await service.listMovements(marianaId, {
+      cursor: firstPage.value.nextCursor,
+      direction: "credit",
+    });
+
+    expect(filteredPage.ok).toBe(true);
+    if (!filteredPage.ok) {
+      return;
+    }
+
+    for (const item of filteredPage.value.items) {
+      expect(item.direction).toBe("credit");
+      expect(seenInFirstPage.has(item.id)).toBe(false);
+    }
   });
 });

@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { LOGIN_METHOD } from "@/domain/user/schemas";
 import { createJsonDatabase } from "../db/json-database";
-import type { DatabaseSnapshot } from "../db/schema";
+import { SCHEMA_VERSION, type DatabaseSnapshot } from "../db/schema";
 import { createAuthService } from "./auth-service";
 import type { ServiceDependencies } from "./types";
 
@@ -16,7 +16,7 @@ let idCounter: number;
 
 function buildStubSeed(): DatabaseSnapshot {
   return {
-    schemaVersion: 1,
+    schemaVersion: SCHEMA_VERSION,
     users: [],
     wallets: [],
     movements: [],

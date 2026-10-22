@@ -8,7 +8,7 @@ import type { Cents } from "@/domain/money/money";
 import { TRANSFER_RECIPIENT_KIND, type TransferId, type TransferRecipientInput } from "@/domain/transfer/types";
 import type { UserId } from "@/domain/user/types";
 import { createJsonDatabase } from "../db/json-database";
-import type { DatabaseSnapshot } from "../db/schema";
+import { SCHEMA_VERSION, type DatabaseSnapshot } from "../db/schema";
 import { createSeed } from "../db/seed";
 import type { ServiceDependencies } from "./types";
 import { createTransferService, type TransferService } from "./transfer-service";
@@ -75,6 +75,7 @@ describe("TransferService.create", () => {
     const movements = await deps.db.read((repositories) => repositories.movements.listByUserId(marianaId));
     const transferOut = movements.find((movement) => movement.transferId === result.value.id);
     expect(transferOut?.counterpartyName).toBe("Carlos Ruiz");
+    expect(transferOut?.counterpartyAccount).toEqual(NEW_RECIPIENT.account);
   });
 
   it("returns VALIDATION_ERROR when the amount is not positive", async () => {
@@ -153,7 +154,7 @@ describe("TransferService.create", () => {
     const userId = "usr_concurrent" as UserId;
 
     const buildStubSeed = (): DatabaseSnapshot => ({
-      schemaVersion: 1,
+      schemaVersion: SCHEMA_VERSION,
       users: [
         {
           id: userId,
@@ -248,6 +249,10 @@ describe("TransferService.create self-transfer, P2P credit and favorites", () =>
     const credit = diegoMovements.find((movement) => movement.type === "transfer_in");
     expect(credit?.counterpartyName).toBe("Mariana López");
     expect(credit?.direction).toBe("credit");
+    expect(credit?.counterpartyAccount).toEqual({
+      type: RECIPIENT_ACCOUNT_TYPE.PHONE,
+      phone: "5512345678",
+    });
   });
 
   it("only debits the sender for a CLABE recipient, even if it belongs to a registered account holder", async () => {
