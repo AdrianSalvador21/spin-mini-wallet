@@ -2,6 +2,28 @@
   "home": {
     "placeholder": {
       "greeting": "Hola, {name}"
+    },
+    "header": {
+      "hello": "Hola,",
+      "greeting": "Hola, {name}",
+      "openAccount": "Abrir mi cuenta"
+    },
+    "account": {
+      "title": "Mi cuenta",
+      "phone": "+52 {phone}",
+      "close": "Cerrar"
+    },
+    "balance": {
+      "label": "Saldo disponible",
+      "show": "Mostrar saldo",
+      "hide": "Ocultar saldo",
+      "hiddenAmount": "$ •••••",
+      "hiddenLabel": "Saldo oculto",
+      "send": "Enviar dinero",
+      "error": {
+        "title": "No pudimos cargar tu saldo",
+        "retry": "Reintentar"
+      }
     }
   }
 }

@@ -1,0 +1,57 @@
+@use "../../../../shared/styles/breakpoints" as bp;
+
+.home-header {
+  padding: var(--space-6) var(--space-5) var(--space-10);
+  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-purple-2) 100%);
+  color: var(--color-white);
+
+  @include bp.lg {
+    padding: var(--space-6) 0 0;
+    background: none;
+    color: var(--color-ink-900);
+  }
+}
+
+.home-header__mobile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+
+  @include bp.lg {
+    display: none;
+  }
+}
+
+.home-header__greeting {
+  font-family: var(--font-display);
+  font-size: var(--text-size-xl);
+  font-weight: 700;
+}
+
+.home-header__avatar-button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.home-header__desktop {
+  display: none;
+
+  @include bp.lg {
+    display: block;
+  }
+}
+
+.home-header__title {
+  font-family: var(--font-display);
+  font-size: var(--text-size-2xl);
+  font-weight: 700;
+}
+
+.home-header__date {
+  margin-top: var(--space-1);
+  color: var(--color-ink-500);
+  font-size: var(--text-size-lead);
+}

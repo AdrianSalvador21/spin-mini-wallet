@@ -14,6 +14,12 @@
     "appBar": {
       "back": "Regresar"
     },
+    "account": {
+      "phone": "Celular",
+      "clabe": "CLABE",
+      "card": "Tarjeta"
+    },
+    "reference": "Referencia: {requestId}",
     "nav": {
       "label": "Navegación principal",
       "home": "Inicio",
