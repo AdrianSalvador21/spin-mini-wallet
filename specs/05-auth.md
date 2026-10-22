@@ -1,6 +1,6 @@
 # SPEC 05 — Authentication: login, registration, logout and route guard
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 00, SPEC 02, SPEC 03, SPEC 04
 > **Date:** 2026-10-21
 > **Objective:** Build PDF screen 1 (login by mobile or email and registration) on the SPEC 03 session primitives, with the first UI primitives, Server Actions, a login rate limit, the route guard in `proxy.ts` and security headers.
@@ -355,38 +355,38 @@ Each step leaves lint, typecheck and tests green and is committed on its own. Be
 
 ## Acceptance criteria
 
-- [ ] `package.json` lists `zod`, `react-hook-form` and `@hookform/resolvers` under `dependencies`.
-- [ ] SPEC 00 §11 describes the rate-limit semantics, §14 lists `--color-info` and `--color-info-bg`, and §15 lists port 3100 and `.data/e2e-db.json`.
-- [ ] `resolveRouteAccess("/transfers/new/amount", false)` redirects to `/login`, and `resolveRouteAccess("/api/v1/wallet/summary", false)` answers `next`.
-- [ ] `formatPhoneInput("551234567899")` returns `"55 1234 5678"`.
-- [ ] A `Button` with `loading` is disabled, has `aria-busy="true"` and does not call `onClick`.
-- [ ] A `Field` with `error` has `aria-invalid="true"` and an `aria-describedby` that points to the element holding the error text.
-- [ ] The `PasswordInput` toggle switches the input between `password` and `text` and updates its accessible name.
-- [ ] `Alert` renders the four tones, and `alert`, `button`, `field`, `password-input`, `icon`, `app-bar`, `segmented` and `action-bar` live in `src/shared/ui/` with `.tsx`, `.module.scss`, `.test.tsx` and, where they declare closed-set constants, `types.ts`, with no hex value and no loose measured value in any SCSS file.
-- [ ] Five failed logins for one phone make the 6th attempt answer `rate_limited`, even with the right password, and `verifyCredentials` is not called for it.
-- [ ] A successful login resets the counter, and after 15 minutes (fake clock) the same phone may try again.
-- [ ] `login` with `{ method: "phone", phone: "55 1234 5678", password: "Spin2026" }` returns Mariana's `UserView`.
-- [ ] `register` with an existing phone returns `validation` with `phone: ["PHONE_ALREADY_REGISTERED"]`.
-- [ ] A throwing `AuthService` makes `login` return `unexpected` with the request id and calls `reporter.captureException` once with `source: "server-action"`.
-- [ ] No logger call in `src/server/auth/` receives the password or the identifier.
-- [ ] `/login` shows the phone field with `+52` by default, and choosing "Email" in the segmented selector switches it to an email field on the same URL.
-- [ ] Submitting the login form empty shows "Escribe tu número celular." and "Escribe tu contraseña." inline and does not call the action.
-- [ ] A wrong password shows the method's invalid-credentials message in an element with `role="alert"`.
-- [ ] Registering with a new phone and email lands on `/home` with "Hola, {name}" and a `smw_session` cookie.
-- [ ] Without a session, `/`, `/home` and `/transfers/new/amount` redirect to `/login`. With one, `/` and `/login` redirect to `/home`.
-- [ ] Without a session, `GET /api/v1/wallet/summary` still answers `401` JSON, not a redirect.
-- [ ] "Cerrar sesión" clears `smw_session` and lands on `/login`, and going back to `/home` redirects to `/login` again.
-- [ ] After a login in Playwright, `GET /api/v1/wallet/summary` answers `200` with an `x-request-id` header and Mariana's name.
-- [ ] Every page response has `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `X-Frame-Options: DENY` and `Permissions-Policy`. `Strict-Transport-Security` appears only in production.
-- [ ] `npm run test:e2e` passes on the `mobile` and `desktop` projects against `.data/e2e-db.json`, and leaves `.data/db.json` untouched.
-- [ ] `npm run lint`, `npm run typecheck`, `npm run test:coverage` (100 % on `src/domain/**`, 80 % on `src/server/**`, `src/shared/lib/**` and `src/shared/observability/**`) and `npm run build` finish with no errors.
-- [ ] No component or page contains user-facing text outside `src/messages/es-MX/`.
-- [ ] The primary button label uses `--color-on-brand-orange`, inputs use `--text-size-input` (16 px), and the segmented options, the AppBar back link and the password toggle have a hit area of at least 44 × 44 px.
-- [ ] Links on the auth screens are purple and underlined; no text is orange.
-- [ ] On a mobile viewport the login and register CTAs sit in the bottom action bar, and `src/app/layout.tsx` exports `viewport.interactiveWidget = "resizes-content"`.
-- [ ] From 1024 px, `/login` and `/register` show the brand panel on the left and a form of at most 400 px aligned to the top on the right; below 1024 px the panel is not rendered visibly.
-- [ ] `specs/design/mini-wallet-design.html`, `challenge.md` §8 and SPEC 00 §14 describe the approved mobile review and desktop proposal, including the "Registro · pantalla dividida" mock.
-- [ ] There are no comments in any file created or modified in this milestone.
+- [x] `package.json` lists `zod`, `react-hook-form` and `@hookform/resolvers` under `dependencies`.
+- [x] SPEC 00 §11 describes the rate-limit semantics, §14 lists `--color-info` and `--color-info-bg`, and §15 lists port 3100 and `.data/e2e-db.json`.
+- [x] `resolveRouteAccess("/transfers/new/amount", false)` redirects to `/login`, and `resolveRouteAccess("/api/v1/wallet/summary", false)` answers `next`.
+- [x] `formatPhoneInput("551234567899")` returns `"55 1234 5678"`.
+- [x] A `Button` with `loading` is disabled, has `aria-busy="true"` and does not call `onClick`.
+- [x] A `Field` with `error` has `aria-invalid="true"` and an `aria-describedby` that points to the element holding the error text.
+- [x] The `PasswordInput` toggle switches the input between `password` and `text` and updates its accessible name.
+- [x] `Alert` renders the four tones, and `alert`, `button`, `field`, `password-input`, `icon`, `app-bar`, `segmented` and `action-bar` live in `src/shared/ui/` with `.tsx`, `.module.scss`, `.test.tsx` and, where they declare closed-set constants, `types.ts`, with no hex value and no loose measured value in any SCSS file.
+- [x] Five failed logins for one phone make the 6th attempt answer `rate_limited`, even with the right password, and `verifyCredentials` is not called for it.
+- [x] A successful login resets the counter, and after 15 minutes (fake clock) the same phone may try again.
+- [x] `login` with `{ method: "phone", phone: "55 1234 5678", password: "Spin2026" }` returns Mariana's `UserView`.
+- [x] `register` with an existing phone returns `validation` with `phone: ["PHONE_ALREADY_REGISTERED"]`.
+- [x] A throwing `AuthService` makes `login` return `unexpected` with the request id and calls `reporter.captureException` once with `source: "server-action"`.
+- [x] No logger call in `src/server/auth/` receives the password or the identifier.
+- [x] `/login` shows the phone field with `+52` by default, and choosing "Email" in the segmented selector switches it to an email field on the same URL.
+- [x] Submitting the login form empty shows "Escribe tu número celular." and "Escribe tu contraseña." inline and does not call the action.
+- [x] A wrong password shows the method's invalid-credentials message in an element with `role="alert"`.
+- [x] Registering with a new phone and email lands on `/home` with "Hola, {name}" and a `smw_session` cookie.
+- [x] Without a session, `/`, `/home` and `/transfers/new/amount` redirect to `/login`. With one, `/` and `/login` redirect to `/home`.
+- [x] Without a session, `GET /api/v1/wallet/summary` still answers `401` JSON, not a redirect.
+- [x] "Cerrar sesión" clears `smw_session` and lands on `/login`, and going back to `/home` redirects to `/login` again.
+- [x] After a login in Playwright, `GET /api/v1/wallet/summary` answers `200` with an `x-request-id` header and Mariana's name.
+- [x] Every page response has `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `X-Frame-Options: DENY` and `Permissions-Policy`. `Strict-Transport-Security` appears only in production.
+- [x] `npm run test:e2e` passes on the `mobile` and `desktop` projects against `.data/e2e-db.json`, and leaves `.data/db.json` untouched.
+- [x] `npm run lint`, `npm run typecheck`, `npm run test:coverage` (100 % on `src/domain/**`, 80 % on `src/server/**`, `src/shared/lib/**` and `src/shared/observability/**`) and `npm run build` finish with no errors.
+- [x] No component or page contains user-facing text outside `src/messages/es-MX/`.
+- [x] The primary button label uses `--color-on-brand-orange`, inputs use `--text-size-input` (16 px), and the segmented options, the AppBar back link and the password toggle have a hit area of at least 44 × 44 px.
+- [x] Links on the auth screens are purple and underlined; no text is orange.
+- [x] On a mobile viewport the login and register CTAs sit in the bottom action bar, and `src/app/layout.tsx` exports `viewport.interactiveWidget = "resizes-content"`.
+- [x] From 1024 px, `/login` and `/register` show the brand panel on the left and a form of at most 400 px aligned to the top on the right; below 1024 px the panel is not rendered visibly.
+- [x] `specs/design/mini-wallet-design.html`, `challenge.md` §8 and SPEC 00 §14 describe the approved mobile review and desktop proposal, including the "Registro · pantalla dividida" mock.
+- [x] There are no comments in any file created or modified in this milestone.
 
 ## Decisions
 

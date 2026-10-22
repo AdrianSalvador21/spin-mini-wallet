@@ -22,13 +22,13 @@
 | 02 | Domain layer | [02-domain.md](./02-domain.md) | `feature/02-domain` | Implemented |
 | 03 | Simulated backend core | [03-mock-backend.md](./03-mock-backend.md) | `feature/03-mock-backend` | Implemented |
 | 04 | HTTP API and observability | [04-api.md](./04-api.md) | `feature/04-api` | Implemented |
-| 05 | Authentication | [05-auth.md](./05-auth.md) | `feature/05-auth` | In progress |
+| 05 | Authentication | [05-auth.md](./05-auth.md) | `feature/05-auth` | Implemented |
 | 06 | Home | To be written | `feature/06-home` | Pending |
 | 07 | New transfer flow | To be written | `feature/07-transfer-flow` | Pending |
 | 08 | Confirmation and receipt | To be written | `feature/08-confirmation-receipt` | Pending |
 | 09 | Final quality, deploy and documentation | To be written | `feature/09-delivery` | Pending |
 
-**In progress:** 05 — Authentication. **Next spec to write:** 06 — Home, once 05 is merged.
+**Next spec to write:** 06 — Home, once the SPEC 05 PR is merged.
 
 The original milestone 02 ("Domain and simulated backend") was split on 2026-10-21 because it touched more than three areas. Session primitives moved from the authentication milestone into the simulated backend so every `/api/v1/*` route is protected from the start.
 

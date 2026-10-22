@@ -115,9 +115,25 @@ The HTTP contract lives in `src/shared/lib/api/contract.ts`: `API_ERROR_CODE`, `
 
 `server/mock/scenarios.ts`'s `pickScenario`/`resolveTransferScenario`/`resolveReadScenario`/`latencyMs` are pure functions over an injected `random`, so the weighted transfer outcomes (60/10/10/10/10) and the read-scenario cookie overrides are deterministic in tests. Overrides only apply when `MOCK_ALLOW_SCENARIO_OVERRIDE=true`; an unknown cookie value is ignored rather than failing the request.
 
+### Authentication (`src/server/auth/`, `src/features/auth/`, `src/proxy.ts`)
+
+Server Actions follow the SPEC 04 handler pattern. `server/auth/auth-actions.ts`'s `createAuthActions({ auth, rateLimiter, logger, reporter })` owns the logic and returns `Result<UserView, AuthFailure>`; `getAuthActions()` in `container.ts` builds it once. `features/auth/actions.ts` (`"use server"`) only reads `x-request-id`, calls the factory, sets or clears the cookie and calls `redirect()` outside any `try`/`catch`. Tests inject a fake clock and services instead of mocking Next modules.
+
+- `src/shared/lib/auth/form-state.ts` is the client/server contract: `AuthFailure` (`validation` | `invalid_credentials` | `rate_limited` | `unexpected`), `AuthFormState` (`idle` | `error`; a success redirects) and the raw `LoginFormValues`/`RegisterFormValues`. It lives in `shared/lib` because features cannot import `@/server` and the server cannot import `@/features`.
+- Forms use React Hook Form with `zodResolver(schema, undefined, { raw: true })` over the domain schemas, and dispatch the action through `useActionState` inside `startTransition` from `handleSubmit`. The server re-parses the raw values. Server `validation` codes land on fields through `setError`; field errors are `ValidationCode`s translated by `useValidationMessage()` (`src/shared/i18n/`). `AuthFailureAlert` renders the other kinds with an exhaustive `switch`.
+- Login rate limit (`login-rate-limiter.ts`, on `globalThis` under `Symbol.for("smw.loginRateLimiter")`): key `` `${method}:${normalizedIdentifier}` ``, 5 failures in a fixed 15-minute window from the first one, blocks even a correct password, reset on success, checked after the schema and before `scrypt`.
+- `getSession()` calls `await connection()` before checking the token's expiry, because the expiry needs the current time and Cache Components would otherwise flag `new Date()` during prerender. The Vitest `node` project mocks `connection` in `src/test/server-setup.ts`.
+- `proxy.ts` keeps the request id and applies `resolveRouteAccess(pathname, hasSession)` (`src/shared/lib/routes.ts`): `/` → `/login` or `/home`, `/login`/`/register` → `/home` with a session, `/home/**` and `/transfers/**` → `/login` without one. `/api/**` is never redirected; Route Handlers answer `401` JSON. An invalid or expired cookie counts as no session and is not deleted. Pages re-check the session themselves.
+- Security headers come from `securityHeaders(isProduction())` (`src/shared/config/security-headers.ts`), applied in `next.config.ts` to `/:path*`; HSTS only in production.
+- Public layout (`app/(public)/layout.tsx`): full-width column on mobile, a 420 px card at `md`, and from `lg` a 50/50 split with `AuthBrandPanel` on the left and the page capped at `--container-form` (400 px) on the right. On mobile the CTA sits in `ActionBar` (sticky, `safe-area-inset-bottom`); the root layout exports `viewport.interactiveWidget = "resizes-content"`.
+
+### UI primitives (`src/shared/ui/`)
+
+`Button` (`variant`, `type`, `block`, `loading`, `loadingLabel`; `ink-900` label on orange; 50 px tall on mobile, 48 px and min 200 px wide from `lg` unless `block`), `Field` (`label`, `id`, `type`, `inputMode`, `autoComplete`, `prefix`, `suffix`, `hint`, `error`, React 19 `ref`; 16 px input text; `aria-invalid` and `aria-describedby` to the error or hint), `PasswordInput` (44 px eye toggle with `aria-pressed`), `Alert` (`tone`, `role`; exhaustive tone → icon `switch`), `Icon` (`name`, `size`, `label`), `AppBar` (`title`, `backHref`; 44 px back hit area; "Regresar" + 32 px title from `lg`), `Segmented` (native radios in a labeled `radiogroup`, 44 px options), `ActionBar` and `BrandLogo` (`size`). Each lives in its own folder with `types.ts` for its `as const` constants.
+
 ### Styling tokens (`src/app/globals.css`)
 
-Spin's brand tokens (colors, radii, fonts) are declared in `@theme static` so they're always emitted as CSS variables — both Tailwind utilities and SCSS Modules read the same source. Full token table is in `specs/00-architecture.md` §14.
+Spin's brand tokens (colors, radii, fonts) and the scale tokens (`--space-*`, `--text-size-*`, `--size-*`, `--border-width*`, `--focus-*`, `--duration-*`, `--container-*`) are declared in `@theme static` so they're always emitted as CSS variables — both Tailwind utilities and SCSS Modules read the same source. Full token table is in `specs/00-architecture.md` §14. If `next dev` ever serves a stale `globals.css` (a new token resolves to nothing), change the file's content or restart the dev server; touching the timestamp is not enough.
 
 `next.config.ts`'s `turbopack.rules` key for the Tailwind loader must stay scoped to the filename `globals.css`, not a broad `*.css` glob — a broad glob also intercepts the CSS Sass emits for `*.module.scss` files and turns their scoped class names into global ones (component styles then silently fail to apply).
 
@@ -130,7 +146,8 @@ Spin's brand tokens (colors, radii, fonts) are declared in `@theme static` so th
 - Vitest (`jsdom`) + Testing Library. `src/test/render.tsx` wraps components with the real `NextIntlClientProvider`/messages — use `renderWithProviders` instead of RTL's `render` directly.
 - MSW's `src/test/setup.ts` calls `server.listen({ onUnhandledFrame: "error" })` — MSW 3 renamed `onUnhandledRequest` to `onUnhandledFrame` (now covers WebSocket too); any test that hits the network without a handler fails loudly.
 - Vitest does not support `async` Server Components — cover those with Playwright instead.
-- Playwright config has `mobile` (Pixel 7) and `desktop` (Desktop Chrome) projects; `webServer` runs `next dev` locally and a production build (`next build && next start`) when `CI=true`.
+- Playwright config has `mobile` (Pixel 7) and `desktop` (Desktop Chrome) projects. Its own server runs on port **3100** with `MOCK_DB_PATH=.data/e2e-db.json` (fixed, never read from the environment), and `e2e/global-setup.ts` deletes that file before each run, so `.data/db.json` is never touched. `webServer` runs `next dev --port 3100` locally and `next build && next start --port 3100` with `CI=true`. Next refuses a second `next dev` in the same directory, so while `npm run dev` is running, run the suite with `CI=true` (PowerShell: `$env:CI="true"; npm run test:e2e`). `e2e/fixtures/auth.ts` has `loginAs`, `uniquePhone` and `uniqueEmail`; failing-login tests use an unregistered phone so the rate limit never blocks the seed users. Next's route announcer is also `role="alert"`, so filter alerts by text.
+- Component tests that dispatch an action through `useActionState` must resolve every pending promise they create (`Promise.withResolvers`): React entangles async transitions, and a never-settling one blocks later tests' updates.
 
 ### Experimental Next.js config (`next.config.ts`)
 
