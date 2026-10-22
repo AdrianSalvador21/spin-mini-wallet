@@ -1,6 +1,6 @@
 # SPEC 01 — Scaffolding, tooling and visual foundations
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 00
 > **Date:** 2026-10-21
 > **Objective:** Leave the repository ready to build features: `src/` structure, pinned runtime, styling with Spin tokens, i18n, unit and E2E testing, architecture rules and CI, all working on a branded base page.

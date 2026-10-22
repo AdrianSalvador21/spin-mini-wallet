@@ -7,7 +7,7 @@
 
 ## 1. Why this spec exists
 
-The challenge evaluates engineering decisions more than screens. This document fixes the global contract so every milestone can be implemented without reopening decisions. Milestone specs (01 to 07) describe **how** each delivery is built. This spec describes **what** the whole system is and **why**.
+The challenge evaluates engineering decisions more than screens. This document fixes the global contract so every milestone can be implemented without reopening decisions. Milestone specs (01 to 08) describe **how** each delivery is built. This spec describes **what** the whole system is and **why**.
 
 Sources:
 
@@ -242,6 +242,7 @@ Also, a `fetch` that throws `TypeError` (no real connection) lands on the same U
 Deterministic override:
 
 - The `mock_scenario` cookie forces a scenario. It is only honored when `MOCK_ALLOW_SCENARIO_OVERRIDE=true`.
+- The `mock_read_scenario` cookie (`ok`, `error`, `slow`) does the same for the read endpoints (`wallet/summary`, `wallet/movements`, `contacts`), so the Home loading and error states can be shown on demand. Reads without it respond after 300–800 ms.
 - The DEV panel writes it. The panel only renders with `NEXT_PUBLIC_ENABLE_DEV_TOOLS=true`.
 - Playwright writes the cookie directly so every E2E is deterministic.
 
@@ -258,7 +259,7 @@ Idempotency:
 - A JSON file at `MOCK_DB_PATH` (default `.data/db.json`, git-ignored).
 - Schema `{ schemaVersion: 1, users, wallets, movements, contacts, transfers, idempotencyKeys }`.
 - If the file does not exist, it is created from `src/server/db/seed.ts`. If `schemaVersion` does not match, it is regenerated from the seed.
-- Writes go through an in-memory queue (mutex) and are atomic: temporary file, then `rename`. A transfer reads the balance, validates, debits, inserts the movement and stores the key inside the same critical section.
+- Writes go through an in-memory queue (mutex) and are atomic: temporary file, then `rename`. A transfer reads the balance, validates, debits, inserts the movement and stores the key inside the same critical section. When the recipient is a phone that belongs to a registered user, that user's wallet is credited and a `transfer_in` movement is inserted in the same critical section; CLABE and card recipients are external and only debit the sender.
 - On Vercel the filesystem is ephemeral: `MOCK_DB_PATH` points to `/tmp`. Records persist while the instance lives. This is documented as a known limitation.
 
 Seed users:
@@ -363,28 +364,28 @@ Approved tokens (extracted from spinbyoxxo.com.mx):
 
 | PDF requirement | Where it is addressed | Milestone |
 | --- | --- | --- |
-| Login with phone or email | Mobile/email toggle, shared schema | 03 |
-| Format and required-field validation | Domain validators + Zod on client and Server Action | 02, 03 |
-| Loading and simulated error states on login | Button loading state + server error | 03 |
-| Simple mocked session persistence | Signed `smw_session` cookie | 03 |
-| Navigate to Home after login | Redirect in the Server Action | 03 |
-| Home: mocked balance and name | `GET /wallet/summary` + SSR | 02, 04 |
-| Home: recent movements | `GET /wallet/movements` with cursor | 02, 04 |
-| Home: loading, empty and error states | Suspense + skeleton, Diego user, per-block error boundary | 04 |
-| Home: new transaction button | "Enviar dinero" CTA | 04 |
-| Enter amount | `amount` step | 05 |
-| Pick a favorite or create a contact (mock) and save it | `recipient` step + `POST /contacts` | 05 |
-| Summary before confirming | `review` step | 05 |
-| Confirmation with mocked response | `POST /transfers` | 06 |
-| Receipt or success | `/transfers/[transferId]` | 06 |
-| Rules: amount > 0, sufficient balance, recipient | `domain/transfer/rules.ts` in client, handler and service | 02, 05, 06 |
-| Random confirmation: 5 scenarios | Scenario engine + per-outcome UI | 02, 06 |
-| Justified SSR/CSR | Section 4 of this spec + `DECISIONS.md` | 07 |
-| Justified state management | Section 3 + `DECISIONS.md` | 07 |
-| API Routes with mocked data | `src/app/api/v1/*` | 02 |
-| Unit tests for validations, hooks and components | Vitest + MSW | 01–06 |
-| Justified E2E | Playwright | 01, 07 |
-| README, DECISIONS, AI_USAGE, time spent | Final documentation | 07 |
+| Login with phone or email | Mobile/email toggle, shared schema | 02, 04 |
+| Format and required-field validation | Domain validators + Zod on client and Server Action | 02, 04 |
+| Loading and simulated error states on login | Button loading state + server error | 04 |
+| Simple mocked session persistence | Signed `smw_session` cookie | 03, 04 |
+| Navigate to Home after login | Redirect in the Server Action | 04 |
+| Home: mocked balance and name | `GET /wallet/summary` + SSR | 03, 05 |
+| Home: recent movements | `GET /wallet/movements` with cursor | 03, 05 |
+| Home: loading, empty and error states | Suspense + skeleton, Diego user, per-block error boundary, `mock_read_scenario` | 03, 05 |
+| Home: new transaction button | "Enviar dinero" CTA | 05 |
+| Enter amount | `amount` step | 06 |
+| Pick a favorite or create a contact (mock) and save it | `recipient` step + `POST /contacts` | 03, 06 |
+| Summary before confirming | `review` step | 06 |
+| Confirmation with mocked response | `POST /transfers` | 03, 07 |
+| Receipt or success | `/transfers/[transferId]` | 07 |
+| Rules: amount > 0, sufficient balance, recipient | `domain/transfer/rules.ts` in client, handler and service | 02, 03, 06 |
+| Random confirmation: 5 scenarios | Scenario engine + per-outcome UI | 03, 07 |
+| Justified SSR/CSR | Section 4 of this spec + `DECISIONS.md` | 08 |
+| Justified state management | Section 3 + `DECISIONS.md` | 08 |
+| API Routes with mocked data | `src/app/api/v1/*` | 03 |
+| Unit tests for validations, hooks and components | Vitest + MSW | 01–07 |
+| Justified E2E | Playwright | 01, 08 |
+| README, DECISIONS, AI_USAGE, time spent | Final documentation | 08 |
 
 ## 18. Decisions
 
