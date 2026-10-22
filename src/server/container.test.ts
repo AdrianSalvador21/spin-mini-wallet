@@ -3,6 +3,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { LOGIN_METHOD } from "@/domain/user/schemas";
 
 const ORIGINAL_ENV = process.env;
 let tempDir: string;
@@ -64,5 +65,24 @@ describe("getHttpDependencies", () => {
     const { getHttpDependencies } = await import("./container");
 
     expect(getHttpDependencies().allowScenarioOverride).toBe(true);
+  });
+});
+
+describe("getAuthActions", () => {
+  it("logs in against the configured database", async () => {
+    const { getAuthActions } = await import("./container");
+
+    const result = await getAuthActions().login(
+      { method: LOGIN_METHOD.PHONE, phone: "55 1234 5678", password: "Spin2026" },
+      "req-container",
+    );
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("returns the same instance on repeated calls", async () => {
+    const { getAuthActions } = await import("./container");
+
+    expect(getAuthActions()).toBe(getAuthActions());
   });
 });

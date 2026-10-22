@@ -91,3 +91,17 @@ describe("getEnv", () => {
     expect(second).toBe(first);
   });
 });
+
+describe("isProduction", () => {
+  it("is true only when NODE_ENV is production", async () => {
+    const { isProduction, NODE_ENV } = await import("./env");
+
+    vi.stubEnv("NODE_ENV", NODE_ENV.PRODUCTION);
+    expect(isProduction()).toBe(true);
+
+    vi.stubEnv("NODE_ENV", "test");
+    expect(isProduction()).toBe(false);
+
+    vi.unstubAllEnvs();
+  });
+});

@@ -1,9 +1,16 @@
 .brand-logo {
   display: block;
-  width: 84px;
   height: auto;
 }
 
+.brand-logo--md {
+  width: var(--size-logo-md);
+}
+
+.brand-logo--lg {
+  width: var(--size-logo-lg);
+}
+
 .brand-logo--on-dark {
-  filter: drop-shadow(0 2px 6px rgb(42 35 56 / 0.25));
+  filter: drop-shadow(0 1px var(--space-2) color-mix(in srgb, var(--color-ink-900) 25%, transparent));
 }

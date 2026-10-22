@@ -1,0 +1,5 @@
+@use "../../../shared/styles/typography" as type;
+
+.home-placeholder__greeting {
+  @include type.display(var(--text-size-lg));
+}

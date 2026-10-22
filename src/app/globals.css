@@ -24,11 +24,63 @@
   --color-danger-bg: #fdecec;
   --color-warning: #a15c00;
   --color-warning-bg: #fff3df;
+  --color-info: #3d1199;
+  --color-info-bg: #eee8fa;
+  --color-success-strong: #0e6b4c;
+  --color-on-brand-orange: var(--color-ink-900);
 
   --radius-s: 10px;
   --radius-m: 16px;
   --radius-l: 24px;
+  --radius-xl: 28px;
+  --radius-icon: 12px;
   --radius-pill: 999px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-14: 56px;
+
+  --text-size-xs: 12px;
+  --text-size-sm: 13px;
+  --text-size-md: 14px;
+  --text-size-lg: 15px;
+  --text-size-xl: 21px;
+  --text-size-input: 16px;
+  --text-size-lead: 17px;
+  --text-size-2xl: 28px;
+  --text-size-3xl: 32px;
+  --text-size-hero: 44px;
+
+  --size-control: 50px;
+  --size-icon-sm: 16px;
+  --size-icon-md: 18px;
+  --size-icon-button: 32px;
+  --size-icon-tile: 36px;
+  --size-touch: 44px;
+  --size-button-desktop: 48px;
+  --size-button-min-width: 200px;
+  --size-logo-md: 84px;
+  --size-logo-lg: 104px;
+
+  --border-width-thin: 1.5px;
+  --border-width: 2px;
+
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 2px;
+  --focus-halo: 4px;
+
+  --duration-fast: 150ms;
+  --duration-spin: 1s;
+
+  --container-auth: 420px;
+  --container-form: 400px;
 
   --font-display: var(--font-montserrat), system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
   --font-body: var(--font-open-sans), system-ui, -apple-system, "Segoe UI", Arial, sans-serif;

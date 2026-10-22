@@ -1,11 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
+import { E2E_DB_PATH } from "./e2e/global-setup";
 
-const PORT = 3000;
+const PORT = 3100;
 const baseURL = `http://localhost:${PORT}`;
 const isCI = Boolean(process.env.CI);
 
 export default defineConfig({
   testDir: "e2e",
+  globalSetup: "./e2e/global-setup.ts",
   fullyParallel: true,
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,
@@ -25,13 +27,13 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: isCI ? "npm run build && npm run start" : "npm run dev",
+    command: isCI ? `npm run build && npx next start --port ${PORT}` : `npx next dev --port ${PORT}`,
     url: baseURL,
-    reuseExistingServer: !isCI,
-    timeout: 120_000,
+    reuseExistingServer: false,
+    timeout: 180_000,
     env: {
       SESSION_SECRET: process.env.SESSION_SECRET ?? "playwright-session-secret-at-least-32-chars",
-      MOCK_DB_PATH: process.env.MOCK_DB_PATH ?? ".data/db.json",
+      MOCK_DB_PATH: E2E_DB_PATH,
     },
   },
 });

@@ -7,7 +7,7 @@
   text-wrap: balance;
 }
 
-@mixin body($size: 15px, $weight: 400) {
+@mixin body($size: var(--text-size-lg), $weight: 400) {
   font-family: var(--font-body);
   font-size: $size;
   font-weight: $weight;

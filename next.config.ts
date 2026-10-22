@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
-import { getEnv } from "./src/shared/config/env";
+import { getEnv, isProduction } from "./src/shared/config/env";
+import { securityHeaders } from "./src/shared/config/security-headers";
 
 const withNextIntl = createNextIntlPlugin("./src/shared/i18n/request.ts");
 
@@ -11,6 +12,9 @@ const nextConfig: NextConfig = {
     agentFeedback: true,
   },
   cacheComponents: true,
+  async headers() {
+    return [{ source: "/:path*", headers: securityHeaders(isProduction()) }];
+  },
   partialPrefetching: true,
   turbopack: {
     rules: {
