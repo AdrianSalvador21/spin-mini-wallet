@@ -1,5 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import type { UserId } from "@/domain/user/types";
 import { getEnv } from "@/shared/config/env";
 import { UnauthorizedError } from "../errors";
@@ -9,6 +10,7 @@ export const SESSION_COOKIE_NAME = "smw_session";
 const SESSION_TTL_SECONDS = 1800;
 
 export async function getSession(): Promise<SessionPayload | null> {
+  await connection();
   const cookieStore = await cookies();
   const cookie = cookieStore.get(SESSION_COOKIE_NAME);
 
