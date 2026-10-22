@@ -38,7 +38,9 @@ test.describe("home", () => {
   test("filters to Recibidos, updates the URL without a full load and survives a reload", async ({ page }) => {
     await loginAs(page, MARIANA);
 
-    await page.getByRole("radio", { name: "Recibidos" }).check();
+    const creditRadio = page.getByRole("radio", { name: "Recibidos" });
+    await creditRadio.click();
+    await expect(creditRadio).toBeChecked();
     await expect(page).toHaveURL(/direction=credit/);
 
     const amount = page.getByText(/^\+\$/).first();
