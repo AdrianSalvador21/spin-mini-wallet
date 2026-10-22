@@ -4,7 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Spin Mini Wallet is a take-home technical challenge for Spin by OXXO (FEMSA): a Next.js mini wallet web app (Login → Home → New transfer → Confirmation/Receipt) with a mocked backend. Full requirements, architecture, data model, API contracts and milestone breakdown live in `specs/` — read `specs/roadmap.md` first, then the spec for the milestone being worked on. `specs/00-architecture.md` is the global contract every milestone must respect.
+Spin Mini Wallet is a take-home technical challenge for Spin by OXXO (FEMSA): a Next.js mini wallet web app (Login → Home → New transfer → Confirmation/Receipt) with a mocked backend. Full requirements, architecture, data model, API contracts and milestone breakdown live in `specs/`. Before writing or implementing any spec, read in this order:
+
+1. `specs/challenge.md`: the original challenge brief (screens, business rules, deliverables, evaluation criteria, deadline) and the design reference, including where SPEC 00 overrides the design.
+2. `specs/roadmap.md`: which milestone is next.
+3. `specs/00-architecture.md`: the global contract every milestone must respect.
+4. The spec for the milestone being worked on.
+
+UI milestones must also follow `specs/design/mini-wallet-design.html`, the approved design: open it in a browser, or read the screens summary in `specs/challenge.md` §8. It is also published at https://claude.ai/artifact/LTCjdMCcyowCVxe9RZqSbr. Specs are self-contained on purpose: they run in separate sessions, so nothing a spec needs may live only in chat history.
 
 ## Next.js version caveat
 

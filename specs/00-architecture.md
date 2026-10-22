@@ -11,8 +11,8 @@ The challenge evaluates engineering decisions more than screens. This document f
 
 Sources:
 
-- Requirements: `Web Challenge.pdf` (Spin by OXXO).
-- Approved design proposal: tokens, components and screens agreed in the planning session on 2026-10-21.
+- Requirements: `Web Challenge.pdf` (Spin by OXXO), transcribed in [`challenge.md`](./challenge.md).
+- Approved design proposal: tokens, components and screens agreed in the planning session on 2026-10-21, kept in [`design/mini-wallet-design.html`](./design/mini-wallet-design.html) and summarized in `challenge.md` §8.
 - Next.js 16.4.2 documentation bundled in `node_modules/next/dist/docs/`.
 
 Project-wide rules:
@@ -137,10 +137,17 @@ interface User {
 
 interface Wallet { userId: UserId; balance: Money; updatedAt: string }
 
-type MovementType = "transfer_out" | "transfer_in" | "cash_deposit" | "qr_payment";
+const MOVEMENT_TYPE = {
+  TRANSFER_OUT: "transfer_out", TRANSFER_IN: "transfer_in",
+  CASH_DEPOSIT: "cash_deposit", QR_PAYMENT: "qr_payment",
+} as const;
+const MOVEMENT_DIRECTION = { DEBIT: "debit", CREDIT: "credit" } as const;
+type MovementType = (typeof MOVEMENT_TYPE)[keyof typeof MOVEMENT_TYPE];
+type MovementDirection = (typeof MOVEMENT_DIRECTION)[keyof typeof MOVEMENT_DIRECTION];
 interface Movement {
-  id: string; userId: UserId; type: MovementType; direction: "debit" | "credit";
-  amount: Money; description: string; transferId?: string; createdAt: string;
+  id: string; userId: UserId; type: MovementType; direction: MovementDirection;
+  amount: Money; counterpartyName?: string; merchantName?: string;
+  transferId?: string; createdAt: string;
 }
 
 type RecipientAccount =
@@ -364,23 +371,23 @@ Approved tokens (extracted from spinbyoxxo.com.mx):
 
 | PDF requirement | Where it is addressed | Milestone |
 | --- | --- | --- |
-| Login with phone or email | Mobile/email toggle, shared schema | 02, 04 |
-| Format and required-field validation | Domain validators + Zod on client and Server Action | 02, 04 |
-| Loading and simulated error states on login | Button loading state + server error | 04 |
-| Simple mocked session persistence | Signed `smw_session` cookie | 03, 04 |
-| Navigate to Home after login | Redirect in the Server Action | 04 |
-| Home: mocked balance and name | `GET /wallet/summary` + SSR | 03, 05 |
-| Home: recent movements | `GET /wallet/movements` with cursor | 03, 05 |
-| Home: loading, empty and error states | Suspense + skeleton, Diego user, per-block error boundary, `mock_read_scenario` | 03, 05 |
-| Home: new transaction button | "Enviar dinero" CTA | 05 |
-| Enter amount | `amount` step | 06 |
-| Pick a favorite or create a contact (mock) and save it | `recipient` step + `POST /contacts` | 03, 06 |
-| Summary before confirming | `review` step | 06 |
-| Confirmation with mocked response | `POST /transfers` | 03, 07 |
-| Receipt or success | `/transfers/[transferId]` | 07 |
-| Rules: amount > 0, sufficient balance, recipient | `domain/transfer/rules.ts` in client, handler and service | 02, 03, 06 |
-| Random confirmation: 5 scenarios | Scenario engine + per-outcome UI | 03, 07 |
-| Justified SSR/CSR | Section 4 of this spec + `DECISIONS.md` | 08 |
+| Login with phone or email | Mobile/email toggle, shared schema | 02, 05 |
+| Format and required-field validation | Domain validators + Zod on client and Server Action | 02, 05 |
+| Loading and simulated error states on login | Button loading state + server error | 05 |
+| Simple mocked session persistence | Signed `smw_session` cookie | 03, 05 |
+| Navigate to Home after login | Redirect in the Server Action | 05 |
+| Home: mocked balance and name | `GET /wallet/summary` + SSR | 04, 06 |
+| Home: recent movements | `GET /wallet/movements` with cursor | 04, 06 |
+| Home: loading, empty and error states | Suspense + skeleton, Diego user, per-block error boundary, `mock_read_scenario` | 04, 06 |
+| Home: new transaction button | "Enviar dinero" CTA | 06 |
+| Enter amount | `amount` step | 07 |
+| Pick a favorite or create a contact (mock) and save it | `recipient` step + `POST /contacts` | 04, 07 |
+| Summary before confirming | `review` step | 07 |
+| Confirmation with mocked response | `POST /transfers` | 04, 08 |
+| Receipt or success | `/transfers/[transferId]` | 08 |
+| Rules: amount > 0, sufficient balance, recipient | `domain/transfer/rules.ts` in client, handler and service | 02, 03, 04, 07 |
+| Random confirmation: 5 scenarios | Scenario engine + per-outcome UI | 04, 08 |
+| Justified SSR/CSR | Section 4 of this spec + `DECISIONS.md` | 09 |
 | Justified state management | Section 3 + `DECISIONS.md` | 08 |
 | API Routes with mocked data | `src/app/api/v1/*` | 03 |
 | Unit tests for validations, hooks and components | Vitest + MSW | 01–07 |
