@@ -1,0 +1,78 @@
+@use "../../../../shared/styles/breakpoints" as bp;
+
+.movement-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+
+  @include bp.lg {
+    padding: var(--space-5);
+    border-radius: var(--radius-l);
+    background: var(--color-white);
+    box-shadow: var(--shadow-card);
+  }
+}
+
+.movement-list__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+
+  @include bp.lg {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.movement-list__title {
+  font-family: var(--font-display);
+  font-size: var(--text-size-lg);
+  font-weight: 700;
+  color: var(--color-ink-900);
+}
+
+.movement-list__columns {
+  display: none;
+
+  @include bp.lg {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    column-gap: var(--space-4);
+    padding-inline: var(--space-2);
+    color: var(--color-ink-500);
+    font-size: var(--text-size-xs);
+    text-transform: uppercase;
+  }
+}
+
+.movement-list__group {
+  display: flex;
+  flex-direction: column;
+}
+
+.movement-list__group-heading {
+  padding-block: var(--space-2);
+  color: var(--color-ink-500);
+  font-size: var(--text-size-xs);
+  text-transform: uppercase;
+}
+
+.movement-list__rows {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.movement-list__more {
+  align-self: center;
+}
+
+.movement-list__more-error {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
