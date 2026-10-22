@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
   experimental: {
     agentFeedback: true,
   },
+  typedRoutes: true,
   cacheComponents: true,
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders(isProduction()) }];

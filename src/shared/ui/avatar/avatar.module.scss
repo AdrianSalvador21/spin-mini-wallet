@@ -1,0 +1,37 @@
+.avatar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.avatar--md {
+  width: var(--size-icon-tile);
+  height: var(--size-icon-tile);
+  font-size: var(--text-size-sm);
+}
+
+.avatar--touch {
+  width: var(--size-touch);
+  height: var(--size-touch);
+  font-size: var(--text-size-md);
+}
+
+.avatar--lg {
+  width: var(--size-avatar-lg);
+  height: var(--size-avatar-lg);
+  font-size: var(--text-size-lg);
+}
+
+.avatar--on-brand {
+  background: var(--color-white);
+  color: var(--color-brand-purple);
+}
+
+.avatar--soft {
+  background: var(--color-lavender-200);
+  color: var(--color-brand-purple);
+}

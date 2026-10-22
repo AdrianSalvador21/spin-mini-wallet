@@ -83,4 +83,17 @@ describe("Button", () => {
 
     expect(screen.getByRole("button")).not.toHaveAttribute("aria-busy");
   });
+
+  it("renders a link with the button classes when given an href", () => {
+    renderWithProviders(
+      <Button variant={BUTTON_VARIANT.PRIMARY} href="/home">
+        Enviar dinero
+      </Button>,
+    );
+
+    const link = screen.getByRole("link", { name: "Enviar dinero" });
+
+    expect(link).toHaveAttribute("href", "/home");
+    expect(link.className).toContain("button--primary");
+  });
 });
