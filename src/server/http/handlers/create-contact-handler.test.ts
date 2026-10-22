@@ -14,12 +14,15 @@ import { createContactService } from "@/server/services/contact-service";
 import { createTransferService } from "@/server/services/transfer-service";
 import type { ServiceDependencies } from "@/server/services/types";
 import { createWalletService } from "@/server/services/wallet-service";
+import type { ContactsList } from "@/shared/lib/api/views";
 import { createCreateContactHandler } from "./create-contact-handler";
+import { createListContactsHandler } from "./list-contacts-handler";
 
 const ORIGINAL_ENV = process.env;
 const SECRET = "a".repeat(32);
 const NOW = new Date("2026-10-21T12:00:00.000Z");
 const VALID_CLABE = "002123456789012343";
+const CARLOS_PHONE = "5523456789";
 
 interface MockCookie {
   name: string;
@@ -53,6 +56,7 @@ vi.mock("next/headers", () => ({
 let tempDir: string;
 let services: Services;
 let marianaId: UserId;
+let marianaPhone: string;
 
 beforeEach(async () => {
   tempDir = await mkdtemp(join(tmpdir(), "spin-mini-wallet-create-contact-"));
@@ -77,6 +81,7 @@ beforeEach(async () => {
   }
 
   marianaId = mariana.id;
+  marianaPhone = mariana.phone;
 });
 
 afterEach(async () => {
@@ -114,6 +119,14 @@ async function signIn(userId: UserId): Promise<void> {
   await setSessionCookie(userId);
 }
 
+async function listFavoriteNames(): Promise<string[]> {
+  const handler = createListContactsHandler(buildHttpDeps());
+  const response = await handler(new NextRequest("https://smw.test/api/v1/contacts"), { params: Promise.resolve({}) });
+  const body = (await response.json()) as ContactsList;
+
+  return body.items.map((contact) => contact.name);
+}
+
 describe("createCreateContactHandler", () => {
   it("answers 201 with a masked account for a valid CLABE contact", async () => {
     await signIn(marianaId);
@@ -147,7 +160,7 @@ describe("createCreateContactHandler", () => {
     expect(body.error.details["account.clabe"]).toEqual(["CLABE_INVALID_LENGTH"]);
   });
 
-  it("returns the existing contact for a duplicate account instead of creating another", async () => {
+  it("answers 200 with the same contact for an account that already exists", async () => {
     await signIn(marianaId);
     const handler = createCreateContactHandler(buildHttpDeps());
     const payload = JSON.stringify({
@@ -162,8 +175,85 @@ describe("createCreateContactHandler", () => {
     const second = await handler(buildRequest(payload), { params: Promise.resolve({}) });
     const secondBody = await second.json();
 
-    expect(second.status).toBe(201);
+    expect(first.status).toBe(201);
+    expect(second.status).toBe(200);
     expect(secondBody.id).toBe(firstBody.id);
+  });
+
+  it("answers 200 and upgrades an existing non-favorite to a favorite", async () => {
+    await signIn(marianaId);
+    const handler = createCreateContactHandler(buildHttpDeps());
+    const account = { type: "clabe", clabe: VALID_CLABE };
+
+    const first = await handler(buildRequest(JSON.stringify({ name: "Luis Pérez", account, saveAsFavorite: false })), {
+      params: Promise.resolve({}),
+    });
+    const second = await handler(buildRequest(JSON.stringify({ name: "Luis Pérez", account, saveAsFavorite: true })), {
+      params: Promise.resolve({}),
+    });
+    const secondBody = await second.json();
+
+    expect(second.status).toBe(200);
+    expect(secondBody.id).toBe((await first.json()).id);
+    expect(secondBody.isFavorite).toBe(true);
+    expect(await listFavoriteNames()).toContain("Luis Pérez");
+  });
+
+  it("does not downgrade an existing favorite saved without the favorite flag", async () => {
+    await signIn(marianaId);
+    const handler = createCreateContactHandler(buildHttpDeps());
+
+    const response = await handler(
+      buildRequest(JSON.stringify({ name: "Carlos Ruiz", account: { type: "phone", phone: CARLOS_PHONE }, saveAsFavorite: false })),
+      { params: Promise.resolve({}) },
+    );
+
+    expect(response.status).toBe(200);
+    expect((await response.json()).isFavorite).toBe(true);
+    expect(await listFavoriteNames()).toContain("Carlos Ruiz");
+  });
+
+  it("answers 400 RECIPIENT_IS_SELF for the user's own phone", async () => {
+    await signIn(marianaId);
+    const handler = createCreateContactHandler(buildHttpDeps());
+
+    const response = await handler(
+      buildRequest(JSON.stringify({ name: "Mariana López", account: { type: "phone", phone: marianaPhone }, saveAsFavorite: true })),
+      { params: Promise.resolve({}) },
+    );
+
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+    expect(body.error.details).toEqual({ account: ["RECIPIENT_IS_SELF"] });
+  });
+
+  it("answers 201 for a new favorite and the next GET includes it", async () => {
+    await signIn(marianaId);
+    const handler = createCreateContactHandler(buildHttpDeps());
+
+    const response = await handler(
+      buildRequest(JSON.stringify({ name: "Luis Pérez", account: { type: "clabe", clabe: VALID_CLABE }, saveAsFavorite: true })),
+      { params: Promise.resolve({}) },
+    );
+
+    expect(response.status).toBe(201);
+    expect((await response.json()).isFavorite).toBe(true);
+    expect(await listFavoriteNames()).toContain("Luis Pérez");
+  });
+
+  it("answers 201 for a new non-favorite and the next GET does not include it", async () => {
+    await signIn(marianaId);
+    const handler = createCreateContactHandler(buildHttpDeps());
+
+    const response = await handler(
+      buildRequest(JSON.stringify({ name: "Luis Pérez", account: { type: "clabe", clabe: VALID_CLABE }, saveAsFavorite: false })),
+      { params: Promise.resolve({}) },
+    );
+
+    expect(response.status).toBe(201);
+    expect((await response.json()).isFavorite).toBe(false);
+    expect(await listFavoriteNames()).not.toContain("Luis Pérez");
   });
 
   it("answers 400 BODY_INVALID_JSON for a malformed body", async () => {

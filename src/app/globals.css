@@ -82,6 +82,7 @@
   --container-auth: 420px;
   --container-form: 400px;
   --container-app: 1040px;
+  --container-wizard: 560px;
 
   --size-rail: 72px;
   --size-sidebar: 240px;
@@ -95,9 +96,14 @@
   --size-state-icon: 56px;
   --size-icon-lg: 20px;
   --size-icon-xl: 26px;
+  --size-contact-row: 64px;
+  --size-step-dot: 28px;
+  --size-progress-bar: 4px;
+  --size-checkbox: 20px;
 
   --text-size-balance: 40px;
   --text-size-balance-cents: 22px;
+  --text-size-amount: 34px;
 
   --duration-shimmer: 1.4s;
 

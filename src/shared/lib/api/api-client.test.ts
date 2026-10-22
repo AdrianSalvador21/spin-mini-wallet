@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { apiGet } from "./api-client";
+import { ApiFailureError, apiGet, apiPost, getRequestId } from "./api-client";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -73,5 +73,81 @@ describe("apiGet", () => {
     const result = await apiGet("/api/v1/wallet/summary");
 
     expect(result).toEqual({ ok: false, error: { kind: "network" } });
+  });
+});
+
+describe("getRequestId", () => {
+  it("reads the reference of an api or unknown failure", () => {
+    expect(
+      getRequestId(new ApiFailureError({ kind: "api", status: 503, code: "UPSTREAM_UNAVAILABLE", requestId: "req-1" })),
+    ).toBe("req-1");
+    expect(getRequestId(new ApiFailureError({ kind: "unknown", status: 500, requestId: "req-2" }))).toBe("req-2");
+  });
+
+  it("has no reference for a network failure or another error", () => {
+    expect(getRequestId(new ApiFailureError({ kind: "network" }))).toBeUndefined();
+    expect(getRequestId(new Error("boom"))).toBeUndefined();
+  });
+});
+
+describe("apiPost", () => {
+  it("sends the body as JSON with its content type and returns the parsed 201 body", async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ id: "ctc_1" }), { status: 201 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await apiPost<{ id: string }>("/api/v1/contacts", { name: "Ana" });
+
+    expect(result).toEqual({ ok: true, value: { id: "ctc_1" } });
+    expect(fetchMock).toHaveBeenCalledWith("/api/v1/contacts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Ana" }),
+      signal: undefined,
+      credentials: "same-origin",
+    });
+  });
+
+  it("maps a 400 envelope to an api failure with its details", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              error: {
+                code: "VALIDATION_ERROR",
+                message: "errors.api.VALIDATION_ERROR",
+                requestId: "req-3",
+                details: { account: ["RECIPIENT_IS_SELF"] },
+              },
+            }),
+            { status: 400 },
+          ),
+      ),
+    );
+
+    const result = await apiPost("/api/v1/contacts", {});
+
+    expect(result).toEqual({
+      ok: false,
+      error: {
+        kind: "api",
+        status: 400,
+        code: "VALIDATION_ERROR",
+        requestId: "req-3",
+        details: { account: ["RECIPIENT_IS_SELF"] },
+      },
+    });
+  });
+
+  it("turns a rejected fetch into a network failure", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new TypeError("Failed to fetch");
+      }),
+    );
+
+    expect(await apiPost("/api/v1/contacts", {})).toEqual({ ok: false, error: { kind: "network" } });
   });
 });

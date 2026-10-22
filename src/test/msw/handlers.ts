@@ -1,6 +1,43 @@
 import { http, HttpResponse, type HttpHandler } from "msw";
-import type { MovementView } from "@/shared/lib/api/views";
+import { detectBank } from "@/domain/contact/banks";
+import { maskAccount } from "@/domain/contact/mask";
+import { RECIPIENT_ACCOUNT_TYPE, type RecipientAccount } from "@/domain/contact/types";
+import { API_ERROR_CODE, type ApiErrorBody } from "@/shared/lib/api/contract";
+import type { ContactView, MovementView } from "@/shared/lib/api/views";
+import { buildContact, buildFavoriteContacts, MARIANA_PHONE } from "../factories/contacts";
 import { buildMovement, buildWalletSummary } from "../factories/wallet";
+
+const CARLOS_PHONE = "5523456789";
+
+interface NewContactBody {
+  name: string;
+  account: RecipientAccount;
+  saveAsFavorite: boolean;
+}
+
+function isPhone(account: RecipientAccount, phone: string): boolean {
+  return account.type === RECIPIENT_ACCOUNT_TYPE.PHONE && account.phone.replace(/\D/g, "") === phone;
+}
+
+function toMockContactView({ name, account, saveAsFavorite }: NewContactBody): ContactView {
+  const bankName = account.type === RECIPIENT_ACCOUNT_TYPE.CLABE ? detectBank(account.clabe) : undefined;
+
+  return {
+    id: "ctc_new" as ContactView["id"],
+    name,
+    account: { type: account.type, masked: maskAccount(account), ...(bankName ? { bankName } : {}) },
+    isFavorite: saveAsFavorite,
+  };
+}
+
+const RECIPIENT_IS_SELF_BODY: ApiErrorBody = {
+  error: {
+    code: API_ERROR_CODE.VALIDATION_ERROR,
+    message: `errors.api.${API_ERROR_CODE.VALIDATION_ERROR}`,
+    requestId: "req-msw-self",
+    details: { account: ["RECIPIENT_IS_SELF"] },
+  },
+};
 
 const DEFAULT_LIMIT = 10;
 const MOVEMENT_POOL_SIZE = 12;
@@ -39,5 +76,19 @@ export const handlers: HttpHandler[] = [
     const hasMore = startIndex + limit < pool.length;
 
     return HttpResponse.json({ items: page, nextCursor: hasMore ? String(startIndex + limit) : null });
+  }),
+  http.get("/api/v1/contacts", () => HttpResponse.json({ items: buildFavoriteContacts() })),
+  http.post("/api/v1/contacts", async ({ request }) => {
+    const body = (await request.json()) as NewContactBody;
+
+    if (isPhone(body.account, MARIANA_PHONE)) {
+      return HttpResponse.json(RECIPIENT_IS_SELF_BODY, { status: 400 });
+    }
+
+    if (isPhone(body.account, CARLOS_PHONE)) {
+      return HttpResponse.json(buildContact(), { status: 200 });
+    }
+
+    return HttpResponse.json(toMockContactView(body), { status: 201 });
   }),
 ];

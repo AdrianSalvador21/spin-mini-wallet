@@ -5,22 +5,22 @@ import { RECIPIENT_ACCOUNT_TYPE, type Contact, type RecipientAccount } from "@/d
 import type { Transfer } from "@/domain/transfer/types";
 import type { User } from "@/domain/user/types";
 import type { Movement } from "@/domain/wallet/types";
-import type { AccountView, MovementsPage, MovementView, WalletSummary } from "@/shared/lib/api/views";
+import type {
+  AccountView,
+  ContactsList,
+  ContactView,
+  MovementsPage,
+  MovementView,
+  WalletSummary,
+} from "@/shared/lib/api/views";
 
-export type { AccountView, MovementsPage, MovementView, WalletSummary };
+export type { AccountView, ContactsList, ContactView, MovementsPage, MovementView, WalletSummary };
 
 export interface UserView {
   id: User["id"];
   fullName: string;
   phone: string;
   email: string;
-}
-
-export interface ContactView {
-  id: Contact["id"];
-  name: string;
-  account: AccountView;
-  isFavorite: boolean;
 }
 
 export interface TransferView {

@@ -34,6 +34,12 @@ describe("Icon", () => {
     expect(container.querySelector("svg")?.getAttribute("class")).toContain(`icon--${ICON_SIZE.SM}`);
   });
 
+  it("draws the plus icon as a single cross path", () => {
+    const { container } = renderWithProviders(<Icon name={ICON_NAME.PLUS} />);
+
+    expect(container.querySelector("svg path")).toHaveAttribute("d", "M12 5v14M5 12h14");
+  });
+
   it.each(Object.values(ICON_NAME))("draws the %s icon", (name) => {
     const { container } = renderWithProviders(<Icon name={name} />);
 

@@ -1,6 +1,5 @@
 "use client";
 
-import type { Route } from "next";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useWalletSummary } from "@/features/wallet/hooks/use-wallet-summary";
@@ -8,6 +7,7 @@ import { SummaryError } from "@/features/wallet/components/summary-error/summary
 import { API_FAILURE_KIND, ApiFailureError } from "@/shared/lib/api/api-client";
 import { splitMoney } from "@/shared/lib/format/money";
 import { writeBalanceHidden } from "@/shared/lib/preferences/balance-visibility";
+import { ROUTES } from "@/shared/lib/routes";
 import { Button } from "@/shared/ui/button/button";
 import { BUTTON_TYPE, BUTTON_VARIANT } from "@/shared/ui/button/types";
 import { Icon } from "@/shared/ui/icon/icon";
@@ -15,8 +15,6 @@ import { ICON_NAME } from "@/shared/ui/icon/types";
 import { Skeleton } from "@/shared/ui/skeleton/skeleton";
 import { SKELETON_SHAPE, SKELETON_SIZE } from "@/shared/ui/skeleton/types";
 import styles from "./balance-card.module.scss";
-
-const TRANSFER_AMOUNT_ROUTE = "/transfers/new/amount" as Route;
 
 interface BalanceCardProps {
   initialHidden: boolean;
@@ -68,7 +66,7 @@ export function BalanceCard({ initialHidden }: BalanceCardProps) {
         <BalanceAmount amount={data.balance} />
       )}
 
-      <Button variant={BUTTON_VARIANT.PRIMARY} href={TRANSFER_AMOUNT_ROUTE} block>
+      <Button variant={BUTTON_VARIANT.PRIMARY} href={ROUTES.TRANSFER_AMOUNT} block>
         <Icon name={ICON_NAME.SEND} />
         {t("send")}
       </Button>

@@ -178,6 +178,7 @@ const ICON_PATHS: Record<IconName, ReactNode> = {
       />
     </>
   ),
+  [ICON_NAME.PLUS]: <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />,
 };
 
 interface IconProps {

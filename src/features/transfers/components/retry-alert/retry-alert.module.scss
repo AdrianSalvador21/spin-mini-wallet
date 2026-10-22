@@ -1,0 +1,20 @@
+.retry-alert {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: flex-start;
+}
+
+.retry-alert__title {
+  font-weight: 700;
+}
+
+.retry-alert__reference {
+  font-size: var(--text-size-xs);
+  color: var(--color-ink-500);
+}
+
+.retry-alert__button {
+  min-height: var(--size-touch);
+  padding-block: 0;
+}

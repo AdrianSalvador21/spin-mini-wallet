@@ -1,4 +1,4 @@
-import type { RecipientAccount } from "@/domain/contact/types";
+import type { ContactId, RecipientAccount } from "@/domain/contact/types";
 import type { Money } from "@/domain/money/money";
 import type { TransferId } from "@/domain/transfer/types";
 import type { UserId } from "@/domain/user/types";
@@ -30,4 +30,15 @@ export interface WalletSummary {
 export interface MovementsPage {
   items: MovementView[];
   nextCursor: string | null;
+}
+
+export interface ContactView {
+  id: ContactId;
+  name: string;
+  account: AccountView;
+  isFavorite: boolean;
+}
+
+export interface ContactsList {
+  items: ContactView[];
 }

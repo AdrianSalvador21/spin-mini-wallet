@@ -1,4 +1,3 @@
-import type { Route } from "next";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { LogoutButton } from "@/features/auth/components/logout-button/logout-button";
@@ -46,7 +45,7 @@ export default async function PrivateLayout({ children }: LayoutProps<"/">) {
 
   const items: SideNavItem[] = [
     { href: ROUTES.HOME, label: t("home"), icon: ICON_NAME.HOME },
-    { href: "/transfers/new/amount" as Route, label: t("send"), icon: ICON_NAME.SEND },
+    { href: ROUTES.TRANSFER_AMOUNT, label: t("send"), icon: ICON_NAME.SEND },
   ];
 
   return (

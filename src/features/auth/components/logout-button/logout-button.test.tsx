@@ -1,7 +1,8 @@
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BUTTON_TYPE } from "@/shared/ui/button/types";
-import { renderWithProviders, screen } from "@/test/render";
+import { SESSION_STORAGE_KEY } from "@/shared/lib/session-storage/client-session";
+import { renderWithProviders, screen, waitFor } from "@/test/render";
 import { LogoutButton } from "./logout-button";
 import { LOGOUT_BUTTON_VARIANT } from "./types";
 
@@ -40,5 +41,16 @@ describe("LogoutButton", () => {
 
     pending.resolve();
     expect(await screen.findByRole("button", { name: "Cerrar sesión" })).toBeEnabled();
+  });
+
+  it("removes the transfer draft from sessionStorage when submitted", async () => {
+    mocks.logoutAction.mockResolvedValue(undefined);
+    window.sessionStorage.setItem(SESSION_STORAGE_KEY.TRANSFER_DRAFT, "{}");
+    renderWithProviders(<LogoutButton variant={LOGOUT_BUTTON_VARIANT.NAV_ITEM} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "Cerrar sesión" }));
+
+    expect(window.sessionStorage.getItem(SESSION_STORAGE_KEY.TRANSFER_DRAFT)).toBeNull();
+    await waitFor(() => expect(mocks.logoutAction).toHaveBeenCalledOnce());
   });
 });

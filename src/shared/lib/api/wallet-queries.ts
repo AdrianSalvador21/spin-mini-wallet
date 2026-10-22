@@ -1,6 +1,6 @@
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import type { MovementDirection } from "@/domain/wallet/types";
-import { apiGet, ApiFailureError } from "./api-client";
+import { apiGetOrThrow } from "./api-client";
 import type { MovementsPage, WalletSummary } from "./views";
 
 export const MOVEMENT_FILTER = {
@@ -25,16 +25,6 @@ export const walletQueryKeys = {
   movements: (filter: MovementFilter) => [...walletQueryKeys.all, "movements", filter] as const,
 };
 
-async function fetchJson<T>(path: string, signal?: AbortSignal): Promise<T> {
-  const result = await apiGet<T>(path, { signal });
-
-  if (!result.ok) {
-    throw new ApiFailureError(result.error);
-  }
-
-  return result.value;
-}
-
 function movementDirectionParam(filter: MovementFilter): MovementDirection | undefined {
   return filter === MOVEMENT_FILTER.ALL ? undefined : filter;
 }
@@ -42,7 +32,7 @@ function movementDirectionParam(filter: MovementFilter): MovementDirection | und
 export function walletSummaryQueryOptions() {
   return queryOptions({
     queryKey: walletQueryKeys.summary(),
-    queryFn: ({ signal }) => fetchJson<WalletSummary>("/api/v1/wallet/summary", signal),
+    queryFn: ({ signal }) => apiGetOrThrow<WalletSummary>("/api/v1/wallet/summary", signal),
   });
 }
 
@@ -63,7 +53,7 @@ export function movementsInfiniteQueryOptions(filter: MovementFilter) {
 
       const query = params.toString();
 
-      return fetchJson<MovementsPage>(`/api/v1/wallet/movements${query ? `?${query}` : ""}`, signal);
+      return apiGetOrThrow<MovementsPage>(`/api/v1/wallet/movements${query ? `?${query}` : ""}`, signal);
     },
     initialPageParam: null as string | null,
     getNextPageParam: (page: MovementsPage) => page.nextCursor,

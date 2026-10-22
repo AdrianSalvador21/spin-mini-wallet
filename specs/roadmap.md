@@ -24,11 +24,11 @@
 | 04 | HTTP API and observability | [04-api.md](./04-api.md) | `feature/04-api` | Implemented |
 | 05 | Authentication | [05-auth.md](./05-auth.md) | `feature/05-auth` | Implemented |
 | 06 | Home | [06-home.md](./06-home.md) | `feature/06-home` | Implemented |
-| 07 | New transfer flow | To be written | `feature/07-transfer-flow` | Pending |
+| 07 | New transfer flow | [07-transfer-flow.md](./07-transfer-flow.md) | `feature/07-transfer-flow` | Implemented |
 | 08 | Confirmation and receipt | To be written | `feature/08-confirmation-receipt` | Pending |
 | 09 | Final quality, deploy and documentation | To be written | `feature/09-delivery` | Pending |
 
-**Next spec to write:** 07 — New transfer flow.
+**Next spec to write:** 08 — Confirmation and receipt.
 
 The original milestone 02 ("Domain and simulated backend") was split on 2026-10-21 because it touched more than three areas. Session primitives moved from the authentication milestone into the simulated backend so every `/api/v1/*` route is protected from the start.
 
@@ -85,11 +85,11 @@ Repo base: branches, Node 24, `src/`, Sass and Spin tokens, fonts, next-intl, ES
 ### 07 — New transfer flow
 
 - `amount` → `recipient` → `review` wizard with a Zustand draft persisted to `sessionStorage` and guards between steps.
-- Amount input with a mask over cents.
-- Favorites and contact creation by mobile, CLABE or card, with bank detection and save to favorites; recents row, search and a vertical contact list (mobile review).
+- Amount typed as a decimal, formatted live and parsed into integer cents, with the `$100` / `$200` / `$500` / `Todo` chips.
+- A vertical favorites list and contact creation by mobile, CLABE or card, with bank detection and save to favorites; every new recipient is saved on the server, so the draft holds only masked data. No "Recientes" row and no search (scope trim, 2026-10-22).
 - Optional concept with a 0/40 counter in step 1, "Continuar" always enabled, and the desktop wizard card with a live summary.
-- Pre-confirmation summary with the three rules applied on the client.
-- Covers: PDF screen 3 up to just before confirming.
+- Pre-confirmation summary with "Comisión $0.00" and "Saldo después" and the three rules applied on the client; "Confirmar envío" rendered and disabled until 08.
+- Covers: PDF screen 3 up to just before confirming. See [07-transfer-flow.md](./07-transfer-flow.md).
 
 ### 08 — Confirmation and receipt
 

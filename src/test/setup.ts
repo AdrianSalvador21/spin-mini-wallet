@@ -25,6 +25,10 @@ beforeAll(() => {
 afterEach(() => {
   cleanup();
   server.resetHandlers();
+
+  if (typeof window !== "undefined") {
+    window.sessionStorage.clear();
+  }
 });
 
 afterAll(() => {

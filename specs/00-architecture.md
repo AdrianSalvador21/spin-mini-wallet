@@ -82,6 +82,8 @@ Server Components get data by calling `src/server/services` directly, without HT
 
 SPEC 06: a Home loader (`src/server/wallet/home-loader.ts`) applies the same `mock_read_scenario` semantics as the Route Handlers (§9) to these Server Component reads, so the skeleton and error states are demonstrable on the first load, not only after a client interaction. A failed server load is simply not dehydrated; the client query then fetches by itself and shows the same error UI.
 
+SPEC 07: the three wizard routes share one static `src/app/(private)/transfers/new/layout.tsx` that renders the client `WizardShell` (app bar, progress and the desktop card with its live summary) around each step. The pages read no cookies, headers or `searchParams` on the server and have no server prefetch: the balance comes from the TanStack Query cache Home already filled, and contacts load once on the client. The new-recipient form is `?mode=new` on `/transfers/new/recipient`, opened and closed through the History API like Home's filter, so back returns to the list and the desktop form stays in the same card without a new route. Step guards run on the client against the `sessionStorage` draft, because the proxy cannot see it.
+
 ## 5. Folder structure
 
 ```text
@@ -98,10 +100,13 @@ src/
   server/                    server only (import "server-only")
     db/ repositories/ services/ session/ mock/ http/
   features/                  UI + hooks + server actions per feature
-    auth/ wallet/ transfers/
+    auth/ wallet/
+    transfers/               draft/ (Zustand store, hydration, step guards), api/ (contacts queries),
+                             hooks/, components/ (wizard shell, steps, live summary) (SPEC 07)
   shared/
     ui/                      primitives (button/, field/, alert/...) with .tsx + .module.scss + .test.tsx
     lib/                     api-client, formatting, utilities
+      session-storage/       SESSION_STORAGE_KEY and clearClientSession, called on logout (SPEC 07)
     i18n/ observability/ config/ styles/
   messages/es-MX/            common.json, auth.json, home.json, transfers.json, errors.json
   test/                      setup, render with providers, MSW handlers, factories
@@ -214,7 +219,7 @@ Every response is JSON. Every response includes the `x-request-id` header. Every
 | `GET /api/v1/wallet/summary` | User name, masked phone, email and balance | `200 { user: { id, fullName, maskedPhone, email }, balance: Money }` |
 | `GET /api/v1/wallet/movements?cursor=&limit=10&direction=` | Movements, newest first, optional `direction` filter | `200 { items: Movement[], nextCursor: string \| null }` |
 | `GET /api/v1/contacts` | The user's favorites | `200 { items: ContactView[] }` |
-| `POST /api/v1/contacts` | Creates a contact | `201 ContactView` |
+| `POST /api/v1/contacts` | Creates a contact, or returns the existing one for the same account (SPEC 07) | `201 ContactView` when created, `200 ContactView` when it existed; `400` with `details.account: ["RECIPIENT_IS_SELF"]` for the user's own phone |
 | `POST /api/v1/transfers` | Creates a transfer; `Idempotency-Key` header required | `201 TransferView` |
 | `GET /api/v1/transfers/{transferId}` | Receipt | `200 TransferView` |
 | `GET /api/v1/transfers?idempotencyKey=` | Status lookup after a timeout | `200 TransferView` or `404` |
@@ -251,6 +256,8 @@ type ApiErrorCode =
 Pagination: the cursor is opaque (base64url of `createdAt|id`). Ordering stays stable even if new movements are inserted while the user paginates, and it is located by sort order rather than by index, so a cursor taken under a different `direction` filter keeps working without duplicates or gaps.
 
 SPEC 06: `direction` accepts `debit` or `credit`; any other value answers `400` with `details.direction: ["DIRECTION_INVALID"]`. `MovementView` gains `counterpartyAccount` (the masked recipient or sender account), set on `transfer_out` and on a P2P `transfer_in`; cash deposits and QR payments have none. The full phone never leaves the server — only `maskedPhone`.
+
+SPEC 07: `POST /api/v1/contacts` honors `saveAsFavorite` (a contact saved without it is not returned by `GET /api/v1/contacts`) and is idempotent by account: an existing contact keeps its id and name, can be upgraded to a favorite and is never downgraded. `ContactView` moves to `src/shared/lib/api/views.ts` so the client can type it.
 
 ## 9. Confirmation scenarios
 
@@ -334,7 +341,7 @@ Web surface:
 - **Reporter:** the `ErrorReporter { captureException(error, context) }` interface has `ConsoleErrorReporter` as the default implementation. Connecting Sentry means writing another adapter, without touching call sites.
 - **Server:** `instrumentation.ts` implements `onRequestError` and sends every unhandled error to the reporter.
 - **Browser:** `instrumentation-client.ts` listens to `error` and `unhandledrejection`. Per-segment `error.tsx` and `global-error.tsx` report and render a recoverable UI.
-- **Typed client errors:** `apiClient` turns every failure into the union `ApiFailure = ApiError | NetworkError | TimeoutError | UnknownError`. The UI runs an exhaustive `switch` on `kind`, and TypeScript fails if a case is missing. SPEC 06 lands the minimal client (`api`, `network`, `unknown` — `apiGet` only); SPEC 08 extends it with `TimeoutError`, `AbortController` and `apiPost` for the transfer wizard.
+- **Typed client errors:** `apiClient` turns every failure into the union `ApiFailure = ApiError | NetworkError | TimeoutError | UnknownError`. The UI runs an exhaustive `switch` on `kind`, and TypeScript fails if a case is missing. SPEC 06 lands the minimal client (`api`, `network`, `unknown` — `apiGet` only); SPEC 07 adds `apiPost` with no timeout, sharing `apiGet`'s failure mapping, so the wizard can create contacts; SPEC 08 extends it with `TimeoutError`, the 8 s `AbortController` and the `Idempotency-Key` header for the transfer.
 - **Isolation:** each Home block has its own `<Suspense>` and error boundary. If movements fail, the balance stays visible.
 
 ## 13. Scalability and maintainability
@@ -401,6 +408,12 @@ Scale tokens (SPEC 05). Spacing follows the same 4 px grid as Tailwind's spacing
 | `--duration-shimmer` | `1.4s` | One skeleton shimmer cycle (SPEC 06) |
 | `--shadow-card` | `0 1px 2px` ink-900 at 6 % + `0 8px 24px` purple at 8 % | White cards (balance on mobile, movements card) (SPEC 06) |
 | `--shadow-balance` | `0 12px 32px` purple at 28 % | Desktop gradient balance card (SPEC 06) |
+| `--container-wizard` | `560px` | Desktop wizard card; Tailwind `max-w-wizard` (SPEC 07) |
+| `--size-contact-row` | `64px` | Contact rows in the recipient step (SPEC 07) |
+| `--size-step-dot` | `28px` | `Stepper` dots (SPEC 07) |
+| `--size-progress-bar` | `4px` | `ProgressSteps` bar height (SPEC 07) |
+| `--size-checkbox` | `20px` | `Checkbox` box (SPEC 07) |
+| `--text-size-amount` | `34px` | The amount in the wizard's amount and review steps on mobile; `--text-size-hero` from `lg` (SPEC 07) |
 
 - Typography: Montserrat (400–900) for headings and amounts, Open Sans (400–700) for body, both through `next/font/google`. Amounts use `tabular-nums`.
 - Tokens live as CSS variables in `src/app/globals.css` and are exposed to Tailwind with `@theme`.
