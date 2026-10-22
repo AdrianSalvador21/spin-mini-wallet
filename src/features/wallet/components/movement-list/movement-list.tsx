@@ -105,6 +105,7 @@ export function MovementList({ now }: MovementListProps) {
       </div>
 
       <div className={styles["movement-list__columns"]} aria-hidden="true">
+        <span />
         <span>{t("columns.concept")}</span>
         <span>{t("columns.date")}</span>
         <span>{t("columns.amount")}</span>

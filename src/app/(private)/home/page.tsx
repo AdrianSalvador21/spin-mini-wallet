@@ -26,7 +26,7 @@ export default async function HomePage({ searchParams }: PageProps<"/home">) {
       </BlockErrorBoundary>
 
       <BlockErrorBoundary title={t("title")} retryLabel={t("retry")}>
-        <Suspense fallback={<MovementsSkeleton />}>
+        <Suspense fallback={<MovementsSkeleton fullCard />}>
           <MovementsSection searchParams={searchParams} />
         </Suspense>
       </BlockErrorBoundary>

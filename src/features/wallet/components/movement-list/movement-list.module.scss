@@ -4,12 +4,15 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+  padding-inline: var(--space-4);
+  margin-bottom: var(--space-6);
 
   @include bp.lg {
     padding: var(--space-5);
     border-radius: var(--radius-l);
     background: var(--color-white);
     box-shadow: var(--shadow-card);
+    margin-bottom: var(--space-8);
   }
 }
 
@@ -37,12 +40,23 @@
 
   @include bp.lg {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-columns: var(--size-movement-icon-lg) minmax(0, 1fr) auto auto;
     column-gap: var(--space-4);
-    padding-inline: var(--space-2);
+    align-items: center;
+    height: var(--space-10);
+    margin-inline: calc(var(--space-5) * -1);
+    padding-inline: var(--space-5);
+    border-top: var(--border-width-thin) solid var(--color-lavender-200);
+    border-bottom: var(--border-width-thin) solid var(--color-lavender-200);
+    background: var(--color-lavender-100);
     color: var(--color-ink-500);
     font-size: var(--text-size-xs);
+    font-weight: 700;
     text-transform: uppercase;
+
+    span:last-child {
+      text-align: right;
+    }
   }
 }
 

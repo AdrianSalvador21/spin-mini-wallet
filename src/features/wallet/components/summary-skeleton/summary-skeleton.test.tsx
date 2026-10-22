@@ -3,9 +3,10 @@ import { renderWithProviders } from "@/test/render";
 import { SummarySkeleton } from "./summary-skeleton";
 
 describe("SummarySkeleton", () => {
-  it("is hidden from assistive technology", () => {
+  it("renders a hidden header and aside shaped like the real blocks", () => {
     const { container } = renderWithProviders(<SummarySkeleton />);
 
-    expect(container.firstElementChild).toHaveAttribute("aria-hidden", "true");
+    expect(container.querySelector("header")).toHaveAttribute("aria-hidden", "true");
+    expect(container.querySelector("section")).toHaveAttribute("aria-hidden", "true");
   });
 });

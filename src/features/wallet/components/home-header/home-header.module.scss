@@ -1,7 +1,7 @@
 @use "../../../../shared/styles/breakpoints" as bp;
 
 .home-header {
-  padding: var(--space-6) var(--space-5) var(--space-10);
+  padding: var(--space-8) var(--space-5) var(--space-12);
   background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-purple-2) 100%);
   color: var(--color-white);
 

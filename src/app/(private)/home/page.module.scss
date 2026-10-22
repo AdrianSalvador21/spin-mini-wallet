@@ -6,11 +6,12 @@
 
   @include bp.lg {
     display: grid;
+    width: 100%;
     grid-template-columns: minmax(0, 1fr) var(--size-aside-lg);
     grid-template-areas:
       "header header"
       "movements aside";
-    column-gap: var(--space-6);
+    gap: var(--space-6);
     max-width: var(--container-app);
     padding-inline: var(--space-6);
     margin-inline: auto;
@@ -29,8 +30,11 @@
 }
 
 .home-page__movements {
+  margin-top: var(--space-6);
+
   @include bp.lg {
     grid-area: movements;
+    margin-top: 0;
   }
 }
 

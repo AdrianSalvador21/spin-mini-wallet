@@ -123,10 +123,7 @@ export function MovementRow({ movement, now }: MovementRowProps) {
       </span>
       <div className={styles["movement-row__main"]}>
         <p className={styles["movement-row__title"]}>{title}</p>
-        <div className={styles["movement-row__meta"]}>
-          {detail && <span>{detail}</span>}
-          <span>{date}</span>
-        </div>
+        <p className={styles["movement-row__meta"]}>{detail ? `${date} · ${detail}` : date}</p>
       </div>
       <span className={styles["movement-row__date"]}>{date}</span>
       <span className={[styles["movement-row__amount"], styles[`movement-row__amount--${toneClass}`]].join(" ")}>

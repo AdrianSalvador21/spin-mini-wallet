@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  margin-top: calc(var(--space-8) * -1);
+  margin: calc(var(--space-10) * -1) var(--space-4) 0;
   padding: var(--space-5);
   border-radius: var(--radius-l);
   background: var(--color-white);
@@ -13,7 +13,8 @@
   @include bp.lg {
     position: sticky;
     top: var(--space-8);
-    margin-top: 0;
+    margin: 0;
+    padding: var(--space-6);
     background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-purple-2) 100%);
     box-shadow: var(--shadow-balance);
     color: var(--color-white);
@@ -70,8 +71,4 @@
 
 .balance-card__skeleton {
   padding-block: var(--space-2);
-}
-
-.balance-card__cta {
-  align-self: flex-start;
 }

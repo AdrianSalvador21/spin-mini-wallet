@@ -68,7 +68,7 @@ export function BalanceCard({ initialHidden }: BalanceCardProps) {
         <BalanceAmount amount={data.balance} />
       )}
 
-      <Button variant={BUTTON_VARIANT.PRIMARY} href={TRANSFER_AMOUNT_ROUTE} className={styles["balance-card__cta"]}>
+      <Button variant={BUTTON_VARIANT.PRIMARY} href={TRANSFER_AMOUNT_ROUTE} block>
         <Icon name={ICON_NAME.SEND} />
         {t("send")}
       </Button>

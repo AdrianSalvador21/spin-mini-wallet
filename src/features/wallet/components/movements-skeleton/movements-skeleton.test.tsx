@@ -16,4 +16,11 @@ describe("MovementsSkeleton", () => {
 
     expect(container.querySelector("ul")?.children).toHaveLength(3);
   });
+
+  it("wraps the rows in the card chrome when fullCard is true", () => {
+    const { container } = renderWithProviders(<MovementsSkeleton fullCard />);
+
+    expect(container.querySelector("section")).toHaveAttribute("aria-hidden", "true");
+    expect(container.querySelector("ul")?.children).toHaveLength(5);
+  });
 });
