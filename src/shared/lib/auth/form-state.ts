@@ -1,7 +1,11 @@
+import type { z } from "zod";
 import type { ValidationCode } from "@/domain/shared/validation-codes";
-import type { LOGIN_METHOD } from "@/domain/user/schemas";
+import type { LOGIN_METHOD, loginSchema, registerSchema } from "@/domain/user/schemas";
 
 export type LoginMethod = (typeof LOGIN_METHOD)[keyof typeof LOGIN_METHOD];
+
+export type LoginFormValues = z.input<typeof loginSchema>;
+export type RegisterFormValues = z.input<typeof registerSchema>;
 
 export const AUTH_FAILURE_KIND = {
   VALIDATION: "validation",
