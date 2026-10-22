@@ -1,6 +1,6 @@
 # SPEC 07 — New transfer flow: amount, recipient and review
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 00, SPEC 02, SPEC 03, SPEC 04, SPEC 05, SPEC 06
 > **Date:** 2026-10-22
 > **Objective:** Build PDF screen 3 up to just before confirming: a three-step `amount` → `recipient` → `review` wizard with a persisted client draft, a favorites list, new contacts saved on the server, and the three business rules applied on the client.
