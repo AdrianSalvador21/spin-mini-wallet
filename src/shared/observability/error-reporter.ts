@@ -2,6 +2,7 @@ import { logger } from "./logger";
 
 export const ERROR_SOURCE = {
   ROUTE_HANDLER: "route-handler",
+  SERVER_ACTION: "server-action",
   REQUEST_ERROR: "request-error",
   BROWSER: "browser",
 } as const;
