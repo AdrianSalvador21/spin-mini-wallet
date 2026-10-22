@@ -1,42 +1,35 @@
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
-import { LogoutButton } from "@/features/auth/components/logout-button/logout-button";
-import { LOGOUT_BUTTON_VARIANT } from "@/features/auth/components/logout-button/types";
-import { getServices } from "@/server/container";
-import { getSession } from "@/server/session/session";
-import { ROUTES } from "@/shared/lib/routes";
+import { MovementsSkeleton } from "@/features/wallet/components/movements-skeleton/movements-skeleton";
+import { SummarySkeleton } from "@/features/wallet/components/summary-skeleton/summary-skeleton";
+import { BlockErrorBoundary } from "@/shared/ui/block-error-boundary/block-error-boundary";
+import { MovementsSection } from "./_sections/movements-section";
+import { SummarySection } from "./_sections/summary-section";
 import styles from "./page.module.scss";
 
-async function Greeting() {
-  const session = await getSession();
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("home");
 
-  if (!session) {
-    redirect(ROUTES.LOGIN);
-  }
-
-  const summary = await getServices().wallet.getSummary(session.userId);
-
-  if (!summary.ok) {
-    throw new Error(`Wallet summary unavailable: ${summary.error.code}`);
-  }
-
-  const t = await getTranslations("home.placeholder");
-
-  return (
-    <div className="flex flex-col items-start gap-6">
-      <h1 className={styles["home-placeholder__greeting"]}>{t("greeting", { name: summary.value.user.fullName })}</h1>
-      <LogoutButton variant={LOGOUT_BUTTON_VARIANT.MENU_ITEM} />
-    </div>
-  );
+  return { title: t("metaTitle") };
 }
 
-export default function HomePage() {
+export default async function HomePage({ searchParams }: PageProps<"/home">) {
+  const t = await getTranslations("common.blockError");
+
   return (
-    <main className="flex flex-1 flex-col px-4 py-8 md:px-8">
-      <Suspense>
-        <Greeting />
-      </Suspense>
-    </main>
+    <div className={styles["home-page"]}>
+      <BlockErrorBoundary title={t("title")} retryLabel={t("retry")}>
+        <Suspense fallback={<SummarySkeleton />}>
+          <SummarySection />
+        </Suspense>
+      </BlockErrorBoundary>
+
+      <BlockErrorBoundary title={t("title")} retryLabel={t("retry")}>
+        <Suspense fallback={<MovementsSkeleton />}>
+          <MovementsSection searchParams={searchParams} />
+        </Suspense>
+      </BlockErrorBoundary>
+    </div>
   );
 }

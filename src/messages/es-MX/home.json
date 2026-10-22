@@ -1,8 +1,6 @@
 {
   "home": {
-    "placeholder": {
-      "greeting": "Hola, {name}"
-    },
+    "metaTitle": "Inicio",
     "header": {
       "hello": "Hola,",
       "greeting": "Hola, {name}",

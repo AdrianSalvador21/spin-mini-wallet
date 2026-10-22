@@ -1,5 +1,41 @@
-@use "../../../shared/styles/typography" as type;
+@use "../../../shared/styles/breakpoints" as bp;
 
-.home-placeholder__greeting {
-  @include type.display(var(--text-size-lg));
+.home-page {
+  display: flex;
+  flex-direction: column;
+
+  @include bp.lg {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--size-aside-lg);
+    grid-template-areas:
+      "header header"
+      "movements aside";
+    column-gap: var(--space-6);
+    max-width: var(--container-app);
+    padding-inline: var(--space-6);
+    margin-inline: auto;
+  }
+
+  @include bp.xl {
+    grid-template-columns: minmax(0, 1fr) var(--size-aside);
+    padding-inline: var(--space-8);
+  }
+}
+
+.home-page__header {
+  @include bp.lg {
+    grid-area: header;
+  }
+}
+
+.home-page__movements {
+  @include bp.lg {
+    grid-area: movements;
+  }
+}
+
+.home-page__aside {
+  @include bp.lg {
+    grid-area: aside;
+  }
 }
