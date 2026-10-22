@@ -3,6 +3,8 @@ import { randomUUID } from "node:crypto";
 import { getEnv } from "@/shared/config/env";
 import { getErrorReporter } from "@/shared/observability/error-reporter";
 import { logger } from "@/shared/observability/logger";
+import { createAuthActions, type AuthActions } from "./auth/auth-actions";
+import { getLoginRateLimiter } from "./auth/login-rate-limiter";
 import { createJsonDatabase } from "./db/json-database";
 import { createSeed } from "./db/seed";
 import type { HttpDependencies } from "./http/route-handler";
@@ -61,4 +63,19 @@ export function getHttpDependencies(): HttpDependencies {
   }
 
   return cachedHttpDependencies;
+}
+
+let cachedAuthActions: AuthActions | undefined;
+
+export function getAuthActions(): AuthActions {
+  if (!cachedAuthActions) {
+    cachedAuthActions = createAuthActions({
+      auth: getServices().auth,
+      rateLimiter: getLoginRateLimiter(),
+      logger,
+      reporter: getErrorReporter(),
+    });
+  }
+
+  return cachedAuthActions;
 }
