@@ -1,0 +1,32 @@
+.app-bar {
+  display: flex;
+  flex: none;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+}
+
+.app-bar__back {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--size-icon-button);
+  height: var(--size-icon-button);
+  border-radius: 50%;
+  background: var(--color-lavender-200);
+  color: var(--color-brand-purple);
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-lavender-500);
+    outline-offset: var(--focus-ring-offset);
+  }
+}
+
+.app-bar__title {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: var(--text-size-lg);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-ink-900);
+}

@@ -90,6 +90,7 @@ Scale tokens, added with the first primitives so no SCSS file carries a loose me
 | `--text-size-xs/sm/md/lg` | `12px` / `13px` / `14px` / `15px` |
 | `--size-control` | `50px` |
 | `--size-icon-sm/md` | `16px` / `18px` |
+| `--size-icon-button` | `32px` |
 | `--border-width-thin` / `--border-width` | `1.5px` / `2px` |
 | `--focus-ring-width` / `--focus-ring-offset` / `--focus-halo` | `3px` / `2px` / `4px` |
 | `--duration-fast` / `--duration-spin` | `150ms` / `1s` |

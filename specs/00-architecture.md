@@ -366,6 +366,7 @@ Scale tokens (SPEC 05). Spacing follows the same 4 px grid as Tailwind's spacing
 | `--text-size-xs/sm/md/lg` | `12px` / `13px` / `14px` / `15px` | Hints and errors, labels and alerts, prefixes, body and buttons |
 | `--size-control` | `50px` | Input and button height |
 | `--size-icon-sm/md` | `16px` / `18px` | Spinner and inline icons, alert and field icons |
+| `--size-icon-button` | `32px` | Round icon-only buttons (app bar back link) |
 | `--border-width-thin` / `--border-width` | `1.5px` / `2px` | Field control border, secondary button and spinner |
 | `--focus-ring-width` / `--focus-ring-offset` / `--focus-halo` | `3px` / `2px` / `4px` | Focus outline and the field's focus and error halo |
 | `--duration-fast` / `--duration-spin` | `150ms` / `1s` | Hover and focus transitions, one spinner turn |

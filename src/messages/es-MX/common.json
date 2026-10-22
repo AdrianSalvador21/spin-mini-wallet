@@ -11,6 +11,9 @@
       "show": "Mostrar contraseña",
       "hide": "Ocultar contraseña"
     },
+    "appBar": {
+      "back": "Regresar"
+    },
     "home": {
       "title": "Tu dinero, tan fácil como suena",
       "subtitle": "Base del proyecto lista"
