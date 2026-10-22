@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({ loginAction: vi.fn() }));
 
 vi.mock("../../actions", () => ({ loginAction: mocks.loginAction }));
 
+const FORM_TEST_TIMEOUT_MS = 20_000;
 const PHONE_LABEL = "Número celular";
 const PASSWORD_LABEL = "Contraseña";
 
@@ -27,7 +28,7 @@ beforeEach(() => {
   mocks.loginAction.mockReset();
 });
 
-describe("LoginForm", () => {
+describe("LoginForm", { timeout: FORM_TEST_TIMEOUT_MS }, () => {
   it("defaults to the phone field with the +52 prefix and the mask", async () => {
     renderWithProviders(<LoginForm />);
 

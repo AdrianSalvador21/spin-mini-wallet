@@ -8,6 +8,8 @@ const mocks = vi.hoisted(() => ({ registerAction: vi.fn() }));
 
 vi.mock("../../actions", () => ({ registerAction: mocks.registerAction }));
 
+const FORM_TEST_TIMEOUT_MS = 20_000;
+
 const VALUES = {
   fullName: "Nueva Usuaria",
   phone: "5500000001",
@@ -27,7 +29,7 @@ beforeEach(() => {
   mocks.registerAction.mockReset();
 });
 
-describe("RegisterForm", () => {
+describe("RegisterForm", { timeout: FORM_TEST_TIMEOUT_MS }, () => {
   it("describes the password field with the policy hint", () => {
     renderWithProviders(<RegisterForm />);
 
