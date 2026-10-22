@@ -8,6 +8,13 @@ export const ICON_NAME = {
   PHONE: "phone",
   RECEIPT: "receipt",
   SHIELD: "shield",
+  SEND: "send",
+  ARROW_IN: "arrow-in",
+  STORE: "store",
+  INBOX: "inbox",
+  HOME: "home",
+  USERS: "users",
+  LOGOUT: "logout",
 } as const;
 
 export type IconName = (typeof ICON_NAME)[keyof typeof ICON_NAME];
@@ -15,6 +22,8 @@ export type IconName = (typeof ICON_NAME)[keyof typeof ICON_NAME];
 export const ICON_SIZE = {
   SM: "sm",
   MD: "md",
+  LG: "lg",
+  XL: "xl",
 } as const;
 
 export type IconSize = (typeof ICON_SIZE)[keyof typeof ICON_SIZE];

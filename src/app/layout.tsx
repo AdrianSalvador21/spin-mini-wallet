@@ -1,23 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
-import { Montserrat, Open_Sans } from "next/font/google";
 import { locale } from "@/shared/i18n/config";
+import { montserrat, openSans } from "@/shared/styles/fonts";
 import "./globals.css";
-
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
-  subsets: ["latin"],
-  weight: ["400", "600", "700", "800", "900"],
-  display: "swap",
-});
-
-const openSans = Open_Sans({
-  variable: "--font-open-sans",
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  display: "swap",
-});
 
 const INTERACTIVE_WIDGET = {
   RESIZES_CONTENT: "resizes-content",

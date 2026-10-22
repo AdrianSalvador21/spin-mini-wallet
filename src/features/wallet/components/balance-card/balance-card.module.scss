@@ -1,0 +1,74 @@
+@use "../../../../shared/styles/breakpoints" as bp;
+
+.balance-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: calc(var(--space-10) * -1) var(--space-4) 0;
+  padding: var(--space-5);
+  border-radius: var(--radius-l);
+  background: var(--color-white);
+  box-shadow: var(--shadow-card);
+
+  @include bp.lg {
+    position: sticky;
+    top: var(--space-8);
+    margin: 0;
+    padding: var(--space-6);
+    background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-purple-2) 100%);
+    box-shadow: var(--shadow-balance);
+    color: var(--color-white);
+  }
+}
+
+.balance-card__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.balance-card__label {
+  font-size: var(--text-size-sm);
+  color: var(--color-ink-500);
+
+  @include bp.lg {
+    color: color-mix(in srgb, var(--color-white) 85%, transparent);
+  }
+}
+
+.balance-card__eye {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-touch);
+  height: var(--size-touch);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.balance-card__amount {
+  font-family: var(--font-display);
+  font-size: var(--text-size-2xl);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-900);
+
+  @include bp.lg {
+    font-size: var(--text-size-balance);
+    color: var(--color-white);
+  }
+}
+
+.balance-card__cents {
+  font-size: var(--text-size-lg);
+
+  @include bp.lg {
+    font-size: var(--text-size-balance-cents);
+  }
+}
+
+.balance-card__skeleton {
+  padding-block: var(--space-2);
+}

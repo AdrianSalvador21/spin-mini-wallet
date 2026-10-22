@@ -8,14 +8,15 @@ import { toMoney } from "@/domain/money/money";
 import type { UserId } from "@/domain/user/types";
 import { MOVEMENT_DIRECTION, MOVEMENT_TYPE, type MovementId } from "@/domain/wallet/types";
 import { createJsonDatabase } from "./json-database";
-import type { DatabaseSnapshot } from "./schema";
+import { createSeed } from "./seed";
+import { SCHEMA_VERSION, type DatabaseSnapshot } from "./schema";
 
 let tempDir: string;
 let dbPath: string;
 
 function buildStubSeed(): DatabaseSnapshot {
   return {
-    schemaVersion: 1,
+    schemaVersion: SCHEMA_VERSION,
     users: [],
     wallets: [],
     movements: [],
@@ -44,7 +45,7 @@ describe("createJsonDatabase", () => {
 
     const raw = await readFile(dbPath, "utf8");
     const persisted = JSON.parse(raw) as DatabaseSnapshot;
-    expect(persisted.schemaVersion).toBe(1);
+    expect(persisted.schemaVersion).toBe(SCHEMA_VERSION);
   });
 
   it("regenerates the file when the schema version does not match", async () => {
@@ -57,7 +58,7 @@ describe("createJsonDatabase", () => {
 
     const raw = await readFile(dbPath, "utf8");
     const persisted = JSON.parse(raw) as DatabaseSnapshot;
-    expect(persisted.schemaVersion).toBe(1);
+    expect(persisted.schemaVersion).toBe(SCHEMA_VERSION);
     expect(persisted.users).toEqual([]);
   });
 
@@ -74,6 +75,25 @@ describe("createJsonDatabase", () => {
 
     const after = await readFile(dbPath, "utf8");
     expect(after).toBe(before);
+  });
+
+  it("regenerates a stale v1 file from the real seed", async () => {
+    const now = new Date("2026-10-21T12:00:00.000Z");
+    const staleSnapshot: DatabaseSnapshot = {
+      ...buildStubSeed(),
+      schemaVersion: 1 as unknown as typeof SCHEMA_VERSION,
+      users: [{ id: "stale" } as DatabaseSnapshot["users"][number]],
+    };
+    await writeFile(dbPath, JSON.stringify(staleSnapshot), "utf8");
+    const db = createJsonDatabase(dbPath, () => createSeed(now));
+
+    const mariana = await db.read((repositories) => repositories.users.findByPhone("5512345678"));
+    expect(mariana?.fullName).toBe("Mariana López");
+
+    const raw = await readFile(dbPath, "utf8");
+    const persisted = JSON.parse(raw) as DatabaseSnapshot;
+    expect(persisted.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(persisted.users.some((user) => user.fullName === "Mariana López")).toBe(true);
   });
 
   it("keeps every write under 20 concurrent transactions", async () => {

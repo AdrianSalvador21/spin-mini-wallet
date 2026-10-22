@@ -81,6 +81,29 @@
 
   --container-auth: 420px;
   --container-form: 400px;
+  --container-app: 1040px;
+
+  --size-rail: 72px;
+  --size-sidebar: 240px;
+  --size-aside-lg: 320px;
+  --size-aside: 340px;
+  --size-avatar-lg: 48px;
+  --size-movement-icon: 34px;
+  --size-movement-icon-lg: 40px;
+  --size-movement-row: 56px;
+  --size-sheet-item: 52px;
+  --size-state-icon: 56px;
+  --size-icon-lg: 20px;
+  --size-icon-xl: 26px;
+
+  --text-size-balance: 40px;
+  --text-size-balance-cents: 22px;
+
+  --duration-shimmer: 1.4s;
+
+  --shadow-card: 0 1px 2px color-mix(in srgb, var(--color-ink-900) 6%, transparent),
+    0 8px 24px color-mix(in srgb, var(--color-brand-purple) 8%, transparent);
+  --shadow-balance: 0 12px 32px color-mix(in srgb, var(--color-brand-purple) 28%, transparent);
 
   --font-display: var(--font-montserrat), system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
   --font-body: var(--font-open-sans), system-ui, -apple-system, "Segoe UI", Arial, sans-serif;

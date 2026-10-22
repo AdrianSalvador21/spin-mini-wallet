@@ -13,6 +13,27 @@
     },
     "appBar": {
       "back": "Regresar"
+    },
+    "account": {
+      "phone": "Celular",
+      "clabe": "CLABE",
+      "card": "Tarjeta"
+    },
+    "reference": "Referencia: {requestId}",
+    "nav": {
+      "label": "Navegación principal",
+      "home": "Inicio",
+      "send": "Enviar dinero"
+    },
+    "errorPage": {
+      "title": "Algo salió mal",
+      "text": "Ocurrió un error inesperado. Intenta de nuevo.",
+      "retry": "Reintentar",
+      "home": "Volver al inicio"
+    },
+    "blockError": {
+      "title": "No pudimos mostrar esta sección",
+      "retry": "Reintentar"
     }
   }
 }

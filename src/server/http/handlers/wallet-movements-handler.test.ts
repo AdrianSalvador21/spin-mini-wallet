@@ -99,8 +99,10 @@ function buildHttpDeps(): HttpDependencies {
   };
 }
 
-function buildRequest(search = ""): NextRequest {
-  return new NextRequest(`https://smw.test/api/v1/wallet/movements${search}`);
+function buildRequest(search = "", cookie?: string): NextRequest {
+  return new NextRequest(`https://smw.test/api/v1/wallet/movements${search}`, {
+    headers: cookie ? { cookie } : {},
+  });
 }
 
 async function signIn(userId: UserId): Promise<void> {
@@ -158,5 +160,39 @@ describe("createWalletMovementsHandler", () => {
 
     expect(response.status).toBe(400);
     expect((await response.json()).error.code).toBe("VALIDATION_ERROR");
+  });
+
+  it("answers 200 with only credit movements for direction=credit", async () => {
+    await signIn(marianaId);
+    const handler = createWalletMovementsHandler(buildHttpDeps());
+
+    const response = await handler(buildRequest("?direction=credit"), { params: Promise.resolve({}) });
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.items.length).toBeGreaterThan(0);
+    expect(body.items.every((item: { direction: string }) => item.direction === "credit")).toBe(true);
+  });
+
+  it("answers 400 with DIRECTION_INVALID details for an unknown direction", async () => {
+    await signIn(marianaId);
+    const handler = createWalletMovementsHandler(buildHttpDeps());
+
+    const response = await handler(buildRequest("?direction=x"), { params: Promise.resolve({}) });
+
+    expect(response.status).toBe(400);
+    expect((await response.json()).error.details).toEqual({ direction: ["DIRECTION_INVALID"] });
+  });
+
+  it("answers 503 UPSTREAM_UNAVAILABLE under the movements_error read scenario", async () => {
+    await signIn(marianaId);
+    const handler = createWalletMovementsHandler(buildHttpDeps());
+
+    const response = await handler(buildRequest("", "mock_read_scenario=movements_error"), {
+      params: Promise.resolve({}),
+    });
+
+    expect(response.status).toBe(503);
+    expect((await response.json()).error.code).toBe("UPSTREAM_UNAVAILABLE");
   });
 });

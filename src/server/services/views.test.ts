@@ -4,7 +4,8 @@ import { RECIPIENT_ACCOUNT_TYPE, type ContactId } from "@/domain/contact/types";
 import { toMoney, type Cents } from "@/domain/money/money";
 import { type TransferId } from "@/domain/transfer/types";
 import type { UserId } from "@/domain/user/types";
-import { toContactView, toTransferView, toUserView } from "./views";
+import { MOVEMENT_DIRECTION, MOVEMENT_TYPE, type MovementId } from "@/domain/wallet/types";
+import { toContactView, toMovementView, toTransferView, toUserView } from "./views";
 
 const FULL_CLABE = "002180111198765433";
 const FULL_CARD = "4111111111111111";
@@ -51,6 +52,37 @@ describe("toContactView", () => {
     });
 
     expect(JSON.stringify(view)).not.toContain(FULL_CARD);
+  });
+});
+
+describe("toMovementView", () => {
+  it("maps the counterparty account to a masked account view", () => {
+    const view = toMovementView({
+      id: "mov_1" as MovementId,
+      userId: "usr_1" as UserId,
+      type: MOVEMENT_TYPE.TRANSFER_OUT,
+      direction: MOVEMENT_DIRECTION.DEBIT,
+      amount: toMoney(1_000 as Cents),
+      counterpartyName: "Carlos Ruiz",
+      counterpartyAccount: { type: RECIPIENT_ACCOUNT_TYPE.PHONE, phone: "5523456789" },
+      createdAt: new Date().toISOString(),
+    });
+
+    expect(view.counterpartyAccount).toEqual({ type: RECIPIENT_ACCOUNT_TYPE.PHONE, masked: "•••• 6789" });
+  });
+
+  it("leaves counterpartyAccount undefined when the movement has none", () => {
+    const view = toMovementView({
+      id: "mov_2" as MovementId,
+      userId: "usr_1" as UserId,
+      type: MOVEMENT_TYPE.CASH_DEPOSIT,
+      direction: MOVEMENT_DIRECTION.CREDIT,
+      amount: toMoney(1_000 as Cents),
+      merchantName: "OXXO Reforma",
+      createdAt: new Date().toISOString(),
+    });
+
+    expect(view.counterpartyAccount).toBeUndefined();
   });
 });
 

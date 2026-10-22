@@ -138,6 +138,7 @@ export function createTransferService({ db, now, random, createId }: ServiceDepe
           direction: MOVEMENT_DIRECTION.DEBIT,
           amount,
           counterpartyName: recipient.name,
+          counterpartyAccount: recipient.account,
           transferId,
           createdAt: now().toISOString(),
         });
@@ -157,6 +158,7 @@ export function createTransferService({ db, now, random, createId }: ServiceDepe
               direction: MOVEMENT_DIRECTION.CREDIT,
               amount,
               counterpartyName: sender.fullName,
+              counterpartyAccount: { type: RECIPIENT_ACCOUNT_TYPE.PHONE, phone: sender.phone },
               transferId,
               createdAt: now().toISOString(),
             });

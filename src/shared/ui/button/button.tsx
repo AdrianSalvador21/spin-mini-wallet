@@ -1,27 +1,33 @@
+import type { Route } from "next";
+import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 import styles from "./button.module.scss";
 import { BUTTON_TYPE, type ButtonType, type ButtonVariant } from "./types";
 
-interface ButtonProps extends Omit<ComponentProps<"button">, "type"> {
+interface ButtonCommonProps {
   variant: ButtonVariant;
-  type?: ButtonType;
   block?: boolean;
+  className?: string;
+  children?: ReactNode;
+}
+
+interface ButtonAsButtonProps
+  extends ButtonCommonProps,
+    Omit<ComponentProps<"button">, "type" | "className" | "children"> {
+  href?: never;
+  type?: ButtonType;
   loading?: boolean;
   loadingLabel?: ReactNode;
 }
 
-export function Button({
-  variant,
-  block = false,
-  loading = false,
-  loadingLabel,
-  type = BUTTON_TYPE.BUTTON,
-  disabled,
-  className,
-  children,
-  ...rest
-}: ButtonProps) {
-  const classNames = [
+interface ButtonAsLinkProps extends ButtonCommonProps {
+  href: Route;
+}
+
+type ButtonProps = ButtonAsButtonProps | ButtonAsLinkProps;
+
+function buttonClassNames(variant: ButtonVariant, block: boolean, loading: boolean, className?: string): string {
+  return [
     styles.button,
     styles[`button--${variant}`],
     block && styles["button--block"],
@@ -30,6 +36,20 @@ export function Button({
   ]
     .filter(Boolean)
     .join(" ");
+}
+
+export function Button(props: ButtonProps) {
+  const { variant, block = false, className, children } = props;
+
+  if (props.href) {
+    return (
+      <Link href={props.href} className={buttonClassNames(variant, block, false, className)}>
+        {children}
+      </Link>
+    );
+  }
+
+  const { loading = false, loadingLabel, type = BUTTON_TYPE.BUTTON, disabled, ...rest } = props;
 
   return (
     <button
@@ -37,7 +57,7 @@ export function Button({
       type={type}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
-      className={classNames}
+      className={buttonClassNames(variant, block, loading, className)}
     >
       {loading && <span className={styles.button__spinner} aria-hidden="true" />}
       {loading ? (loadingLabel ?? children) : children}

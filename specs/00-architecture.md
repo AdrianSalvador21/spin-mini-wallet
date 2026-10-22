@@ -80,6 +80,8 @@ Rules derived from Cache Components (doc `01-getting-started/08-caching.md`):
 
 Server Components get data by calling `src/server/services` directly, without HTTP calls to their own API. Client Components use the `/api/v1/*` Route Handlers through TanStack Query. Home prefetches on the server and hands over the hydrated cache (`HydrationBoundary`) so the client continues pagination without repeating the first load.
 
+SPEC 06: a Home loader (`src/server/wallet/home-loader.ts`) applies the same `mock_read_scenario` semantics as the Route Handlers (§9) to these Server Component reads, so the skeleton and error states are demonstrable on the first load, not only after a client interaction. A failed server load is simply not dehydrated; the client query then fetches by itself and shows the same error UI.
+
 ## 5. Folder structure
 
 ```text
@@ -209,8 +211,8 @@ Every response is JSON. Every response includes the `x-request-id` header. Every
 
 | Method and route | Description | Success |
 | --- | --- | --- |
-| `GET /api/v1/wallet/summary` | User name and balance | `200 { user: { id, fullName }, balance: Money }` |
-| `GET /api/v1/wallet/movements?cursor=&limit=10` | Movements, newest first | `200 { items: Movement[], nextCursor: string \| null }` |
+| `GET /api/v1/wallet/summary` | User name, masked phone, email and balance | `200 { user: { id, fullName, maskedPhone, email }, balance: Money }` |
+| `GET /api/v1/wallet/movements?cursor=&limit=10&direction=` | Movements, newest first, optional `direction` filter | `200 { items: Movement[], nextCursor: string \| null }` |
 | `GET /api/v1/contacts` | The user's favorites | `200 { items: ContactView[] }` |
 | `POST /api/v1/contacts` | Creates a contact | `201 ContactView` |
 | `POST /api/v1/transfers` | Creates a transfer; `Idempotency-Key` header required | `201 TransferView` |
@@ -246,7 +248,9 @@ type ApiErrorCode =
 | `UPSTREAM_UNAVAILABLE` | 503 | Simulated network failure or forced read error |
 | `INTERNAL_ERROR` | 500 | Unexpected server error or simulated unknown failure |
 
-Pagination: the cursor is opaque (base64url of `createdAt|id`). Ordering stays stable even if new movements are inserted while the user paginates.
+Pagination: the cursor is opaque (base64url of `createdAt|id`). Ordering stays stable even if new movements are inserted while the user paginates, and it is located by sort order rather than by index, so a cursor taken under a different `direction` filter keeps working without duplicates or gaps.
+
+SPEC 06: `direction` accepts `debit` or `credit`; any other value answers `400` with `details.direction: ["DIRECTION_INVALID"]`. `MovementView` gains `counterpartyAccount` (the masked recipient or sender account), set on `transfer_out` and on a P2P `transfer_in`; cash deposits and QR payments have none. The full phone never leaves the server — only `maskedPhone`.
 
 ## 9. Confirmation scenarios
 
@@ -265,11 +269,13 @@ Also, a `fetch` that throws `TypeError` (no real connection) lands on the same U
 Deterministic override:
 
 - The `mock_scenario` cookie forces a scenario. It is only honored when `MOCK_ALLOW_SCENARIO_OVERRIDE=true`.
-- The `mock_read_scenario` cookie (`ok`, `error`, `slow`) does the same for the read endpoints (`wallet/summary`, `wallet/movements`, `contacts`), so the Home loading and error states can be shown on demand. Reads without it respond after 300–800 ms.
+- The `mock_read_scenario` cookie (`ok`, `error`, `slow`, and from SPEC 06 `movements_error`) does the same for the read endpoints (`wallet/summary`, `wallet/movements`, `contacts`), so the Home loading and error states can be shown on demand. Reads without it respond after 300–800 ms.
   - `ok`: wait 300–800 ms, then respond normally.
   - `slow`: wait 3000 ms, then respond normally — long enough to see the loading skeleton.
-  - `error`: wait 300–800 ms, then `503 UPSTREAM_UNAVAILABLE` — makes the "Reintentar" button meaningful.
+  - `error`: wait 300–800 ms, then `503 UPSTREAM_UNAVAILABLE` on every resource — makes the "Reintentar" button meaningful.
+  - `movements_error` (SPEC 06): only `wallet/movements` fails with `503 UPSTREAM_UNAVAILABLE`; `wallet/summary` and `contacts` respond normally. Demonstrates the design's partial error (balance visible, movements failed).
   - An unknown cookie value is ignored and falls back to the random pick (transfer) or `ok` (read) instead of breaking the endpoint.
+  - `readOutcome(scenario, resource)` in `src/server/mock/scenarios.ts` is the pure table behind these rows, with an exhaustive `switch`; `runReadScenario` applies the matching latency and branches to success or failure, shared by the Route Handlers and the SPEC 06 Home loader (§4).
 - The DEV panel writes it. The panel only renders with `NEXT_PUBLIC_ENABLE_DEV_TOOLS=true`.
 - Playwright writes the cookie directly so every E2E is deterministic.
 
@@ -328,7 +334,7 @@ Web surface:
 - **Reporter:** the `ErrorReporter { captureException(error, context) }` interface has `ConsoleErrorReporter` as the default implementation. Connecting Sentry means writing another adapter, without touching call sites.
 - **Server:** `instrumentation.ts` implements `onRequestError` and sends every unhandled error to the reporter.
 - **Browser:** `instrumentation-client.ts` listens to `error` and `unhandledrejection`. Per-segment `error.tsx` and `global-error.tsx` report and render a recoverable UI.
-- **Typed client errors:** `apiClient` turns every failure into the union `ApiFailure = ApiError | NetworkError | TimeoutError | UnknownError`. The UI runs an exhaustive `switch` on `kind`, and TypeScript fails if a case is missing.
+- **Typed client errors:** `apiClient` turns every failure into the union `ApiFailure = ApiError | NetworkError | TimeoutError | UnknownError`. The UI runs an exhaustive `switch` on `kind`, and TypeScript fails if a case is missing. SPEC 06 lands the minimal client (`api`, `network`, `unknown` — `apiGet` only); SPEC 08 extends it with `TimeoutError`, `AbortController` and `apiPost` for the transfer wizard.
 - **Isolation:** each Home block has its own `<Suspense>` and error boundary. If movements fail, the balance stays visible.
 
 ## 13. Scalability and maintainability
@@ -382,13 +388,26 @@ Scale tokens (SPEC 05). Spacing follows the same 4 px grid as Tailwind's spacing
 | `--duration-fast` / `--duration-spin` | `150ms` / `1s` | Hover and focus transitions, one spinner turn |
 | `--container-auth` | `420px` | Max width of the public card at `md`; Tailwind `max-w-auth` |
 | `--container-form` | `400px` | Max width of the auth form at `lg`; Tailwind `max-w-form` |
+| `--size-rail` / `--size-sidebar` | `72px` / `240px` | Side navigation at `lg` and from `xl` (SPEC 06) |
+| `--size-aside-lg` / `--size-aside` | `320px` / `340px` | Home aside at `lg` and from `xl` (SPEC 06) |
+| `--container-app` | `1040px` | Private content cap; Tailwind `max-w-app` (SPEC 06) |
+| `--text-size-balance` / `--text-size-balance-cents` | `40px` / `22px` | Desktop balance; mobile uses `--text-size-2xl` / `--text-size-lg` (SPEC 06) |
+| `--size-avatar-lg` | `48px` | Avatar in the "Mi cuenta" sheet (SPEC 06) |
+| `--size-movement-icon` / `--size-movement-icon-lg` | `34px` / `40px` | Movement icon tile on mobile and from `lg` (SPEC 06) |
+| `--size-movement-row` | `56px` | Movement row height from `lg` (SPEC 06) |
+| `--size-sheet-item` | `52px` | Bottom sheet item height (SPEC 06) |
+| `--size-state-icon` | `56px` | Empty and error state icon circle (SPEC 06) |
+| `--size-icon-lg` / `--size-icon-xl` | `20px` / `26px` | Navigation and sheet icons, state icons (SPEC 06) |
+| `--duration-shimmer` | `1.4s` | One skeleton shimmer cycle (SPEC 06) |
+| `--shadow-card` | `0 1px 2px` ink-900 at 6 % + `0 8px 24px` purple at 8 % | White cards (balance on mobile, movements card) (SPEC 06) |
+| `--shadow-balance` | `0 12px 32px` purple at 28 % | Desktop gradient balance card (SPEC 06) |
 
 - Typography: Montserrat (400–900) for headings and amounts, Open Sans (400–700) for body, both through `next/font/google`. Amounts use `tabular-nums`.
 - Tokens live as CSS variables in `src/app/globals.css` and are exposed to Tailwind with `@theme`.
 - Every custom component has `name.module.scss` with BEM (`.button`, `.button__spinner`, `.button--primary`) and consumes only CSS variables. No loose measured values: padding, gaps, sizes, borders, type sizes and durations come from the scale tokens above. A value no token describes is allowed only for a percentage or ratio, a `1px` hairline, `999px`, and decorative geometry used once (the brand panel's orange ring), which is declared as a named custom property at the top of its block.
 - A component's closed-set constants (`BUTTON_VARIANT`, `ICON_NAME`, …) and their unions live in a `types.ts` next to it; its `XProps` interface stays in the component file.
 - Tailwind only handles page layout: flex, grid, gap, padding and breakpoints.
-- Mobile-first. Breakpoints `md` 768 px, `lg` 1024 px and, from SPEC 06, `xl` 1280 px (approved desktop proposal, 2026-10-22). Below `md` one column with a top bar; at `md` one centered column, with login in a rounded card; from `lg` login and registration become a 50/50 split with a brand panel, and the private layout gets a 72 px icon rail, content and a 320 px aside; from `xl` a 240 px labeled sidebar, content capped at 1040 px and a 340 px sticky aside. The private-layout tokens (`--container-content`, aside, rail and sidebar widths) are added by SPEC 06.
+- Mobile-first. Breakpoints `md` 768 px, `lg` 1024 px and, from SPEC 06, `xl` 1280 px (approved desktop proposal, 2026-10-22). Below `md` one column with a top bar; at `md` one centered column, with login in a rounded card; from `lg` login and registration become a 50/50 split with a brand panel, and the private layout gets a 72 px icon rail, content and a 320 px aside; from `xl` a 240 px labeled sidebar, content capped at 1040 px and a 340 px sticky aside. The private-layout tokens (`--container-app`, aside, rail and sidebar widths) are added by SPEC 06.
 - Buttons: 50 px tall and full width on mobile; from `lg`, 48 px tall with auto width (min 200 px), full width only inside forms up to 400 px or cards up to 340 px.
 - On mobile the main CTA of a form sits in a bottom action bar with `env(safe-area-inset-bottom)`, and the root `viewport` sets `interactiveWidget: "resizes-content"` so the keyboard never covers it.
 - Light theme only.

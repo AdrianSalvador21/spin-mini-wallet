@@ -157,4 +157,15 @@ describe("createListContactsHandler", () => {
 
     expect(response.status).toBe(503);
   });
+
+  it("answers 200 under the movements_error scenario, since it only fails the movements resource", async () => {
+    await signIn(marianaId);
+    const handler = createListContactsHandler(buildHttpDeps());
+
+    const response = await handler(buildRequest("mock_read_scenario=movements_error"), {
+      params: Promise.resolve({}),
+    });
+
+    expect(response.status).toBe(200);
+  });
 });

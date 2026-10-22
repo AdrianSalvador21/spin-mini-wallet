@@ -1,7 +1,12 @@
 import "server-only";
+import { assertUnreachable } from "@/domain/shared/assert-unreachable";
 import {
+  READ_OUTCOME,
+  READ_RESOURCE,
   READ_SCENARIO,
   TRANSFER_SCENARIO,
+  type ReadOutcome,
+  type ReadResource,
   type ReadScenario,
   type TransferScenario,
 } from "@/shared/lib/api/contract";
@@ -59,6 +64,21 @@ export function resolveReadScenario(cookieValue: string | undefined, allowOverri
   }
 
   return READ_SCENARIO.OK;
+}
+
+export function readOutcome(scenario: ReadScenario, resource: ReadResource): ReadOutcome {
+  switch (scenario) {
+    case READ_SCENARIO.OK:
+      return READ_OUTCOME.OK;
+    case READ_SCENARIO.SLOW:
+      return READ_OUTCOME.SLOW;
+    case READ_SCENARIO.ERROR:
+      return READ_OUTCOME.ERROR;
+    case READ_SCENARIO.MOVEMENTS_ERROR:
+      return resource === READ_RESOURCE.MOVEMENTS ? READ_OUTCOME.ERROR : READ_OUTCOME.OK;
+    default:
+      return assertUnreachable(scenario);
+  }
 }
 
 export function latencyMs(range: readonly [number, number], random: () => number): number {

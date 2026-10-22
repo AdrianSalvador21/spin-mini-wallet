@@ -5,6 +5,9 @@ import { RECIPIENT_ACCOUNT_TYPE, type Contact, type RecipientAccount } from "@/d
 import type { Transfer } from "@/domain/transfer/types";
 import type { User } from "@/domain/user/types";
 import type { Movement } from "@/domain/wallet/types";
+import type { AccountView, MovementsPage, MovementView, WalletSummary } from "@/shared/lib/api/views";
+
+export type { AccountView, MovementsPage, MovementView, WalletSummary };
 
 export interface UserView {
   id: User["id"];
@@ -13,20 +16,12 @@ export interface UserView {
   email: string;
 }
 
-export interface AccountView {
-  type: RecipientAccount["type"];
-  masked: string;
-  bankName?: string;
-}
-
 export interface ContactView {
   id: Contact["id"];
   name: string;
   account: AccountView;
   isFavorite: boolean;
 }
-
-export type MovementView = Omit<Movement, "userId">;
 
 export interface TransferView {
   id: Transfer["id"];
@@ -72,6 +67,7 @@ export function toMovementView(movement: Movement): MovementView {
     amount: movement.amount,
     counterpartyName: movement.counterpartyName,
     merchantName: movement.merchantName,
+    counterpartyAccount: movement.counterpartyAccount ? toAccountView(movement.counterpartyAccount) : undefined,
     transferId: movement.transferId,
     createdAt: movement.createdAt,
   };

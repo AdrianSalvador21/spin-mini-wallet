@@ -1,0 +1,97 @@
+@use "../../../../shared/styles/breakpoints" as bp;
+
+.movement-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-block: var(--space-3);
+  border-bottom: var(--border-width-thin) solid var(--color-lavender-200);
+
+  @include bp.lg {
+    display: grid;
+    grid-template-columns: var(--size-movement-icon-lg) minmax(0, 1fr) auto auto;
+    align-items: center;
+    column-gap: var(--space-4);
+    height: var(--size-movement-row);
+    padding-block: 0;
+  }
+}
+
+.movement-row__icon {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-movement-icon);
+  height: var(--size-movement-icon);
+  border-radius: var(--radius-icon);
+
+  @include bp.lg {
+    width: var(--size-movement-icon-lg);
+    height: var(--size-movement-icon-lg);
+  }
+}
+
+.movement-row__icon--credit {
+  background: var(--color-success-bg);
+  color: var(--color-success-strong);
+}
+
+.movement-row__icon--debit {
+  background: var(--color-lavender-200);
+  color: var(--color-brand-purple);
+}
+
+.movement-row__main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  gap: var(--space-1);
+}
+
+.movement-row__title {
+  overflow: hidden;
+  color: var(--color-ink-900);
+  font-size: var(--text-size-md);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.movement-row__meta {
+  overflow: hidden;
+  color: var(--color-ink-500);
+  font-size: var(--text-size-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  @include bp.lg {
+    display: none;
+  }
+}
+
+.movement-row__date {
+  display: none;
+  color: var(--color-ink-500);
+  font-size: var(--text-size-sm);
+
+  @include bp.lg {
+    display: block;
+  }
+}
+
+.movement-row__amount {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.movement-row__amount--credit {
+  color: var(--color-success);
+}
+
+.movement-row__amount--debit {
+  color: var(--color-ink-900);
+}

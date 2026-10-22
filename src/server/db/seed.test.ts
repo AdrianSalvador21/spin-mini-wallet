@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { detectBank } from "@/domain/contact/banks";
 import { RECIPIENT_ACCOUNT_TYPE } from "@/domain/contact/types";
 import { validateRecipientAccount } from "@/domain/contact/validators";
+import { maskAccount } from "@/domain/contact/mask";
 import { MOVEMENT_TYPE } from "@/domain/wallet/types";
 import { verifyPassword } from "../session/password";
 import { createSeed } from "./seed";
@@ -52,6 +53,25 @@ describe("createSeed", () => {
 
     if (ana?.account.type === RECIPIENT_ACCOUNT_TYPE.CLABE) {
       expect(detectBank(ana.account.clabe)).toBe("Banamex");
+    }
+  });
+
+  it("gives every transfer_out movement a counterpartyAccount masked to at most 4 digits", async () => {
+    const snapshot = await createSeed(NOW);
+    const mariana = snapshot.users.find((user) => user.fullName === "Mariana López");
+    const transferOuts = snapshot.movements.filter(
+      (movement) => movement.userId === mariana?.id && movement.type === MOVEMENT_TYPE.TRANSFER_OUT,
+    );
+
+    expect(transferOuts.length).toBeGreaterThan(0);
+
+    for (const movement of transferOuts) {
+      expect(movement.counterpartyAccount).toBeDefined();
+
+      if (movement.counterpartyAccount) {
+        const masked = maskAccount(movement.counterpartyAccount);
+        expect(masked.replace(/\D/g, "")).toHaveLength(4);
+      }
     }
   });
 

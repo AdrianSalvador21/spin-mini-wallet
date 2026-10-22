@@ -176,14 +176,14 @@ The design shows them, but SPEC 00 does not mention them. The spec of the listed
 
 | Detail | Milestone that decides |
 | --- | --- |
-| Hide-balance eye icon on Home | 06 |
-| "Filtrar" link on the desktop movements list | 06 |
-| "Contactos" item in the desktop side navigation | 06 |
+| Hide-balance eye icon on Home | 06 — Yes, ships; persisted in the `smw_balance_hidden` cookie so it survives a reload |
+| "Filtrar" link on the desktop movements list | 06 — No; replaced by the "Todos / Enviados / Recibidos" `Segmented` filter shown on every breakpoint, not only desktop |
+| "Contactos" item in the desktop side navigation | 06 — No; no spec builds a contacts page, so the side navigation keeps only "Inicio" and "Enviar dinero" |
 | Quick amount chips (`$100`, `$200`, `$500`, `Todo`) | 07 |
 | "Comisión $0.00" and "Saldo después" rows in the review | 07 |
 | "Compartir comprobante" on the receipt | 08 |
-| Mobile review: avatar button that opens the "Mi cuenta" bottom sheet with logout; movements grouped by "Hoy / Ayer / Esta semana" | 06 |
-| Desktop proposal: icon rail, `xl` sidebar, 1040 px container and sticky aside | 06 |
+| Mobile review: avatar button that opens the "Mi cuenta" bottom sheet with logout; movements grouped by "Hoy / Ayer / Esta semana" | 06 — Yes, ships as specified |
+| Desktop proposal: icon rail, `xl` sidebar, 1040 px container and sticky aside | 06 — Yes, ships as specified |
 | Mobile review: optional "Concepto" field with a 0/40 counter in step 1, "Continuar" always enabled, recents row plus search and a vertical contact list in step 2 | 07 |
 | Desktop proposal: wizard card with stepper and live summary | 07 |
 | Mobile review: "Copiar" button next to the support reference; text never under 12 px | 08 |

@@ -38,9 +38,26 @@ export const READ_SCENARIO = {
   OK: "ok",
   ERROR: "error",
   SLOW: "slow",
+  MOVEMENTS_ERROR: "movements_error",
 } as const;
 
 export type ReadScenario = (typeof READ_SCENARIO)[keyof typeof READ_SCENARIO];
+
+export const READ_RESOURCE = {
+  SUMMARY: "summary",
+  MOVEMENTS: "movements",
+  CONTACTS: "contacts",
+} as const;
+
+export type ReadResource = (typeof READ_RESOURCE)[keyof typeof READ_RESOURCE];
+
+export const READ_OUTCOME = {
+  OK: "ok",
+  SLOW: "slow",
+  ERROR: "error",
+} as const;
+
+export type ReadOutcome = (typeof READ_OUTCOME)[keyof typeof READ_OUTCOME];
 
 export const SCENARIO_COOKIE = {
   TRANSFER: "mock_scenario",

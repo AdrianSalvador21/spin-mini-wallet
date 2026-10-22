@@ -1,7 +1,78 @@
 {
   "home": {
-    "placeholder": {
-      "greeting": "Hola, {name}"
+    "metaTitle": "Inicio",
+    "header": {
+      "hello": "Hola,",
+      "greeting": "Hola, {name}",
+      "openAccount": "Abrir mi cuenta"
+    },
+    "account": {
+      "title": "Mi cuenta",
+      "phone": "+52 {phone}",
+      "close": "Cerrar"
+    },
+    "balance": {
+      "label": "Saldo disponible",
+      "show": "Mostrar saldo",
+      "hide": "Ocultar saldo",
+      "hiddenAmount": "$ •••••",
+      "hiddenLabel": "Saldo oculto",
+      "send": "Enviar dinero",
+      "error": {
+        "title": "No pudimos cargar tu saldo",
+        "retry": "Reintentar"
+      }
+    },
+    "movements": {
+      "title": "Movimientos recientes",
+      "filter": {
+        "label": "Filtrar movimientos",
+        "all": "Todos",
+        "debit": "Enviados",
+        "credit": "Recibidos"
+      },
+      "columns": {
+        "concept": "Concepto",
+        "date": "Fecha",
+        "amount": "Monto"
+      },
+      "groups": {
+        "today": "Hoy",
+        "yesterday": "Ayer",
+        "thisWeek": "Esta semana"
+      },
+      "titles": {
+        "transferOut": "Envío a {name}",
+        "transferIn": "Recibido de {name}",
+        "cashDeposit": "Depósito en {merchant}",
+        "qrPayment": "Pago con QR · {merchant}"
+      },
+      "fallbackTitles": {
+        "transferOut": "Envío de dinero",
+        "transferIn": "Dinero recibido",
+        "cashDeposit": "Depósito en efectivo",
+        "qrPayment": "Pago con QR"
+      },
+      "details": {
+        "cash": "Efectivo",
+        "store": "Compra en tienda"
+      },
+      "more": "Ver más movimientos",
+      "loadingMore": "Cargando…",
+      "empty": {
+        "title": "Aún no tienes movimientos",
+        "text": "Cuando envíes o recibas dinero, lo verás aquí."
+      },
+      "emptyFiltered": {
+        "title": "No hay movimientos de este tipo",
+        "text": "Prueba con otro filtro."
+      },
+      "error": {
+        "title": "No pudimos cargar tus movimientos",
+        "text": "Tu saldo está actualizado. Intenta cargar la lista otra vez.",
+        "retry": "Reintentar"
+      },
+      "moreError": "No pudimos cargar más movimientos."
     }
   }
 }

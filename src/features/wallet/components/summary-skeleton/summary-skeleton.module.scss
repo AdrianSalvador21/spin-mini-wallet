@@ -1,0 +1,24 @@
+@use "../../../../shared/styles/breakpoints" as bp;
+
+.summary-skeleton__header {
+  @include bp.lg {
+    grid-area: header;
+  }
+}
+
+.summary-skeleton__aside {
+  @include bp.lg {
+    grid-area: aside;
+  }
+}
+
+.summary-skeleton__lines {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.summary-skeleton__spaced {
+  margin-top: var(--space-2);
+}
