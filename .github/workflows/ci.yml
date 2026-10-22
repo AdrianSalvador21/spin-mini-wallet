@@ -13,6 +13,9 @@ jobs:
   verify:
     name: Lint, typecheck, test and build
     runs-on: ubuntu-latest
+    env:
+      SESSION_SECRET: ci-session-secret-placeholder-at-least-32-chars
+      MOCK_DB_PATH: .data/db.json
     steps:
       - name: Checkout
         uses: actions/checkout@v7

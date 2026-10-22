@@ -11,9 +11,7 @@ export default defineConfig({
     tsconfigPaths: true,
   },
   test: {
-    environment: "jsdom",
     setupFiles: [path.resolve(dirname, "src/test/setup.ts")],
-    include: ["src/**/*.test.{ts,tsx}"],
     coverage: {
       provider: "v8",
       include: ["src/domain/**", "src/server/**", "src/shared/lib/**"],
@@ -30,5 +28,29 @@ export default defineConfig({
         },
       },
     },
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: "dom",
+          environment: "jsdom",
+          include: ["src/**/*.test.{ts,tsx}"],
+          exclude: ["**/node_modules/**", "**/.git/**", "src/server/**"],
+        },
+      },
+      {
+        extends: true,
+        resolve: {
+          alias: {
+            "server-only": path.resolve(dirname, "node_modules/server-only/empty.js"),
+          },
+        },
+        test: {
+          name: "node",
+          environment: "node",
+          include: ["src/server/**/*.test.{ts,tsx}"],
+        },
+      },
+    ],
   },
 });
