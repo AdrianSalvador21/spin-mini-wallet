@@ -1,6 +1,6 @@
 # SPEC 03 — Simulated backend core: persistence, services and session
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 00, SPEC 02
 > **Date:** 2026-10-21
 > **Objective:** Build the server-side core that every page and Route Handler will call (validated environment, JSON database with a write lock, seed data, repositories, services and signed-cookie session primitives) without exposing any HTTP endpoint yet.
@@ -237,31 +237,31 @@ Each step leaves typecheck, lint and tests green and is committed on its own. Ev
 
 ## Acceptance criteria
 
-- [ ] `roadmap.md` lists 9 milestones, with 04 "HTTP API and observability". SPEC 00 §6 shows the structured `Movement`, and `challenge.md` §8.4 uses the new numbers.
-- [ ] `npm run dev` without `SESSION_SECRET` fails at startup with a message naming the variable, and `.env.example` exists with every variable.
-- [ ] Tests under `src/server/**` run in the Vitest `node` project and can import modules that start with `import "server-only"`.
-- [ ] `encodeCursor` and `decodeCursor` round-trip, and `decodeCursor("not-a-cursor")` returns `INVALID_CURSOR`.
-- [ ] `PHONE_ALREADY_REGISTERED`, `EMAIL_ALREADY_REGISTERED` and `RECIPIENT_IS_SELF` are in `VALIDATION_CODES`, each with an es-MX message.
-- [ ] `verifyPassword("Spin2026", await hashPassword("Spin2026"))` is `true`, and the same check with `"spin2026"` is `false`.
-- [ ] `verifySessionToken` returns `INVALID` for a token with one changed character and `EXPIRED` for one older than 30 minutes.
-- [ ] `requireSession()` throws `UnauthorizedError` when `smw_session` is missing, tampered or expired.
-- [ ] With no database file, the first `read` creates it from the seed. A file with `schemaVersion: 0` is regenerated.
-- [ ] A transaction that throws leaves the file byte-for-byte unchanged.
-- [ ] 20 concurrent transactions incrementing one counter end at exactly 20.
-- [ ] The seed has Mariana with 1245080 cents, 25 movements and 4 favorites, and Diego with 50000 cents and no movements.
-- [ ] A new registration gets a $1,000.00 balance and zero movements. Registering an existing phone reports `PHONE_ALREADY_REGISTERED` on `phone`.
-- [ ] `verifyCredentials` returns `INVALID_CREDENTIALS` both for a wrong password and for an unknown email.
-- [ ] Paging Mariana's movements with `limit` 10 returns 10, 10 and 5 items, with no repeated `id`, and the last page has `nextCursor: null`.
-- [ ] `listFavorites` for Mariana returns 4 contacts. No `account.masked` contains more than 4 digits, and Ana's has `bankName: "Banamex"`.
-- [ ] A transfer for exactly Mariana's balance succeeds and leaves the balance at 0. One cent more returns `INSUFFICIENT_FUNDS` with the current balance.
-- [ ] Repeating `create` with the same key and payload returns the same `TransferView.id` and debits once. The same key with another amount returns `IDEMPOTENCY_CONFLICT`.
-- [ ] 10 concurrent transfers of $2,000.00 on a $10,000.00 balance produce exactly 5 successes and a final balance of 0.
-- [ ] A transfer to the sender's own phone returns `VALIDATION_ERROR` with `recipient: ["RECIPIENT_IS_SELF"]`.
-- [ ] A transfer from Mariana to Diego's phone increases Diego's balance by the same amount and creates a `transfer_in` movement with `counterpartyName: "Mariana López"`.
-- [ ] A `kind: "new"` transfer with `saveAsFavorite: true` that fails on balance creates no contact.
-- [ ] No service return value contains `passwordHash`, a full CLABE or a full card number (tested on `UserView`, `ContactView` and `TransferView`).
-- [ ] `npm run lint`, `npm run typecheck`, `npm run test:coverage` (100 % on `src/domain/**`, 80 % on `src/server/**`) and `npm run build` finish with no errors.
-- [ ] There are no comments in any file created or modified in this milestone.
+- [x] `roadmap.md` lists 9 milestones, with 04 "HTTP API and observability". SPEC 00 §6 shows the structured `Movement`, and `challenge.md` §8.4 uses the new numbers.
+- [x] `npm run dev` without `SESSION_SECRET` fails at startup with a message naming the variable, and `.env.example` exists with every variable.
+- [x] Tests under `src/server/**` run in the Vitest `node` project and can import modules that start with `import "server-only"`.
+- [x] `encodeCursor` and `decodeCursor` round-trip, and `decodeCursor("not-a-cursor")` returns `INVALID_CURSOR`.
+- [x] `PHONE_ALREADY_REGISTERED`, `EMAIL_ALREADY_REGISTERED` and `RECIPIENT_IS_SELF` are in `VALIDATION_CODES`, each with an es-MX message.
+- [x] `verifyPassword("Spin2026", await hashPassword("Spin2026"))` is `true`, and the same check with `"spin2026"` is `false`.
+- [x] `verifySessionToken` returns `INVALID` for a token with one changed character and `EXPIRED` for one older than 30 minutes.
+- [x] `requireSession()` throws `UnauthorizedError` when `smw_session` is missing, tampered or expired.
+- [x] With no database file, the first `read` creates it from the seed. A file with `schemaVersion: 0` is regenerated.
+- [x] A transaction that throws leaves the file byte-for-byte unchanged.
+- [x] 20 concurrent transactions incrementing one counter end at exactly 20.
+- [x] The seed has Mariana with 1245080 cents, 25 movements and 4 favorites, and Diego with 50000 cents and no movements.
+- [x] A new registration gets a $1,000.00 balance and zero movements. Registering an existing phone reports `PHONE_ALREADY_REGISTERED` on `phone`.
+- [x] `verifyCredentials` returns `INVALID_CREDENTIALS` both for a wrong password and for an unknown email.
+- [x] Paging Mariana's movements with `limit` 10 returns 10, 10 and 5 items, with no repeated `id`, and the last page has `nextCursor: null`.
+- [x] `listFavorites` for Mariana returns 4 contacts. No `account.masked` contains more than 4 digits, and Ana's has `bankName: "Banamex"`.
+- [x] A transfer for exactly Mariana's balance succeeds and leaves the balance at 0. One cent more returns `INSUFFICIENT_FUNDS` with the current balance.
+- [x] Repeating `create` with the same key and payload returns the same `TransferView.id` and debits once. The same key with another amount returns `IDEMPOTENCY_CONFLICT`.
+- [x] 10 concurrent transfers of $2,000.00 on a $10,000.00 balance produce exactly 5 successes and a final balance of 0.
+- [x] A transfer to the sender's own phone returns `VALIDATION_ERROR` with `recipient: ["RECIPIENT_IS_SELF"]`.
+- [x] A transfer from Mariana to Diego's phone increases Diego's balance by the same amount and creates a `transfer_in` movement with `counterpartyName: "Mariana López"`.
+- [x] A `kind: "new"` transfer with `saveAsFavorite: true` that fails on balance creates no contact.
+- [x] No service return value contains `passwordHash`, a full CLABE or a full card number (tested on `UserView`, `ContactView` and `TransferView`).
+- [x] `npm run lint`, `npm run typecheck`, `npm run test:coverage` (100 % on `src/domain/**`, 80 % on `src/server/**`) and `npm run build` finish with no errors.
+- [x] There are no comments in any file created or modified in this milestone.
 
 ## Decisions
 

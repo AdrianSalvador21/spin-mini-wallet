@@ -20,7 +20,7 @@
 | 00 | Architecture and global contracts | [00-architecture.md](./00-architecture.md) | — | Approved |
 | 01 | Scaffolding, tooling and visual foundations | [01-scaffolding.md](./01-scaffolding.md) | `feature/01-scaffolding` | Implemented |
 | 02 | Domain layer | [02-domain.md](./02-domain.md) | `feature/02-domain` | Implemented |
-| 03 | Simulated backend core | [03-mock-backend.md](./03-mock-backend.md) | `feature/03-mock-backend` | Approved |
+| 03 | Simulated backend core | [03-mock-backend.md](./03-mock-backend.md) | `feature/03-mock-backend` | Implemented |
 | 04 | HTTP API and observability | To be written | `feature/04-api` | Pending |
 | 05 | Authentication | To be written | `feature/05-auth` | Pending |
 | 06 | Home | To be written | `feature/06-home` | Pending |
@@ -28,7 +28,7 @@
 | 08 | Confirmation and receipt | To be written | `feature/08-confirmation-receipt` | Pending |
 | 09 | Final quality, deploy and documentation | To be written | `feature/09-delivery` | Pending |
 
-**Next spec to write:** 04 — HTTP API and observability (after implementing 03).
+**Next spec to write:** 04 — HTTP API and observability.
 
 The original milestone 02 ("Domain and simulated backend") was split on 2026-10-21 because it touched more than three areas. Session primitives moved from the authentication milestone into the simulated backend so every `/api/v1/*` route is protected from the start.
 
