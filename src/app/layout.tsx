@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { Montserrat, Open_Sans } from "next/font/google";
@@ -18,6 +18,14 @@ const openSans = Open_Sans({
   weight: ["400", "600", "700"],
   display: "swap",
 });
+
+const INTERACTIVE_WIDGET = {
+  RESIZES_CONTENT: "resizes-content",
+} as const;
+
+export const viewport: Viewport = {
+  interactiveWidget: INTERACTIVE_WIDGET.RESIZES_CONTENT,
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("common");

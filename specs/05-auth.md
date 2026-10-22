@@ -26,7 +26,7 @@ Server Actions follow the same pattern as the SPEC 04 handlers (user decision). 
 - `--color-info` and `--color-info-bg` tokens, with the design's values.
 - `src/shared/lib/routes.ts`: route constants and the pure route-access rule the proxy applies.
 - `src/shared/lib/format/phone.ts`: the `55 1234 5678` input mask.
-- UI primitives in `src/shared/ui/`: `icon`, `button`, `field`, `password-input`, `alert`, `app-bar` and `segmented`, each with `.tsx`, `.module.scss` (BEM) and `.test.tsx`.
+- UI primitives in `src/shared/ui/`: `icon`, `button`, `field`, `password-input`, `alert`, `app-bar`, `segmented` and `action-bar`, each with `.tsx`, `.module.scss` (BEM) and `.test.tsx`.
 - The approved mobile review and desktop proposal for auth: segmented method selector, CTA label in `ink-900`, 16 px inputs, 44 px touch targets, purple links, the bottom action bar with `interactiveWidget: "resizes-content"`, and the 50/50 split screen with a brand panel from `lg` for login and registration.
 - The auth form contract in `src/shared/lib/auth/form-state.ts`.
 - A login rate limiter and the auth action factories in `src/server/auth/`, plus `getAuthActions()` in the container.
@@ -113,7 +113,7 @@ Tokens from the approved mobile review and desktop proposal (2026-10-22), also i
 | `--text-size-lead` / `-2xl` / `-3xl` / `-hero` | `17px` / `28px` / `32px` / `44px` |
 | `--size-touch` | `44px` |
 | `--size-button-desktop` / `--size-button-min-width` | `48px` / `200px` |
-| `--size-icon-tile` / `--size-logo-lg` | `36px` / `104px` |
+| `--size-icon-tile` / `--size-logo-md` / `--size-logo-lg` | `36px` / `84px` / `104px` |
 | `--container-form` | `400px` |
 
 ### UI primitives (`src/shared/ui/`)
@@ -127,6 +127,7 @@ Tokens from the approved mobile review and desktop proposal (2026-10-22), also i
 | `Alert` | `tone: AlertTone`, `role?: AlertRole`, `children` | Tone background and icon (`alert`, `clock`, `check`, `alert`). The success tone uses `--color-success-strong` for text. `ALERT_TONE` and `ALERT_ROLE` are `as const` objects, and the tone → icon mapping is an exhaustive `switch` |
 | `AppBar` | `title`, `backHref` | Back link with a 44 × 44 hit area around the 32 px lavender circle (`Icon` `back`, labeled "Regresar") and the title. From `lg` it becomes a purple "Regresar" text link above a 32 px title, as in the desktop register mock. SPEC 07 adds the step counter |
 | `Segmented` | `label`, `name`, `options: { value, label }[]`, `value`, `onChange` | Pill track on `lavender-200` with 44 px options; the selected one is white with a soft shadow. Built on native `<input type="radio">` inside a `role="radiogroup"` labeled by `label`, so arrow keys move the selection and the focus stays in the group |
+| `ActionBar` | `children`, `className?` | The bottom action bar of a form on mobile: sticky at the bottom edge, white, with a hairline on top and `env(safe-area-inset-bottom)` padding. It cancels the page's `--space-5` gutter so it spans the full width. From `lg` it is static and flat, right after the last field. SPEC 07 reuses it for the wizard |
 
 Each primitive folder has a `types.ts` with its closed-set constants and unions (`ICON_NAME`, `ICON_SIZE`, `BUTTON_VARIANT`, `BUTTON_TYPE`, `INPUT_TYPE`, `INPUT_MODE`, `AUTO_COMPLETE`, `ALERT_TONE`, `ALERT_ROLE`); the `XProps` interface stays in the component file. `BUTTON_TYPE = { BUTTON: "button", SUBMIT: "submit", RESET: "reset" }` replaces any raw `type` literal (user decision). Every component consumes only CSS variables (colors and scale tokens) and the `_typography.scss` mixins. Focus is visible (`--color-lavender-500` outline). The spinner respects `prefers-reduced-motion`. Texts come from the caller or from `common.json`, never inline.
 
@@ -334,7 +335,7 @@ Each step leaves lint, typecheck and tests green and is committed on its own. Be
     - `Button`: `ink-900` primary label, 50 px minimum height on mobile, 48 px and a 200 px minimum width (unless `block`) from `lg`.
     - `Field`: 16 px input text. `PasswordInput`: 44 px toggle hit area. `AppBar`: 44 px back hit area, and the "Regresar" + 32 px title layout from `lg`. `Alert`: `success-strong` text.
     - `Icon`: `phone`, `receipt` and `shield`.
-    - New `Segmented` primitive with tests: options render as radios inside a labeled `radiogroup`, the selected value is checked, clicking or pressing an arrow key calls `onChange`, and each option is at least `--size-touch` tall.
+    - New `Segmented` and `ActionBar` primitives with tests. `BrandLogo` gains `size?: BrandLogoSize` (`md` / `lg`). `Segmented`: options render as radios inside a labeled `radiogroup`, the selected value is checked, and clicking or pressing an arrow key calls `onChange`. The 44 px height comes from `--size-touch` in its SCSS; jsdom has no layout, so the E2E checks it.
     - `LoginForm`: the segmented selector replaces the switch link; the submit button and the "Regístrate" link move into the action bar. Tests: switching to email clears the identifier and the server error and keeps the password.
     - `(public)/layout.tsx` with the `md` card and the `lg` split, the new `AuthBrandPanel` with a test, the login page's `lg` header, purple underlined links, and `viewport` with `interactiveWidget: "resizes-content"` in `src/app/layout.tsx`.
     - `auth.json`: `methodLabel` / `methodPhone` / `methodEmail` and the `brand` keys replace `switchToEmail` / `switchToPhone`.
@@ -346,7 +347,7 @@ Each step leaves lint, typecheck and tests green and is committed on its own. Be
 14. **Proxy guard, `/` and headers.** Extend `src/proxy.ts` and its tests. Move `src/proxy.test.ts` to the Vitest `node` project, because `token.ts` imports `server-only`. Cover: `/home` without a cookie → 307 to `/login` with `x-request-id`; `/login` with a valid cookie → `/home`; a tampered or expired cookie counts as none; `/` in both cases; `/api/v1/wallet/summary` without a session passes through. Create `security-headers.ts` with tests and wire it in `next.config.ts`. Delete `src/app/page.tsx`, `page.module.scss` and `common.home`, and update `e2e/smoke.spec.ts` so `/` lands on `/login`.
     - Why: the first barrier in front of private pages (SPEC 00 §11). Handlers and the page itself keep re-checking the session.
 
-15. **E2E.** Update `playwright.config.ts` (port 3100, `.data/e2e-db.json`, `globalSetup`) and add `e2e/global-setup.ts`, `e2e/fixtures/auth.ts` and `e2e/auth.spec.ts`. The specs cover: login by phone, login by email after the switch, invalid credentials with an unregistered phone, inline field errors, registration with a unique phone and email landing on `/home`, the guard redirects, and logout. They also cover the API smoke test: after login, `page.request.get("/api/v1/wallet/summary")` answers `200`, has `x-request-id` and contains `"Mariana López"`. Finally, the security headers on `/login`.
+15. **E2E.** Update `playwright.config.ts` (port 3100, `.data/e2e-db.json`, `globalSetup`) and add `e2e/global-setup.ts`, `e2e/fixtures/auth.ts` and `e2e/auth.spec.ts`. The specs cover: login by phone, login by email after the switch, invalid credentials with an unregistered phone, inline field errors, registration with a unique phone and email landing on `/home`, the guard redirects, and logout. They also cover the API smoke test: after login, `page.request.get("/api/v1/wallet/summary")` answers `200`, has `x-request-id` and contains `"Mariana López"`. Finally, the security headers on `/login`, the 44 px height of the segmented options on mobile, and the brand panel being visible on the `desktop` project and hidden on `mobile`.
     - Why: proves the session works across proxy, pages, Server Actions and Route Handlers in a real browser, on mobile and desktop.
 
 16. **Docs.** Add an "Authentication" section to `CLAUDE.md`: the action factories with injected dependencies and thin `actions.ts`, the `AuthFormState` contract in `src/shared/lib/auth/`, RHF + `useActionState`, the rate-limit rule, `resolveRouteAccess` in the proxy, `/api/**` never redirected, the UI primitives and their props (including `Segmented`), the public layout (md card, lg split with `AuthBrandPanel`), the bottom action bar and `interactiveWidget`, and the E2E port and database. Mark SPEC 05 as `Implemented` in `roadmap.md` once the criteria pass.
@@ -361,7 +362,7 @@ Each step leaves lint, typecheck and tests green and is committed on its own. Be
 - [ ] A `Button` with `loading` is disabled, has `aria-busy="true"` and does not call `onClick`.
 - [ ] A `Field` with `error` has `aria-invalid="true"` and an `aria-describedby` that points to the element holding the error text.
 - [ ] The `PasswordInput` toggle switches the input between `password` and `text` and updates its accessible name.
-- [ ] `Alert` renders the four tones, and `alert`, `button`, `field`, `password-input`, `icon`, `app-bar` and `segmented` live in `src/shared/ui/` with `.tsx`, `.module.scss`, `.test.tsx` and, where they declare closed-set constants, `types.ts`, with no hex value and no loose measured value in any SCSS file.
+- [ ] `Alert` renders the four tones, and `alert`, `button`, `field`, `password-input`, `icon`, `app-bar`, `segmented` and `action-bar` live in `src/shared/ui/` with `.tsx`, `.module.scss`, `.test.tsx` and, where they declare closed-set constants, `types.ts`, with no hex value and no loose measured value in any SCSS file.
 - [ ] Five failed logins for one phone make the 6th attempt answer `rate_limited`, even with the right password, and `verifyCredentials` is not called for it.
 - [ ] A successful login resets the counter, and after 15 minutes (fake clock) the same phone may try again.
 - [ ] `login` with `{ method: "phone", phone: "55 1234 5678", password: "Spin2026" }` returns Mariana's `UserView`.

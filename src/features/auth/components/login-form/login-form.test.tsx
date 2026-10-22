@@ -37,27 +37,39 @@ describe("LoginForm", () => {
     expect(phone).toHaveAttribute("type", INPUT_TYPE.TEL);
     expect(screen.getByText("+52")).toBeInTheDocument();
     expect(phone).toHaveValue("55 1234 5678");
-    expect(screen.queryByLabelText("Email")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Email", { selector: "input:not([type=radio])" })).not.toBeInTheDocument();
   });
 
-  it("switches to email, clearing the identifier, keeping the password and moving focus", async () => {
+  it("offers the method as a labeled segmented selector with phone selected", () => {
+    renderWithProviders(<LoginForm />);
+
+    expect(screen.getByRole("radiogroup", { name: "Método de acceso" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Celular" })).toBeChecked();
+    expect(screen.getByRole("radio", { name: "Email" })).not.toBeChecked();
+  });
+
+  it("switches to email, clearing the identifier and keeping the password", async () => {
     renderWithProviders(<LoginForm />);
     await userEvent.type(screen.getByLabelText(PHONE_LABEL), "5512345678");
     await userEvent.type(screen.getByLabelText(PASSWORD_LABEL), "Spin2026");
 
-    await userEvent.click(screen.getByRole("button", { name: "Iniciar sesión con email" }));
+    await userEvent.click(screen.getByRole("radio", { name: "Email" }));
 
-    const email = screen.getByLabelText("Email");
-    await waitFor(() => expect(email).toHaveFocus());
+    const email = await screen.findByLabelText("Email", { selector: "input:not([type=radio])" });
     expect(email).toHaveValue("");
+    expect(email).toHaveAttribute("type", INPUT_TYPE.EMAIL);
     expect(screen.queryByLabelText(PHONE_LABEL)).not.toBeInTheDocument();
     expect(screen.getByLabelText(PASSWORD_LABEL)).toHaveValue("Spin2026");
 
-    await userEvent.click(screen.getByRole("button", { name: "Iniciar sesión con celular" }));
+    await userEvent.click(screen.getByRole("radio", { name: "Celular" }));
 
-    const phone = screen.getByLabelText(PHONE_LABEL);
-    await waitFor(() => expect(phone).toHaveFocus());
-    expect(phone).toHaveValue("");
+    expect(await screen.findByLabelText(PHONE_LABEL)).toHaveValue("");
+  });
+
+  it("renders the footer inside the form", () => {
+    renderWithProviders(<LoginForm footer={<p>¿No tienes cuenta?</p>} />);
+
+    expect(screen.getByText("¿No tienes cuenta?").closest("form")).not.toBeNull();
   });
 
   it("shows inline errors on an empty submit without calling the action", async () => {
@@ -139,7 +151,7 @@ describe("LoginForm", () => {
     await submitPhoneLogin();
     await screen.findByRole("alert");
 
-    await userEvent.click(screen.getByRole("button", { name: "Iniciar sesión con email" }));
+    await userEvent.click(screen.getByRole("radio", { name: "Email" }));
 
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });

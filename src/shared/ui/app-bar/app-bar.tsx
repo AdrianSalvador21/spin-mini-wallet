@@ -15,8 +15,11 @@ export function AppBar({ title, backHref }: AppBarProps) {
 
   return (
     <header className={styles["app-bar"]}>
-      <Link href={backHref} className={styles["app-bar__back"]} aria-label={t("back")}>
-        <Icon name={ICON_NAME.BACK} size={ICON_SIZE.SM} />
+      <Link href={backHref} className={styles["app-bar__back"]}>
+        <span className={styles["app-bar__back-circle"]}>
+          <Icon name={ICON_NAME.BACK} size={ICON_SIZE.SM} />
+        </span>
+        <span className={styles["app-bar__back-label"]}>{t("back")}</span>
       </Link>
       <h1 className={styles["app-bar__title"]}>{title}</h1>
     </header>

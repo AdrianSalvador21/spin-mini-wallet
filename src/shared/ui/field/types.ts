@@ -3,6 +3,7 @@ export const INPUT_TYPE = {
   PASSWORD: "password",
   EMAIL: "email",
   TEL: "tel",
+  RADIO: "radio",
 } as const;
 
 export type InputType = (typeof INPUT_TYPE)[keyof typeof INPUT_TYPE];

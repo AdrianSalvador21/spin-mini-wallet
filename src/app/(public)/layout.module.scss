@@ -7,4 +7,9 @@
     overflow: hidden;
     border-radius: var(--radius-l);
   }
+
+  @include bp.lg {
+    overflow: visible;
+    border-radius: 0;
+  }
 }

@@ -1,35 +1,61 @@
+@use "../../../shared/styles/breakpoints" as bp;
 @use "../../../shared/styles/typography" as type;
 
 .login-page__hero {
   border-radius: 0 0 var(--radius-xl) var(--radius-xl);
   background: linear-gradient(90deg, var(--color-brand-purple) 40%, var(--color-brand-purple-2) 100%);
+
+  @include bp.lg {
+    border-radius: 0;
+    background: none;
+  }
+}
+
+.login-page__logo {
+  @include bp.lg {
+    display: none;
+  }
 }
 
 .login-page__title {
   @include type.display(var(--text-size-xl));
   color: var(--color-white);
+
+  @include bp.lg {
+    font-size: var(--text-size-3xl);
+    color: var(--color-ink-900);
+  }
 }
 
 .login-page__subtitle {
   @include type.body(var(--text-size-sm));
   color: color-mix(in srgb, var(--color-white) 85%, transparent);
+
+  @include bp.lg {
+    font-size: var(--text-size-lg);
+    color: var(--color-ink-500);
+  }
 }
 
 .login-page__footer {
   @include type.body(var(--text-size-sm));
   text-align: center;
   color: var(--color-ink-500);
+
+  @include bp.lg {
+    margin-top: var(--space-1);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-lavender-200);
+    font-size: var(--text-size-md);
+  }
 }
 
 .login-page__register-link {
   font-family: var(--font-display);
   font-weight: 700;
-  color: var(--color-brand-orange);
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
+  color: var(--color-brand-purple);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 
   &:focus-visible {
     border-radius: var(--radius-s);

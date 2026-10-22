@@ -5,6 +5,9 @@ export const ICON_NAME = {
   EYE: "eye",
   EYE_OFF: "eye-off",
   BACK: "back",
+  PHONE: "phone",
+  RECEIPT: "receipt",
+  SHIELD: "shield",
 } as const;
 
 export type IconName = (typeof ICON_NAME)[keyof typeof ICON_NAME];

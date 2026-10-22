@@ -54,6 +54,41 @@ const ICON_PATHS: Record<IconName, ReactNode> = {
       strokeLinejoin="round"
     />
   ),
+  [ICON_NAME.PHONE]: (
+    <>
+      <rect x="7" y="3" width="10" height="18" rx="2.5" fill="none" stroke="currentColor" strokeWidth="2" />
+      <path d="M11 17.5h2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </>
+  ),
+  [ICON_NAME.RECEIPT]: (
+    <path
+      d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+  [ICON_NAME.SHIELD]: (
+    <>
+      <path
+        d="M12 3l7.5 3v5.5c0 4.5-3.2 8-7.5 9.5C7.7 19.5 4.5 16 4.5 11.5V6z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9 12l2.2 2.2L15.5 10"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </>
+  ),
 };
 
 interface IconProps {

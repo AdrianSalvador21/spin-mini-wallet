@@ -374,7 +374,7 @@ Scale tokens (SPEC 05). Spacing follows the same 4 px grid as Tailwind's spacing
 | `--size-control` | `50px` | Input height, and the minimum button height on mobile |
 | `--size-touch` | `44px` | Minimum touch target (segmented options, back link, eye toggle) |
 | `--size-button-desktop` / `--size-button-min-width` | `48px` / `200px` | Button height from `lg`, and the minimum width of a non-block button from `lg` |
-| `--size-icon-tile` / `--size-logo-lg` | `36px` / `104px` | Brand panel perk tiles and the desktop logo |
+| `--size-icon-tile` / `--size-logo-md` / `--size-logo-lg` | `36px` / `84px` / `104px` | Brand panel perk tiles, the mobile logo and the desktop logo |
 | `--size-icon-sm/md` | `16px` / `18px` | Spinner and inline icons, alert and field icons |
 | `--size-icon-button` | `32px` | Round icon-only buttons (app bar back link) |
 | `--border-width-thin` / `--border-width` | `1.5px` / `2px` | Field control border, secondary button and spinner |

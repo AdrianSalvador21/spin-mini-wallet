@@ -1,8 +1,11 @@
+@use "../../styles/breakpoints" as bp;
+
 .button {
   display: inline-flex;
   gap: var(--space-2);
   align-items: center;
   justify-content: center;
+  min-height: var(--size-control);
   padding: var(--space-4) var(--space-6);
   border: 0;
   border-radius: var(--radius-pill);
@@ -24,11 +27,16 @@
   &:disabled {
     cursor: not-allowed;
   }
+
+  @include bp.lg {
+    min-height: var(--size-button-desktop);
+    padding-block: 0;
+  }
 }
 
 .button--primary {
   background: var(--color-brand-orange);
-  color: var(--color-white);
+  color: var(--color-on-brand-orange);
 
   &:hover:not(:disabled) {
     background: var(--color-brand-orange-hover);
@@ -60,6 +68,12 @@
 
 .button--loading {
   cursor: progress;
+}
+
+.button:not(.button--block) {
+  @include bp.lg {
+    min-width: var(--size-button-min-width);
+  }
 }
 
 .button--block {

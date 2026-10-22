@@ -17,20 +17,23 @@ export default function LoginPage() {
   const t = useTranslations("auth.login");
 
   return (
-    <main className="flex flex-1 flex-col">
-      <header className={`${styles["login-page__hero"]} flex flex-col gap-3 px-5 pt-10 pb-6`}>
-        <BrandLogo onDark priority />
+    <main className="flex flex-1 flex-col lg:pt-36">
+      <header className={`${styles["login-page__hero"]} flex flex-col gap-3 px-5 pt-10 pb-6 lg:gap-2 lg:p-0`}>
+        <BrandLogo onDark priority className={styles["login-page__logo"]} />
         <h1 className={styles["login-page__title"]}>{t("title")}</h1>
         <p className={styles["login-page__subtitle"]}>{t("subtitle")}</p>
       </header>
-      <div className="flex flex-1 flex-col gap-6 px-5 pt-5 pb-8">
-        <LoginForm />
-        <p className={`${styles["login-page__footer"]} mt-auto`}>
-          {t("noAccount")}{" "}
-          <Link href={ROUTES.REGISTER} className={styles["login-page__register-link"]}>
-            {t("registerLink")}
-          </Link>
-        </p>
+      <div className="flex flex-1 flex-col px-5 pt-5 lg:flex-none lg:px-0 lg:pt-6">
+        <LoginForm
+          footer={
+            <p className={styles["login-page__footer"]}>
+              {t("noAccount")}{" "}
+              <Link href={ROUTES.REGISTER} className={styles["login-page__register-link"]}>
+                {t("registerLink")}
+              </Link>
+            </p>
+          }
+        />
       </div>
     </main>
   );
