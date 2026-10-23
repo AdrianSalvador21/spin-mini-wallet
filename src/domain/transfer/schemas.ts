@@ -1,23 +1,17 @@
 import { z } from "zod";
-import { recipientAccountSchema } from "../contact/schemas";
-import { parseAmount } from "../money/money";
+import type { ContactId } from "../contact/types";
+import { parseAmount, validateAmountInCents } from "../money/money";
 import { fromValidator } from "../shared/validation";
-import { validateFullName } from "../user/validators";
-import { TRANSFER_RECIPIENT_KIND } from "./types";
 import { validateConcept } from "./validators";
 
-const recipientNameSchema = fromValidator(validateFullName);
 const conceptSchema = fromValidator(validateConcept).optional();
 
-const transferRecipientInputSchema = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal(TRANSFER_RECIPIENT_KIND.CONTACT), contactId: z.string() }),
-  z.object({
-    kind: z.literal(TRANSFER_RECIPIENT_KIND.NEW),
-    name: recipientNameSchema,
-    account: recipientAccountSchema,
-    saveAsFavorite: z.boolean(),
-  }),
-]);
+const transferRecipientSchema = z.object({
+  contactId: z
+    .string()
+    .min(1)
+    .transform((value) => value as ContactId),
+});
 
 export const transferAmountSchema = z.object({ amount: z.string() }).transform((data, ctx) => {
   const result = parseAmount(data.amount);
@@ -30,8 +24,19 @@ export const transferAmountSchema = z.object({ amount: z.string() }).transform((
   return { amountInCents: result.value };
 });
 
+const amountInCentsSchema = z.number().transform((value, ctx) => {
+  const result = validateAmountInCents(value);
+
+  if (!result.ok) {
+    ctx.addIssue({ code: "custom", message: result.error });
+    return z.NEVER;
+  }
+
+  return result.value;
+});
+
 export const createTransferSchema = z.object({
-  amountInCents: z.number(),
-  recipient: transferRecipientInputSchema,
+  amountInCents: amountInCentsSchema,
+  recipient: transferRecipientSchema,
   concept: conceptSchema,
 });

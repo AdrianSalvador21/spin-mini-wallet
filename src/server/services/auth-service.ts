@@ -16,6 +16,7 @@ const DUMMY_PASSWORD_HASH =
 export interface AuthService {
   register(input: z.infer<typeof registerSchema>): Promise<Result<UserView, ServiceError>>;
   verifyCredentials(input: z.infer<typeof loginSchema>): Promise<Result<UserView, ServiceError>>;
+  exists(userId: UserId): Promise<boolean>;
 }
 
 export function createAuthService({ db, now, createId }: ServiceDependencies): AuthService {
@@ -76,6 +77,12 @@ export function createAuthService({ db, now, createId }: ServiceDependencies): A
       }
 
       return ok(toUserView(user));
+    },
+
+    async exists(userId) {
+      const user = await db.read((repositories) => repositories.users.findById(userId));
+
+      return user !== undefined;
     },
   };
 }

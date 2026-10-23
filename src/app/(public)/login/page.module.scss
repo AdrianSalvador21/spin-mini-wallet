@@ -2,12 +2,28 @@
 @use "../../../shared/styles/typography" as type;
 
 .login-page__hero {
+  position: relative;
+  overflow: hidden;
   border-radius: 0 0 var(--radius-xl) var(--radius-xl);
   background: linear-gradient(90deg, var(--color-brand-purple) 40%, var(--color-brand-purple-2) 100%);
 
   @include bp.lg {
     border-radius: 0;
     background: none;
+  }
+}
+
+.login-page__hero > *:not(.login-page__texture) {
+  position: relative;
+}
+
+.login-page__texture {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  @include bp.lg {
+    display: none;
   }
 }
 

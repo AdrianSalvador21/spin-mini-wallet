@@ -7,7 +7,6 @@ import { toMoney, type Money } from "@/domain/money/money";
 import { assertUnreachable } from "@/domain/shared/assert-unreachable";
 import { TRANSFER_FEE } from "@/domain/transfer/fees";
 import { TRANSFER_RULE_VIOLATION, validateTransfer, type TransferRuleViolation } from "@/domain/transfer/rules";
-import { TRANSFER_RECIPIENT_KIND } from "@/domain/transfer/types";
 import { useAccountLabel } from "@/shared/i18n/use-account-label";
 import { useValidationMessage } from "@/shared/i18n/use-validation-message";
 import { getRequestId } from "@/shared/lib/api/api-client";
@@ -81,7 +80,7 @@ function ReviewContent({ amount, recipient, onConfirm }: ReviewContentProps) {
 
   const validation = balance
     ? validateTransfer(
-        { amount, recipient: { kind: TRANSFER_RECIPIENT_KIND.CONTACT, contactId: recipient.contactId } },
+        { amount, recipient: { contactId: recipient.contactId } },
         balance,
       )
     : null;

@@ -47,9 +47,12 @@ afterEach(() => {
   vi.resetModules();
 });
 
-function buildDeps(overrides: Partial<HttpDependencies> = {}): HttpDependencies {
+function buildDeps(
+  overrides: Partial<HttpDependencies> = {},
+  userExists = true,
+): HttpDependencies {
   return {
-    services: {} as HttpDependencies["services"],
+    services: { auth: { exists: async () => userExists } } as unknown as HttpDependencies["services"],
     random: () => 0,
     sleep: async () => {},
     createRequestId: () => "generated-id",
@@ -111,6 +114,20 @@ describe("createRouteHandler", () => {
 
     expect(response.status).toBe(401);
     expect((await response.json()).error.code).toBe("UNAUTHORIZED");
+  });
+
+  it("answers 401 UNAUTHORIZED for a valid session whose user no longer exists", async () => {
+    const { createRouteHandler } = await import("./route-handler");
+    await signIn();
+
+    const handle = vi.fn(async () => Response.json({ ok: true }));
+    const handler = createRouteHandler(buildDeps({}, false), {}, handle);
+
+    const response = await handler(buildGetRequest(), { params: Promise.resolve({}) });
+
+    expect(response.status).toBe(401);
+    expect((await response.json()).error.code).toBe("UNAUTHORIZED");
+    expect(handle).not.toHaveBeenCalled();
   });
 
   it("answers 415 FORBIDDEN for a wrong Content-Type on a mutating route, before the session check", async () => {

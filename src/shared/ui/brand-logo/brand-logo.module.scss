@@ -3,6 +3,14 @@
   height: auto;
 }
 
+.brand-logo--xs {
+  width: var(--size-logo-xs);
+}
+
+.brand-logo--sm {
+  width: var(--size-logo-sm);
+}
+
 .brand-logo--md {
   width: var(--size-logo-md);
 }

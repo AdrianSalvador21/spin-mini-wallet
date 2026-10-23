@@ -159,7 +159,9 @@ describe("createWalletMovementsHandler", () => {
     const response = await handler(buildRequest("?cursor=not-a-cursor"), { params: Promise.resolve({}) });
 
     expect(response.status).toBe(400);
-    expect((await response.json()).error.code).toBe("VALIDATION_ERROR");
+    const body = await response.json();
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+    expect(body.error.details).toEqual({ cursor: ["CURSOR_INVALID"] });
   });
 
   it("answers 200 with only credit movements for direction=credit", async () => {

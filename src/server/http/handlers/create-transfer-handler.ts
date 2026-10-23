@@ -56,6 +56,12 @@ export function createCreateTransferHandler(deps: HttpDependencies) {
       return result.ok ? json(result.value, 201) : errorResponse(toApiError(result.error), ctx.requestId);
     }
 
+    const check = await deps.services.transfer.check(ctx.session.userId, parsed.data);
+
+    if (!check.ok) {
+      return errorResponse(toApiError(check.error), ctx.requestId);
+    }
+
     const cookieValue = ctx.request.cookies.get(SCENARIO_COOKIE.TRANSFER)?.value;
     const scenario = resolveTransferScenario(cookieValue, deps.allowScenarioOverride, deps.random);
 

@@ -23,6 +23,17 @@
   }
 }
 
+.auth-brand-panel > *:not(.auth-brand-panel__texture) {
+  position: relative;
+}
+
+.auth-brand-panel__texture {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 .auth-brand-panel__headline {
   @include type.display(var(--text-size-hero), 900);
   max-width: 13ch;

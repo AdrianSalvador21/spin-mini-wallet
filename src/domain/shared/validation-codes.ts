@@ -37,6 +37,7 @@ export const VALIDATION_CODES = [
   "BODY_INVALID_JSON",
   "LIMIT_INVALID",
   "DIRECTION_INVALID",
+  "CURSOR_INVALID",
 ] as const;
 
 export type ValidationCode = (typeof VALIDATION_CODES)[number];

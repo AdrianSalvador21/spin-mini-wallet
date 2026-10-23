@@ -1,6 +1,7 @@
-import { compareMoney, type Money } from "../money/money";
+import { addMoney, compareMoney, type Money } from "../money/money";
 import { err, ok, type Result } from "../shared/result";
-import type { TransferRecipientInput } from "./types";
+import { TRANSFER_FEE } from "./fees";
+import type { TransferRecipient } from "./types";
 
 export const TRANSFER_RULE_VIOLATION = {
   AMOUNT_NOT_POSITIVE: "AMOUNT_NOT_POSITIVE",
@@ -12,23 +13,24 @@ export type TransferRuleViolation = (typeof TRANSFER_RULE_VIOLATION)[keyof typeo
 
 export interface TransferDraft {
   amount: Money;
-  recipient: TransferRecipientInput | null;
+  recipient: TransferRecipient | null;
 }
 
 export interface ValidTransfer {
   amount: Money;
-  recipient: TransferRecipientInput;
+  recipient: TransferRecipient;
 }
 
 export function validateTransferAmount(
   amount: Money,
   availableBalance: Money,
+  fee: Money = TRANSFER_FEE,
 ): Result<Money, TransferRuleViolation[]> {
   if (amount.amountInCents <= 0) {
     return err([TRANSFER_RULE_VIOLATION.AMOUNT_NOT_POSITIVE]);
   }
 
-  if (compareMoney(amount, availableBalance) > 0) {
+  if (compareMoney(addMoney(amount, fee), availableBalance) > 0) {
     return err([TRANSFER_RULE_VIOLATION.INSUFFICIENT_FUNDS]);
   }
 

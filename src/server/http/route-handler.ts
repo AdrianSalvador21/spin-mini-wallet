@@ -83,6 +83,10 @@ export function createRouteHandler<P = Record<string, never>>(
       throw error;
     }
 
+    if (!(await deps.services.auth.exists(session.userId))) {
+      return finish(errorResponse({ status: 401, code: API_ERROR_CODE.UNAUTHORIZED }, requestId));
+    }
+
     try {
       const params = await context.params;
       const response = await handle({

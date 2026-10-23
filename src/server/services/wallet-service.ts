@@ -1,6 +1,5 @@
 import "server-only";
 import { err, ok, type Result } from "@/domain/shared/result";
-import type { ValidationCode } from "@/domain/shared/validation-codes";
 import { maskPhone } from "@/domain/user/mask";
 import type { UserId } from "@/domain/user/types";
 import { decodeCursor, encodeCursor, type MovementCursor } from "@/domain/wallet/cursor";
@@ -71,7 +70,7 @@ export function createWalletService({ db }: ServiceDependencies): WalletService 
         if (!decoded.ok) {
           return err({
             code: SERVICE_ERROR_CODE.VALIDATION_ERROR,
-            details: { cursor: ["INVALID_CURSOR"] } as unknown as Record<string, ValidationCode[]>,
+            details: { cursor: [decoded.error] },
           });
         }
 

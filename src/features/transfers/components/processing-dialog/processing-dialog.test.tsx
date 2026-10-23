@@ -42,6 +42,18 @@ describe("ProcessingDialog", () => {
     expect(screen.getByRole("progressbar", { name: "Procesando", hidden: true })).toBeInTheDocument();
   });
 
+  it("draws the orbit as decoration and shows the color logo", () => {
+    renderDialog(SUBMISSION_STATUS.PROCESSING);
+
+    const orbit = screen.getByRole("progressbar", { name: "Procesando", hidden: true });
+
+    expect(orbit.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+    expect(screen.getByRole("img", { name: "Spin by OXXO", hidden: true })).toHaveAttribute(
+      "src",
+      expect.stringContaining("spin-oxxo-logo-color.svg"),
+    );
+  });
+
   it("does not close on Esc", () => {
     renderDialog(SUBMISSION_STATUS.PROCESSING);
 

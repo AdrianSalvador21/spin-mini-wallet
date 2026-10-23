@@ -113,7 +113,18 @@ describe("WizardShell", () => {
     expect(screen.getByText("Contenido del paso")).toBeInTheDocument();
   });
 
-  it("resets the draft when Cancelar is pressed", async () => {
+  it("offers Cancelar envío as the mobile X and the desktop link, both to /home, and none in the card head", () => {
+    renderShell();
+
+    const cancels = screen.getAllByRole("link", { name: "Cancelar envío" });
+
+    expect(cancels).toHaveLength(2);
+    cancels.forEach((link) => expect(link).toHaveAttribute("href", "/home"));
+    expect(screen.getByRole("banner")).toContainElement(cancels[0]);
+    expect(screen.queryByRole("link", { name: "Cancelar" })).not.toBeInTheDocument();
+  });
+
+  it("resets the draft when Cancelar envío is pressed", async () => {
     useTransferDraft.setState({
       amountInCents: 5_000 as Cents,
       concept: "Cena",
@@ -125,7 +136,7 @@ describe("WizardShell", () => {
     });
     renderShell();
 
-    const cancel = screen.getByRole("link", { name: "Cancelar" });
+    const [cancel] = screen.getAllByRole("link", { name: "Cancelar envío" });
     expect(cancel).toHaveAttribute("href", "/home");
     cancel.addEventListener("click", (event) => event.preventDefault());
 
@@ -177,7 +188,7 @@ describe("WizardShell", () => {
     expect(screen.getByText("Contenido del paso")).toBe(content);
     expect(screen.queryByRole("banner")).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { level: 1, name: "Enviar dinero" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Cancelar" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Cancelar/ })).not.toBeInTheDocument();
     expect(content.closest('[class*="wizard-shell__body"]')?.className).toContain("max-w-focus");
 
     useSubmissionStore.setState({ state: IDLE_SUBMISSION });

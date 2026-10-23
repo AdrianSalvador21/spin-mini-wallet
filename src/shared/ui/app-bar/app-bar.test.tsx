@@ -22,6 +22,14 @@ describe("AppBar", () => {
     expect(screen.getByText("1 de 3")).toBeInTheDocument();
   });
 
+  it("renders the action slot after the title", () => {
+    renderWithProviders(
+      <AppBar title="Enviar dinero" backHref={ROUTES.HOME} action={<button type="button">Cerrar</button>} />,
+    );
+
+    expect(screen.getByRole("button", { name: "Cerrar" })).toBeInTheDocument();
+  });
+
   it("renders no counter without a step", () => {
     renderWithProviders(<AppBar title="Crea tu cuenta" backHref={ROUTES.LOGIN} />);
 

@@ -25,6 +25,7 @@
       "continueWith": "Continuar con {name}",
       "back": "Atrás",
       "cancel": "Cancelar",
+      "cancelTransfer": "Cancelar envío",
       "edit": "Editar datos",
       "confirm": "Confirmar envío",
       "home": "Inicio"

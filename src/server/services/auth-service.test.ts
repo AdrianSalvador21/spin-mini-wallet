@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { LOGIN_METHOD } from "@/domain/user/schemas";
+import type { UserId } from "@/domain/user/types";
 import { createJsonDatabase } from "../db/json-database";
 import { SCHEMA_VERSION, type DatabaseSnapshot } from "../db/schema";
 import { createAuthService } from "./auth-service";
@@ -145,5 +146,15 @@ describe("AuthService.verifyCredentials", () => {
     });
 
     expect(result).toEqual({ ok: false, error: { code: "INVALID_CREDENTIALS" } });
+  });
+});
+
+describe("AuthService.exists", () => {
+  it("is true for a registered user and false for a missing one", async () => {
+    const service = createAuthService(deps);
+    const registered = await service.register(VALID_REGISTRATION);
+
+    expect(registered.ok && (await service.exists(registered.value.id))).toBe(true);
+    expect(await service.exists("usr_missing" as UserId)).toBe(false);
   });
 });
