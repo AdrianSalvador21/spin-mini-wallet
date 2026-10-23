@@ -1,6 +1,6 @@
 # Design decisions
 
-The decisions behind the Spin Mini Wallet, written to be read in about ten minutes. Each item says what was chosen and why, and links to a diagram or a spec when there is more to say. The full record, including the options that were discarded, lives in [`specs/`](./specs/README.md).
+The decisions behind the Spin Mini Wallet. Each item says what was chosen and why, and links to a diagram or a spec when there is more to say. The full record, including the options that were discarded, lives in [`specs/`](./specs/README.md).
 
 ## Contents
 
