@@ -1,4 +1,4 @@
-import { QueryCache, QueryClient } from "@tanstack/react-query";
+import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 import { API_FAILURE_KIND, ApiFailureError } from "../api/api-client";
 
 const STALE_TIME_MS = 30_000;
@@ -10,11 +10,13 @@ function isRetriableFailure(error: unknown): boolean {
 
 export interface MakeQueryClientOptions {
   queryCache?: QueryCache;
+  mutationCache?: MutationCache;
 }
 
 export function makeQueryClient(options: MakeQueryClientOptions = {}): QueryClient {
   return new QueryClient({
     queryCache: options.queryCache,
+    mutationCache: options.mutationCache,
     defaultOptions: {
       queries: {
         staleTime: STALE_TIME_MS,

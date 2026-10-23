@@ -4,6 +4,7 @@ import { err, ok, type Result } from "@/domain/shared/result";
 import {
   CONTENT_TYPE_HEADER,
   HTTP_METHOD,
+  IDEMPOTENCY_KEY_HEADER,
   JSON_CONTENT_TYPE,
   REQUEST_ID_HEADER,
   type ApiErrorBody,
@@ -13,6 +14,7 @@ import {
 export const API_FAILURE_KIND = {
   API: "api",
   NETWORK: "network",
+  TIMEOUT: "timeout",
   UNKNOWN: "unknown",
 } as const;
 
@@ -25,7 +27,8 @@ export type ApiFailure =
       details?: Record<string, ValidationCode[]>;
       balance?: Money;
     }
-  | { kind: typeof API_FAILURE_KIND.NETWORK }
+  | { kind: typeof API_FAILURE_KIND.NETWORK; requestId?: string }
+  | { kind: typeof API_FAILURE_KIND.TIMEOUT; requestId?: string }
   | { kind: typeof API_FAILURE_KIND.UNKNOWN; status?: number; requestId?: string };
 
 export class ApiFailureError extends Error {
@@ -42,7 +45,7 @@ export function getRequestId(error: unknown): string | undefined {
     return undefined;
   }
 
-  return error.failure.kind === API_FAILURE_KIND.NETWORK ? undefined : error.failure.requestId;
+  return error.failure.requestId;
 }
 
 function isApiErrorBody(value: unknown): value is ApiErrorBody {
@@ -51,10 +54,13 @@ function isApiErrorBody(value: unknown): value is ApiErrorBody {
 
 export interface ApiRequestInit {
   signal?: AbortSignal;
+  timeoutMs?: number;
+  requestId?: string;
+  idempotencyKey?: string;
 }
 
 export function apiGet<T>(path: string, init?: ApiRequestInit): Promise<Result<T, ApiFailure>> {
-  return request<T>(path, { method: HTTP_METHOD.GET, signal: init?.signal });
+  return request<T>(path, { method: HTTP_METHOD.GET }, init);
 }
 
 export async function apiGetOrThrow<T>(path: string, signal?: AbortSignal): Promise<T> {
@@ -68,21 +74,79 @@ export async function apiGetOrThrow<T>(path: string, signal?: AbortSignal): Prom
 }
 
 export function apiPost<T>(path: string, body: unknown, init?: ApiRequestInit): Promise<Result<T, ApiFailure>> {
-  return request<T>(path, {
-    method: HTTP_METHOD.POST,
-    headers: { [CONTENT_TYPE_HEADER]: JSON_CONTENT_TYPE },
-    body: JSON.stringify(body),
-    signal: init?.signal,
-  });
+  return request<T>(
+    path,
+    { method: HTTP_METHOD.POST, headers: { [CONTENT_TYPE_HEADER]: JSON_CONTENT_TYPE }, body: JSON.stringify(body) },
+    init,
+  );
 }
 
-async function request<T>(path: string, init: RequestInit): Promise<Result<T, ApiFailure>> {
+interface RequestAbort {
+  signal?: AbortSignal;
+  timedOut: () => boolean;
+  clear: () => void;
+}
+
+function createRequestAbort(signal: AbortSignal | undefined, timeoutMs: number | undefined): RequestAbort {
+  if (timeoutMs === undefined) {
+    return { signal, timedOut: () => false, clear: () => undefined };
+  }
+
+  const controller = new AbortController();
+  let timedOut = false;
+  const abortFromCaller = () => controller.abort(signal?.reason);
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeoutMs);
+
+  if (signal?.aborted) {
+    abortFromCaller();
+  } else {
+    signal?.addEventListener("abort", abortFromCaller, { once: true });
+  }
+
+  return {
+    signal: controller.signal,
+    timedOut: () => timedOut,
+    clear: () => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", abortFromCaller);
+    },
+  };
+}
+
+interface BaseRequest {
+  method: (typeof HTTP_METHOD)[keyof typeof HTTP_METHOD];
+  headers?: Record<string, string>;
+  body?: string;
+}
+
+function requestHeaders(base: Record<string, string> | undefined, init: ApiRequestInit): Record<string, string> {
+  return {
+    ...base,
+    ...(init.requestId === undefined ? {} : { [REQUEST_ID_HEADER]: init.requestId }),
+    ...(init.idempotencyKey === undefined ? {} : { [IDEMPOTENCY_KEY_HEADER]: init.idempotencyKey }),
+  };
+}
+
+async function request<T>(path: string, base: BaseRequest, init: ApiRequestInit = {}): Promise<Result<T, ApiFailure>> {
+  const abort = createRequestAbort(init.signal, init.timeoutMs);
   let response: Response;
 
   try {
-    response = await fetch(path, { ...init, credentials: "same-origin" });
+    response = await fetch(path, {
+      ...base,
+      headers: requestHeaders(base.headers, init),
+      signal: abort.signal,
+      credentials: "same-origin",
+    });
   } catch {
-    return err({ kind: API_FAILURE_KIND.NETWORK });
+    const kind = abort.timedOut() ? API_FAILURE_KIND.TIMEOUT : API_FAILURE_KIND.NETWORK;
+
+    return err(init.requestId === undefined ? { kind } : { kind, requestId: init.requestId });
+  } finally {
+    abort.clear();
   }
 
   return toResult<T>(response);
