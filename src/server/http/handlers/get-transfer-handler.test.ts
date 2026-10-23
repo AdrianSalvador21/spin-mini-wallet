@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { ContactId } from "@/domain/contact/types";
 import type { Cents } from "@/domain/money/money";
 import type { TransferId } from "@/domain/transfer/types";
 import type { UserId } from "@/domain/user/types";
@@ -123,12 +124,7 @@ describe("createGetTransferHandler", () => {
       marianaId,
       {
         amountInCents: (10_000) as Cents,
-        recipient: {
-          kind: "new",
-          name: "Carlos Ruiz",
-          account: { type: "phone", phone: "5523456789" },
-          saveAsFavorite: false,
-        },
+        recipient: { contactId: "ctc_carlos" as ContactId },
       },
       "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
     );
@@ -163,12 +159,7 @@ describe("createGetTransferHandler", () => {
       marianaId,
       {
         amountInCents: (10_000) as Cents,
-        recipient: {
-          kind: "new",
-          name: "Carlos Ruiz",
-          account: { type: "phone", phone: "5523456789" },
-          saveAsFavorite: false,
-        },
+        recipient: { contactId: "ctc_carlos" as ContactId },
       },
       "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
     );

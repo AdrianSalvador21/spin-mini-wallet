@@ -1,7 +1,7 @@
 import { addMoney, compareMoney, type Money } from "../money/money";
 import { err, ok, type Result } from "../shared/result";
 import { TRANSFER_FEE } from "./fees";
-import type { TransferRecipientInput } from "./types";
+import type { TransferRecipient } from "./types";
 
 export const TRANSFER_RULE_VIOLATION = {
   AMOUNT_NOT_POSITIVE: "AMOUNT_NOT_POSITIVE",
@@ -13,12 +13,12 @@ export type TransferRuleViolation = (typeof TRANSFER_RULE_VIOLATION)[keyof typeo
 
 export interface TransferDraft {
   amount: Money;
-  recipient: TransferRecipientInput | null;
+  recipient: TransferRecipient | null;
 }
 
 export interface ValidTransfer {
   amount: Money;
-  recipient: TransferRecipientInput;
+  recipient: TransferRecipient;
 }
 
 export function validateTransferAmount(

@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { ContactId } from "@/domain/contact/types";
 import type { Cents } from "@/domain/money/money";
 import type { UserId } from "@/domain/user/types";
 import type { Services } from "@/server/container";
@@ -153,12 +154,7 @@ describe("createFindTransferByKeyHandler", () => {
       marianaId,
       {
         amountInCents: (10_000) as Cents,
-        recipient: {
-          kind: "new",
-          name: "Carlos Ruiz",
-          account: { type: "phone", phone: "5523456789" },
-          saveAsFavorite: false,
-        },
+        recipient: { contactId: "ctc_carlos" as ContactId },
       },
       VALID_KEY,
     );

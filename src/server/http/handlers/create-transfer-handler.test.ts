@@ -133,12 +133,7 @@ function buildRequest(options: { body?: string; idempotencyKey?: string; cookie?
 function transferPayload(amountInCents = 10_000) {
   return JSON.stringify({
     amountInCents,
-    recipient: {
-      kind: "new",
-      name: "Carlos Ruiz",
-      account: { type: "phone", phone: "5523456789" },
-      saveAsFavorite: false,
-    },
+    recipient: { contactId: "ctc_carlos" },
   });
 }
 

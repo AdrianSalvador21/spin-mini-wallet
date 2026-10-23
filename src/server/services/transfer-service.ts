@@ -1,16 +1,15 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import type { z } from "zod";
-import { RECIPIENT_ACCOUNT_TYPE, type ContactId } from "@/domain/contact/types";
+import { RECIPIENT_ACCOUNT_TYPE } from "@/domain/contact/types";
 import { addMoney, subtractMoney, toMoney, type Cents } from "@/domain/money/money";
 import { err, ok, type Result } from "@/domain/shared/result";
 import type { ValidationCode } from "@/domain/shared/validation-codes";
 import { validateTransfer } from "@/domain/transfer/rules";
 import type { createTransferSchema } from "@/domain/transfer/schemas";
-import { TRANSFER_RECIPIENT_KIND, type Transfer, type TransferId } from "@/domain/transfer/types";
+import type { Transfer, TransferId } from "@/domain/transfer/types";
 import type { UserId } from "@/domain/user/types";
 import { MOVEMENT_DIRECTION, MOVEMENT_TYPE, type MovementId } from "@/domain/wallet/types";
-import { accountsMatch } from "./account-match";
 import { SERVICE_ERROR_CODE, type ServiceDependencies, type ServiceError } from "./types";
 import { toTransferView, type TransferView } from "./views";
 
@@ -77,19 +76,13 @@ export function createTransferService({ db, now, random, createId }: ServiceDepe
           }
         }
 
-        let recipient: Transfer["recipient"];
+        const contact = repositories.contacts.findById(input.recipient.contactId);
 
-        if (input.recipient.kind === TRANSFER_RECIPIENT_KIND.CONTACT) {
-          const contact = repositories.contacts.findById(input.recipient.contactId as ContactId);
-
-          if (!contact || contact.ownerId !== userId) {
-            return err({ code: SERVICE_ERROR_CODE.NOT_FOUND });
-          }
-
-          recipient = { name: contact.name, account: contact.account };
-        } else {
-          recipient = { name: input.recipient.name, account: input.recipient.account };
+        if (!contact || contact.ownerId !== userId) {
+          return err({ code: SERVICE_ERROR_CODE.NOT_FOUND });
         }
+
+        const recipient: Transfer["recipient"] = { name: contact.name, account: contact.account };
 
         const sender = repositories.users.findById(userId);
         const wallet = repositories.wallets.findByUserId(userId);
@@ -160,25 +153,6 @@ export function createTransferService({ db, now, random, createId }: ServiceDepe
               counterpartyName: sender.fullName,
               counterpartyAccount: { type: RECIPIENT_ACCOUNT_TYPE.PHONE, phone: sender.phone },
               transferId,
-              createdAt: now().toISOString(),
-            });
-          }
-        }
-
-        const recipientInput = input.recipient;
-
-        if (recipientInput.kind === TRANSFER_RECIPIENT_KIND.NEW && recipientInput.saveAsFavorite) {
-          const existingContact = repositories.contacts
-            .listByOwnerId(userId)
-            .find((contact) => accountsMatch(contact.account, recipientInput.account));
-
-          if (!existingContact) {
-            repositories.contacts.insert({
-              id: `ctc_${createId()}` as ContactId,
-              ownerId: userId,
-              name: recipientInput.name,
-              account: recipientInput.account,
-              isFavorite: true,
               createdAt: now().toISOString(),
             });
           }

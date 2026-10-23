@@ -43,7 +43,7 @@ describe("useCreateTransfer", () => {
     expect(isRequestId(requests[0].headers.get("x-request-id"))).toBe(true);
     expect(await requests[0].json()).toEqual({
       amountInCents: 10_000,
-      recipient: { kind: "contact", contactId: "ctc_carlos" },
+      recipient: { contactId: "ctc_carlos" },
       concept: "Comida",
     });
   });
