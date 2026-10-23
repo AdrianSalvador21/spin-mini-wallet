@@ -45,6 +45,19 @@ describe("validateTransferAmount", () => {
       error: ["INSUFFICIENT_FUNDS"],
     });
   });
+
+  it("counts the fee against the balance", () => {
+    const fee = toMoney(100 as Cents);
+
+    expect(validateTransferAmount(toMoney(9_900 as Cents), BALANCE, fee)).toEqual({
+      ok: true,
+      value: toMoney(9_900 as Cents),
+    });
+    expect(validateTransferAmount(toMoney(9_901 as Cents), BALANCE, fee)).toEqual({
+      ok: false,
+      error: ["INSUFFICIENT_FUNDS"],
+    });
+  });
 });
 
 describe("validateTransfer", () => {

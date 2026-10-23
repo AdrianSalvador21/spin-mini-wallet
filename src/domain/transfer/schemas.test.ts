@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { RECIPIENT_ACCOUNT_TYPE } from "../contact/types";
+import { MAX_AMOUNT_IN_CENTS } from "../money/money";
 import { createTransferSchema, transferAmountSchema } from "./schemas";
 import { TRANSFER_RECIPIENT_KIND } from "./types";
 
@@ -58,6 +59,20 @@ describe("createTransferSchema", () => {
       },
       concept: "Renta oct.",
     });
+  });
+
+  it.each([
+    [10.5, "AMOUNT_INVALID_FORMAT"],
+    [MAX_AMOUNT_IN_CENTS + 1, "AMOUNT_EXCEEDS_MAXIMUM"],
+  ])("rejects amountInCents %s with %s", (amountInCents, code) => {
+    const result = createTransferSchema.safeParse({
+      amountInCents,
+      recipient: { kind: TRANSFER_RECIPIENT_KIND.CONTACT, contactId: "contact-1" },
+    });
+
+    expect(result.success).toBe(false);
+    const issue = result.error?.issues.find((i) => i.path.join(".") === "amountInCents");
+    expect(issue?.message).toBe(code);
   });
 
   it("reports the underlying validator code for an invalid concept", () => {

@@ -1,5 +1,6 @@
-import { compareMoney, type Money } from "../money/money";
+import { addMoney, compareMoney, type Money } from "../money/money";
 import { err, ok, type Result } from "../shared/result";
+import { TRANSFER_FEE } from "./fees";
 import type { TransferRecipientInput } from "./types";
 
 export const TRANSFER_RULE_VIOLATION = {
@@ -23,12 +24,13 @@ export interface ValidTransfer {
 export function validateTransferAmount(
   amount: Money,
   availableBalance: Money,
+  fee: Money = TRANSFER_FEE,
 ): Result<Money, TransferRuleViolation[]> {
   if (amount.amountInCents <= 0) {
     return err([TRANSFER_RULE_VIOLATION.AMOUNT_NOT_POSITIVE]);
   }
 
-  if (compareMoney(amount, availableBalance) > 0) {
+  if (compareMoney(addMoney(amount, fee), availableBalance) > 0) {
     return err([TRANSFER_RULE_VIOLATION.INSUFFICIENT_FUNDS]);
   }
 

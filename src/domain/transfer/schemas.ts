@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { recipientAccountSchema } from "../contact/schemas";
-import { parseAmount } from "../money/money";
+import { parseAmount, validateAmountInCents } from "../money/money";
 import { fromValidator } from "../shared/validation";
 import { validateFullName } from "../user/validators";
 import { TRANSFER_RECIPIENT_KIND } from "./types";
@@ -30,8 +30,19 @@ export const transferAmountSchema = z.object({ amount: z.string() }).transform((
   return { amountInCents: result.value };
 });
 
+const amountInCentsSchema = z.number().transform((value, ctx) => {
+  const result = validateAmountInCents(value);
+
+  if (!result.ok) {
+    ctx.addIssue({ code: "custom", message: result.error });
+    return z.NEVER;
+  }
+
+  return result.value;
+});
+
 export const createTransferSchema = z.object({
-  amountInCents: z.number(),
+  amountInCents: amountInCentsSchema,
   recipient: transferRecipientInputSchema,
   concept: conceptSchema,
 });

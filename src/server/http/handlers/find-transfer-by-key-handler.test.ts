@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { Cents } from "@/domain/money/money";
 import type { UserId } from "@/domain/user/types";
 import type { Services } from "@/server/container";
 import { createJsonDatabase } from "@/server/db/json-database";
@@ -151,7 +152,7 @@ describe("createFindTransferByKeyHandler", () => {
     await services.transfer.create(
       marianaId,
       {
-        amountInCents: 10_000,
+        amountInCents: (10_000) as Cents,
         recipient: {
           kind: "new",
           name: "Carlos Ruiz",

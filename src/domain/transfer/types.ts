@@ -19,6 +19,12 @@ export type TransferRecipientInput =
       saveAsFavorite: boolean;
     };
 
+export const TRANSFER_STATUS = {
+  COMPLETED: "completed",
+} as const;
+
+export type TransferStatus = (typeof TRANSFER_STATUS)[keyof typeof TRANSFER_STATUS];
+
 export interface Transfer {
   id: TransferId;
   folio: string;
@@ -27,7 +33,7 @@ export interface Transfer {
   recipient: { name: string; account: RecipientAccount };
   amount: Money;
   concept?: string;
-  status: "completed";
+  status: TransferStatus;
   idempotencyKey: string;
   createdAt: string;
 }
