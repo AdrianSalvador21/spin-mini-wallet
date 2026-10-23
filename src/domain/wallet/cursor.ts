@@ -20,24 +20,24 @@ export function encodeCursor(cursor: MovementCursor): string {
   return toBase64Url(`${cursor.createdAt}|${cursor.id}`);
 }
 
-export function decodeCursor(cursor: string): Result<MovementCursor, "INVALID_CURSOR"> {
+export function decodeCursor(cursor: string): Result<MovementCursor, "CURSOR_INVALID"> {
   try {
     const decoded = fromBase64Url(cursor);
     const separatorIndex = decoded.indexOf("|");
 
     if (separatorIndex === -1) {
-      return err("INVALID_CURSOR");
+      return err("CURSOR_INVALID");
     }
 
     const createdAt = decoded.slice(0, separatorIndex);
     const id = decoded.slice(separatorIndex + 1);
 
     if (!createdAt || !id) {
-      return err("INVALID_CURSOR");
+      return err("CURSOR_INVALID");
     }
 
     return ok({ createdAt, id: id as MovementId });
   } catch {
-    return err("INVALID_CURSOR");
+    return err("CURSOR_INVALID");
   }
 }

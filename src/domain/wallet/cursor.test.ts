@@ -15,23 +15,23 @@ describe("movement cursor", () => {
     expect(decodeCursor(encoded)).toEqual({ ok: true, value: cursor });
   });
 
-  it("returns INVALID_CURSOR for a string with no separator", () => {
-    expect(decodeCursor("not-a-cursor")).toEqual({ ok: false, error: "INVALID_CURSOR" });
+  it("returns CURSOR_INVALID for a string with no separator", () => {
+    expect(decodeCursor("not-a-cursor")).toEqual({ ok: false, error: "CURSOR_INVALID" });
   });
 
-  it("returns INVALID_CURSOR when createdAt is empty", () => {
+  it("returns CURSOR_INVALID when createdAt is empty", () => {
     const encoded = toBase64Url("|mov_123");
 
-    expect(decodeCursor(encoded)).toEqual({ ok: false, error: "INVALID_CURSOR" });
+    expect(decodeCursor(encoded)).toEqual({ ok: false, error: "CURSOR_INVALID" });
   });
 
-  it("returns INVALID_CURSOR when id is empty", () => {
+  it("returns CURSOR_INVALID when id is empty", () => {
     const encoded = toBase64Url("2026-10-01T12:00:00.000Z|");
 
-    expect(decodeCursor(encoded)).toEqual({ ok: false, error: "INVALID_CURSOR" });
+    expect(decodeCursor(encoded)).toEqual({ ok: false, error: "CURSOR_INVALID" });
   });
 
-  it("returns INVALID_CURSOR when the input cannot be base64-decoded", () => {
-    expect(decodeCursor("!!!")).toEqual({ ok: false, error: "INVALID_CURSOR" });
+  it("returns CURSOR_INVALID when the input cannot be base64-decoded", () => {
+    expect(decodeCursor("!!!")).toEqual({ ok: false, error: "CURSOR_INVALID" });
   });
 });
