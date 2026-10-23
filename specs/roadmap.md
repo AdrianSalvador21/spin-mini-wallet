@@ -26,9 +26,9 @@
 | 06 | Home | [06-home.md](./06-home.md) | `feature/06-home` | Implemented |
 | 07 | New transfer flow | [07-transfer-flow.md](./07-transfer-flow.md) | `feature/07-transfer-flow` | Implemented |
 | 08 | Confirmation and receipt | [08-confirmation-receipt.md](./08-confirmation-receipt.md) | `feature/08-confirmation-receipt` | Implemented |
-| 09 | Final quality, deploy and documentation | To be written | `feature/09-delivery` | Pending |
+| 09 | Final quality, deploy and documentation | [09-delivery.md](./09-delivery.md) | `feature/09-delivery-code`, `fix/09-validation-codes`, `feature/09-delivery-docs` | Implemented |
 
-**Next spec to write:** 09 — Final quality, deploy and documentation.
+**Next spec to write:** none. 09 is the last milestone.
 
 The original milestone 02 ("Domain and simulated backend") was split on 2026-10-21 because it touched more than three areas. Session primitives moved from the authentication milestone into the simulated backend so every `/api/v1/*` route is protected from the start.
 
@@ -102,8 +102,10 @@ Repo base: branches, Node 24, `src/`, Sass and Spin tokens, fonts, next-intl, ES
 
 ### 09 — Final quality, deploy and documentation
 
-- Full E2E suite (login, registration, Home, wizard and the five scenarios) on mobile and desktop.
-- Accessibility and coverage review.
+- Fixes from the pre-delivery audit: an integer, bounded wire amount, the business pre-check before the scenario draw, the dead `kind: "new"` recipient removed, and minor defects.
+- Ghost-session handling for Vercel's per-instance `/tmp` database.
+- Brand improvements in the flow (third design approval, `challenge.md` §8.5).
 - Vercel deploy.
-- `README.md` (how to run, libraries, limitations, time spent), `DECISIONS.md` and `AI_USAGE.md`.
-- Covers: the PDF's deliverables and AI section.
+- `README.md` (how to run, libraries, limitations, time spent), `DECISIONS.md`, `AI_USAGE.md`, `docs/` with architecture, flow and state diagrams, and a Spanish presentation exported to PDF.
+- The E2E suite already covers login, registration, Home, the wizard and the five scenarios; accessibility is documented, not re-audited.
+- Covers: the PDF's deliverables and AI section. See [09-delivery.md](./09-delivery.md).

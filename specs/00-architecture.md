@@ -174,19 +174,22 @@ interface Contact {
   isFavorite: boolean; createdAt: string;
 }
 
-type TransferRecipientInput =
-  | { kind: "contact"; contactId: string }
-  | { kind: "new"; name: string; account: RecipientAccount; saveAsFavorite: boolean };
+interface TransferRecipient { contactId: ContactId }
+
+const TRANSFER_STATUS = { COMPLETED: "completed" } as const;
+type TransferStatus = (typeof TRANSFER_STATUS)[keyof typeof TRANSFER_STATUS];
 
 interface Transfer {
-  id: string; folio: string; trackingKey: string; senderId: UserId;
+  id: TransferId; folio: string; trackingKey: string; senderId: UserId;
   recipient: { name: string; account: RecipientAccount };
-  amount: Money; concept?: string; status: "completed";
+  amount: Money; concept?: string; status: TransferStatus;
   idempotencyKey: string; createdAt: string;
 }
 
 type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
 ```
+
+SPEC 09: a transfer always targets a saved contact, so the recipient is `{ contactId }`. The `{ kind: "new", … }` branch was removed because no client sent it: since SPEC 07, every new recipient is saved through `POST /api/v1/contacts` first. A wire amount goes through `validateAmountInCents` (`src/domain/money/money.ts`), which rejects a non-integer with `AMOUNT_INVALID_FORMAT` and a value above `MAX_AMOUNT_IN_CENTS` with `AMOUNT_EXCEEDS_MAXIMUM`.
 
 Domain validators (`src/domain/*/validators.ts`):
 
@@ -210,8 +213,10 @@ The three PDF rules are pure functions in `src/domain/transfer/rules.ts`:
 `validateTransfer(input, availableBalance): Result<ValidTransfer, TransferRuleViolation[]>` runs in three places:
 
 1. On the client, inside each step's Zod schema, to guide the user with immediate messages.
-2. In the `POST /api/v1/transfers` Route Handler, when validating the payload.
-3. In `TransferService`, inside the write lock, right before debiting. This is the validation that decides.
+2. In the `POST /api/v1/transfers` Route Handler, through `TransferService.check` after the idempotency replay and before the scenario draw, so invalid input never gets a simulated outcome (SPEC 09).
+3. In `TransferService.create`, inside the write lock, right before debiting. This is the validation that decides.
+
+The sufficient-balance rule compares the amount plus `TRANSFER_FEE` against the balance, so it always agrees with "Saldo después" (SPEC 09).
 
 The server is the source of truth. Client validation is UX; it never authorizes anything.
 
@@ -264,6 +269,8 @@ SPEC 06: `direction` accepts `debit` or `credit`; any other value answers `400` 
 
 SPEC 07: `POST /api/v1/contacts` honors `saveAsFavorite` (a contact saved without it is not returned by `GET /api/v1/contacts`) and is idempotent by account: an existing contact keeps its id and name, can be upgraded to a favorite and is never downgraded. `ContactView` moves to `src/shared/lib/api/views.ts` so the client can type it.
 
+SPEC 09: the `POST /api/v1/transfers` body is `{ amountInCents, recipient: { contactId }, concept? }`. An invalid movements cursor answers `400` with `details.cursor: ["CURSOR_INVALID"]`. Every `details` entry is a `ValidationCode`: a Zod message that is not one (a wrong type, a missing field) is reported as `INPUT_INVALID`. A valid session whose user no longer exists answers `401 UNAUTHORIZED`, like a missing session.
+
 SPEC 08: a client may send its own `x-request-id`; `proxy.ts` keeps it when it is a valid UUID and replaces anything else, and the response echoes the id actually used. The transfer client sends one fresh UUID per attempt, so a timeout or offline screen can show a reference that matches the server log. `TransferView` moves to `src/shared/lib/api/views.ts`, re-exported by `src/server/services/views.ts`, so the receipt and the submission hook can type it.
 
 ## 9. Confirmation scenarios
@@ -303,7 +310,7 @@ Idempotency:
 
 Status lookup (SPEC 08): after a client timeout, "Revisar estado del envío" calls `GET /api/v1/transfers?idempotencyKey=` with the draft's key. A `200` is handled like a success. A `404`, or any failure of the lookup itself, shows "Todavía no encontramos tu envío" with "Revisar de nuevo" and "Reintentar envío", never a definitive failure: in the `timeout` scenario the server commits at 12 s, so a lookup at 9 s answers `404` for a transfer that is about to complete. A retry from `network_error` or `not_found_yet` resends with the same `Idempotency-Key` and a new request id, and the draft and its key survive "Volver al inicio", so a later retry can never charge twice. There is no automatic polling.
 
-`POST /api/v1/transfers` runs its checks in this fixed order (SPEC 04): CSRF and content type → session → input validation (`Idempotency-Key` format, then payload schema) → idempotency replay (`findByIdempotencyKey`) → scenario pick and the behavior above. When the key already has a completed transfer, the handler skips the random scenario and latency entirely and calls `TransferService.create` directly: its own payload-hash check then decides the outcome, returning the stored transfer (`201`, matching payload) or `409 IDEMPOTENCY_CONFLICT` (different payload) with no further debit either way. Invalid input always gets a real `400` before any scenario applies, and a retry after a `timeout` never lands on a fake failure because the replay check runs before the random pick.
+`POST /api/v1/transfers` runs its checks in this fixed order (SPEC 04, extended by SPEC 09): CSRF and content type → session → input validation (`Idempotency-Key` format, then payload schema) → idempotency replay (`findByIdempotencyKey`) → business pre-check (`TransferService.check`: contact ownership, self-transfer and the three rules, answering the real `400`, `404` or `422`) → scenario pick and the behavior above. The replay runs before the pre-check because a replayed success was already debited, and re-checking the balance would reject a legitimate retry. When the key already has a completed transfer, the handler skips the random scenario and latency entirely and calls `TransferService.create` directly: its own payload-hash check then decides the outcome, returning the stored transfer (`201`, matching payload) or `409 IDEMPOTENCY_CONFLICT` (different payload) with no further debit either way. Invalid input always gets a real `400` before any scenario applies, and a retry after a `timeout` never lands on a fake failure because the replay check runs before the random pick.
 
 ## 10. Simulated persistence
 
@@ -329,6 +336,7 @@ Session:
 - `proxy.ts` verifies signature and expiry: redirects `/home` and `/transfers/*` to `/login` without a session, and `/login` and `/register` to `/home` with one. `/` redirects to `/login` or `/home`. An invalid or expired cookie counts as no session.
 - `proxy.ts` never redirects `/api/**`: Route Handlers answer `401` JSON themselves, and an API client must never receive a redirect to an HTML page.
 - `proxy.ts` keeps an incoming `x-request-id` only when `isRequestId` (`src/shared/lib/api/request-id.ts`) accepts it as a UUID, and generates one otherwise, so arbitrary text never reaches the logs. A client-chosen id only labels the client's own request (SPEC 08).
+- Ghost session (SPEC 09): a correctly signed cookie whose user is missing from the database (for example, another Vercel instance's `/tmp`) counts as no session. `createRouteHandler` answers `401`; the private layout's `SessionGuard` and the client's `UNAUTHORIZED` handler both go to `/session/end`, a Route Handler that deletes `smw_session` and redirects to `/login`. The cookie must be cleared there, because the proxy would otherwise bounce `/login` back to `/home`.
 - Defense in depth (doc `proxy.md` and the data security guide): every Server Action and every Route Handler re-checks the session with `requireSession()`. The proxy is not the only barrier.
 
 Credentials:
@@ -427,6 +435,14 @@ Scale tokens (SPEC 05). Spacing follows the same 4 px grid as Tailwind's spacing
 | `--container-focus` | `520px` | Results and receipt column; Tailwind `max-w-focus` (SPEC 08) |
 | `--size-result-icon` / `--size-result-icon-lg` | `48px` / `64px` | Receipt success icon on mobile and from `lg` (SPEC 08) |
 | `--size-dev-panel-offset` | `168px` | DEV pill bottom offset below `lg`, clearing a two-button `ActionBar` (SPEC 08) |
+| `--opacity-rings` | `0.14` | The `BrandRings` texture over purple surfaces (SPEC 09) |
+| `--size-logo-xs` / `--size-logo-sm` | `42px` / `56px` | Logo on the balance card, and in the Home header, the processing dialog and the receipt (SPEC 09) |
+| `--size-rings-sm` / `--size-rings-md` / `--size-rings-lg` | `380px` / `440px` / `640px` | `BrandRings` widths: cards and headers, the login header, the side navigation and the brand panel (SPEC 09) |
+| `--size-orbit` / `--size-orbit-core` | `132px` / `64px` | The processing orbit and its lavender core (SPEC 09) |
+| `--size-nav-indicator` | `3px` | Orange indicator on the current side-navigation item (SPEC 09) |
+| `--size-ticket-notch` | `24px` | Side notches of the receipt ticket (SPEC 09) |
+| `--size-receipt-band` / `--size-receipt-band-lg` | `220px` / `240px` | Purple band behind the receipt, mobile and from `lg` (SPEC 09) |
+| `--duration-orbit` / `--duration-orbit-reduced` | `1.1s` / `3s` | One orbit turn, and one turn under `prefers-reduced-motion` (SPEC 09) |
 
 - Typography: Montserrat (400–900) for headings and amounts, Open Sans (400–700) for body, both through `next/font/google`. Amounts use `tabular-nums`.
 - Tokens live as CSS variables in `src/app/globals.css` and are exposed to Tailwind with `@theme`.
@@ -437,7 +453,8 @@ Scale tokens (SPEC 05). Spacing follows the same 4 px grid as Tailwind's spacing
 - Buttons: 50 px tall and full width on mobile; from `lg`, 48 px tall with auto width (min 200 px), full width only inside forms up to 400 px or cards up to 340 px.
 - On mobile the main CTA of a form sits in a bottom action bar with `env(safe-area-inset-bottom)`, and the root `viewport` sets `interactiveWidget: "resizes-content"` so the keyboard never covers it.
 - Light theme only.
-- Accessibility: AA contrast (links are purple and underlined, never orange), visible focus, touch targets of at least 44 × 44 px, `aria-describedby` on field errors, `role="alert"` on server errors, no text under 12 px and respect for `prefers-reduced-motion`.
+- Accessibility: AA contrast (links are purple and underlined, never orange), visible focus, touch targets of at least 44 × 44 px, `aria-describedby` on field errors, `role="alert"` on server errors, no text under 12 px and respect for `prefers-reduced-motion`. The one exception is the processing orbit (SPEC 09, user decision): under reduced motion it slows to `--duration-orbit-reduced` instead of stopping, because a frozen indicator would read as a hung transfer.
+- Brand improvements in the flow (SPEC 09, third design approval): the `BrandRings` texture on purple surfaces, a color logo (`spin-oxxo-logo-color.svg`) for light backgrounds, Home proposal B, the processing orbit and the ticket receipt. See `challenge.md` §8.
 - Logo: `public/assets/shared/spin-oxxo-logo.svg`.
 
 ## 15. Testing strategy
@@ -460,7 +477,7 @@ Scale tokens (SPEC 05). Spacing follows the same 4 px grid as Tailwind's spacing
 - Scripts: `dev`, `build`, `start`, `lint`, `typecheck`, `test`, `test:watch`, `test:coverage`, `test:e2e`.
 - `.github/workflows/ci.yml` runs on push to `develop` and `feature/**` and on PRs to `develop`: `npm ci`, lint, typecheck, tests with coverage, build and E2E. Uploads the Playwright report as an artifact.
 - Branches: `main` (merged by the user), `develop` (integration) and `feature/NN-slug` per milestone, branched from `develop` and merged back through a PR. Commits follow Conventional Commits.
-- Vercel deploy with `SESSION_SECRET`, `MOCK_DB_PATH=/tmp/spin-mini-wallet/db.json`, `MOCK_ALLOW_SCENARIO_OVERRIDE=true` and `NEXT_PUBLIC_ENABLE_DEV_TOOLS=true`. The override and the panel stay on deliberately for the evaluator's demo.
+- Vercel deploy with `SESSION_SECRET`, `MOCK_DB_PATH=/tmp/spin-mini-wallet/db.json`, `MOCK_ALLOW_SCENARIO_OVERRIDE=true` and `NEXT_PUBLIC_ENABLE_DEV_TOOLS=true`. The override and the panel stay on deliberately for the evaluator's demo. Every variable is set for every environment, build included, because `next.config.ts` validates the environment at load (SPEC 09). Each instance has its own `/tmp` database, so the README tells the evaluator to demo with the seed users; the ghost-session redirect (§11) covers a session whose user lives on another instance.
 
 ## 17. PDF requirements traceability
 
@@ -483,11 +500,11 @@ Scale tokens (SPEC 05). Spacing follows the same 4 px grid as Tailwind's spacing
 | Rules: amount > 0, sufficient balance, recipient | `domain/transfer/rules.ts` in client, handler and service | 02, 03, 04, 07 |
 | Random confirmation: 5 scenarios | Scenario engine + per-outcome UI | 04, 08 |
 | Justified SSR/CSR | Section 4 of this spec + `DECISIONS.md` | 09 |
-| Justified state management | Section 3 + `DECISIONS.md` | 08 |
+| Justified state management | Section 3 + `DECISIONS.md` + `docs/state.md` | 09 |
 | API Routes with mocked data | `src/app/api/v1/*` | 04 |
 | Unit tests for validations, hooks and components | Vitest + MSW | 01–07 |
 | Justified E2E | Playwright | 01, 05, 08 |
-| README, DECISIONS, AI_USAGE, time spent | Final documentation | 08 |
+| README, DECISIONS, AI_USAGE, time spent | Root documents plus `docs/` | 09 |
 
 ## 18. Decisions
 
