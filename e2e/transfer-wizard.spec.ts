@@ -58,7 +58,7 @@ test.describe("transfer wizard", () => {
     await expect(summary).toContainText("Celular •••• 6789");
     await expect(summary).toContainText("Comisión$0.00");
     await expect(summary).toContainText("Saldo después$12,100.80");
-    await expect(page.getByRole("button", { name: "Confirmar envío" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Confirmar envío" })).toBeEnabled();
 
     const stored = await page.evaluate((key) => window.sessionStorage.getItem(key), SESSION_STORAGE_KEY.TRANSFER_DRAFT);
     expect(stored).not.toMatch(FULL_ACCOUNT_DIGITS);

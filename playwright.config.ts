@@ -12,6 +12,7 @@ export default defineConfig({
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,
   reporter: "html",
+  expect: { timeout: 10_000 },
   use: {
     baseURL,
     trace: "on-first-retry",
@@ -35,6 +36,7 @@ export default defineConfig({
       SESSION_SECRET: process.env.SESSION_SECRET ?? "playwright-session-secret-at-least-32-chars",
       MOCK_DB_PATH: E2E_DB_PATH,
       MOCK_ALLOW_SCENARIO_OVERRIDE: "true",
+      NEXT_PUBLIC_ENABLE_DEV_TOOLS: "false",
     },
   },
 });

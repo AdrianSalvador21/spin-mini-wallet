@@ -79,3 +79,18 @@ export async function logout(page: Page, options: { mobile: boolean }): Promise<
 
   await page.getByRole("button", { name: "Cerrar sesión" }).click();
 }
+
+export async function registerUser(page: Page, fullName = "Remitente Prueba"): Promise<SeedUser> {
+  const user: SeedUser = { fullName, phone: uniquePhone(), email: uniqueEmail(), password: PASSWORD };
+
+  await page.goto(ROUTES.REGISTER);
+  await page.getByLabel("Nombre completo").fill(user.fullName);
+  await page.getByLabel("Número celular", { exact: true }).fill(user.phone);
+  await page.getByLabel("Email", { exact: true }).fill(user.email);
+  await page.getByLabel("Contraseña", { exact: true }).fill(user.password);
+  await page.getByLabel("Confirma tu contraseña", { exact: true }).fill(user.password);
+  await page.getByRole("button", { name: "Crear cuenta" }).click();
+  await expect(page).toHaveURL(new RegExp(`${ROUTES.HOME}$`));
+
+  return user;
+}
