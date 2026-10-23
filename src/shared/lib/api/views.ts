@@ -1,6 +1,6 @@
 import type { ContactId, RecipientAccount } from "@/domain/contact/types";
 import type { Money } from "@/domain/money/money";
-import type { TransferId } from "@/domain/transfer/types";
+import type { Transfer, TransferId } from "@/domain/transfer/types";
 import type { UserId } from "@/domain/user/types";
 import type { MovementDirection, MovementId, MovementType } from "@/domain/wallet/types";
 
@@ -41,4 +41,15 @@ export interface ContactView {
 
 export interface ContactsList {
   items: ContactView[];
+}
+
+export interface TransferView {
+  id: TransferId;
+  folio: string;
+  trackingKey: string;
+  recipient: { name: string; account: AccountView };
+  amount: Money;
+  concept?: string;
+  status: Transfer["status"];
+  createdAt: string;
 }

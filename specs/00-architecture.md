@@ -69,8 +69,8 @@ Project-wide rules:
 | `/home` | Private | Prerendered shell + dynamic sections in `<Suspense>` (SSR streaming); "Ver más" on the client | Balance arrives server-rendered with no initial spinner; pagination is a client interaction |
 | `/transfers/new/amount` | Private | Client Component inside a static shell | Interactive wizard; depends on the balance in the TanStack Query cache |
 | `/transfers/new/recipient` | Private | Client Component | Contact selection and creation |
-| `/transfers/new/review` | Private | Client Component | Summary, confirmation and non-success outcomes |
-| `/transfers/[transferId]` | Private | Dynamic SSR in `<Suspense>` | Receipt that can be reloaded and shared by URL |
+| `/transfers/new/review` | Private | Client Component | Summary, confirmation, the "Procesando" dialog and the non-success outcomes (SPEC 08) |
+| `/transfers/[transferId]` | Private | Dynamic SSR in `<Suspense>` | Receipt that can be reloaded; it reads `getServices().transfer.getById` directly, with no read scenario (SPEC 08) |
 
 Rules derived from Cache Components (doc `01-getting-started/08-caching.md`):
 
@@ -83,6 +83,8 @@ Server Components get data by calling `src/server/services` directly, without HT
 SPEC 06: a Home loader (`src/server/wallet/home-loader.ts`) applies the same `mock_read_scenario` semantics as the Route Handlers (§9) to these Server Component reads, so the skeleton and error states are demonstrable on the first load, not only after a client interaction. A failed server load is simply not dehydrated; the client query then fetches by itself and shows the same error UI.
 
 SPEC 07: the three wizard routes share one static `src/app/(private)/transfers/new/layout.tsx` that renders the client `WizardShell` (app bar, progress and the desktop card with its live summary) around each step. The pages read no cookies, headers or `searchParams` on the server and have no server prefetch: the balance comes from the TanStack Query cache Home already filled, and contacts load once on the client. The new-recipient form is `?mode=new` on `/transfers/new/recipient`, opened and closed through the History API like Home's filter, so back returns to the list and the desktop form stays in the same card without a new route. Step guards run on the client against the `sessionStorage` draft, because the proxy cannot see it.
+
+SPEC 08: the five non-success outcomes and the timeout status lookup render on `/transfers/new/review` itself, from a non-persisted submission store; while one shows, `WizardShell` drops its chrome and renders a 520 px focus column. A success replaces the review with `/transfers/[transferId]`, so back does not return to it. The receipt's `ReceiptSection` awaits `params` inside its `<Suspense>`, calls `notFound()` for a missing or foreign transfer and is never subject to `mock_read_scenario`: after a real success the receipt must always show.
 
 ## 5. Folder structure
 
@@ -103,12 +105,15 @@ src/
     auth/ wallet/
     transfers/               draft/ (Zustand store, hydration, step guards), api/ (contacts queries),
                              hooks/, components/ (wizard shell, steps, live summary) (SPEC 07)
+                             submission/ (outcome types and mappers, submission store and hook),
+                             api/ transfer requests, outcome screens and the receipt (SPEC 08)
+    dev-tools/               DEV scenario panel and its cookie helpers (SPEC 08)
   shared/
     ui/                      primitives (button/, field/, alert/...) with .tsx + .module.scss + .test.tsx
     lib/                     api-client, formatting, utilities
       session-storage/       SESSION_STORAGE_KEY and clearClientSession, called on logout (SPEC 07)
     i18n/ observability/ config/ styles/
-  messages/es-MX/            common.json, auth.json, home.json, transfers.json, errors.json
+  messages/es-MX/            common.json, auth.json, home.json, transfers.json, errors.json, devTools.json (SPEC 08)
   test/                      setup, render with providers, MSW handlers, factories
 e2e/                         Playwright specs and fixtures
 ```
@@ -259,6 +264,8 @@ SPEC 06: `direction` accepts `debit` or `credit`; any other value answers `400` 
 
 SPEC 07: `POST /api/v1/contacts` honors `saveAsFavorite` (a contact saved without it is not returned by `GET /api/v1/contacts`) and is idempotent by account: an existing contact keeps its id and name, can be upgraded to a favorite and is never downgraded. `ContactView` moves to `src/shared/lib/api/views.ts` so the client can type it.
 
+SPEC 08: a client may send its own `x-request-id`; `proxy.ts` keeps it when it is a valid UUID and replaces anything else, and the response echoes the id actually used. The transfer client sends one fresh UUID per attempt, so a timeout or offline screen can show a reference that matches the server log. `TransferView` moves to `src/shared/lib/api/views.ts`, re-exported by `src/server/services/views.ts`, so the receipt and the submission hook can type it.
+
 ## 9. Confirmation scenarios
 
 `POST /api/v1/transfers` picks the scenario with `pickScenario(random)` in `src/server/mock/scenarios.ts`. The function receives the random generator as an injected dependency so it can be tested.
@@ -283,7 +290,7 @@ Deterministic override:
   - `movements_error` (SPEC 06): only `wallet/movements` fails with `503 UPSTREAM_UNAVAILABLE`; `wallet/summary` and `contacts` respond normally. Demonstrates the design's partial error (balance visible, movements failed).
   - An unknown cookie value is ignored and falls back to the random pick (transfer) or `ok` (read) instead of breaking the endpoint.
   - `readOutcome(scenario, resource)` in `src/server/mock/scenarios.ts` is the pure table behind these rows, with an exhaustive `switch`; `runReadScenario` applies the matching latency and branches to success or failure, shared by the Route Handlers and the SPEC 06 Home loader (§4).
-- The DEV panel writes it. The panel only renders with `NEXT_PUBLIC_ENABLE_DEV_TOOLS=true`.
+- The DEV panel writes it. The panel only renders with `NEXT_PUBLIC_ENABLE_DEV_TOOLS=true`. From SPEC 08 it also requires `MOCK_ALLOW_SCENARIO_OVERRIDE=true`, because a panel whose cookies the server ignores would mislead; it lives in `features/dev-tools/`, sits in the private layout and drives both cookies. Below `lg` the pill is draggable; from `lg` it is fixed at the bottom right. `docs/dev-panel.md` is its usage guide.
 - Playwright writes the cookie directly so every E2E is deterministic.
 
 Idempotency:
@@ -294,6 +301,8 @@ Idempotency:
 - Same key with a different payload returns `409 IDEMPOTENCY_CONFLICT`.
 - Failed attempts are not stored, so the retry can complete.
 
+Status lookup (SPEC 08): after a client timeout, "Revisar estado del envío" calls `GET /api/v1/transfers?idempotencyKey=` with the draft's key. A `200` is handled like a success. A `404`, or any failure of the lookup itself, shows "Todavía no encontramos tu envío" with "Revisar de nuevo" and "Reintentar envío", never a definitive failure: in the `timeout` scenario the server commits at 12 s, so a lookup at 9 s answers `404` for a transfer that is about to complete. A retry from `network_error` or `not_found_yet` resends with the same `Idempotency-Key` and a new request id, and the draft and its key survive "Volver al inicio", so a later retry can never charge twice. There is no automatic polling.
+
 `POST /api/v1/transfers` runs its checks in this fixed order (SPEC 04): CSRF and content type → session → input validation (`Idempotency-Key` format, then payload schema) → idempotency replay (`findByIdempotencyKey`) → scenario pick and the behavior above. When the key already has a completed transfer, the handler skips the random scenario and latency entirely and calls `TransferService.create` directly: its own payload-hash check then decides the outcome, returning the stored transfer (`201`, matching payload) or `409 IDEMPOTENCY_CONFLICT` (different payload) with no further debit either way. Invalid input always gets a real `400` before any scenario applies, and a retry after a `timeout` never lands on a fake failure because the replay check runs before the random pick.
 
 ## 10. Simulated persistence
@@ -301,7 +310,7 @@ Idempotency:
 - A JSON file at `MOCK_DB_PATH` (default `.data/db.json`, git-ignored).
 - Schema `{ schemaVersion: 1, users, wallets, movements, contacts, transfers, idempotencyKeys }`.
 - If the file does not exist, it is created from `src/server/db/seed.ts`. If `schemaVersion` does not match, it is regenerated from the seed.
-- Writes go through an in-memory queue (mutex) and are atomic: temporary file, then `rename`. A transfer reads the balance, validates, debits, inserts the movement and stores the key inside the same critical section. When the recipient is a phone that belongs to a registered user, that user's wallet is credited and a `transfer_in` movement is inserted in the same critical section; CLABE and card recipients are external and only debit the sender.
+- Writes go through an in-memory queue (mutex) and are atomic: temporary file, then `rename`. From SPEC 08 reads take the same mutex, because on Windows an open read made the `rename` fail with `EPERM`. A transfer reads the balance, validates, debits, inserts the movement and stores the key inside the same critical section. When the recipient is a phone that belongs to a registered user, that user's wallet is credited and a `transfer_in` movement is inserted in the same critical section; CLABE and card recipients are external and only debit the sender.
 - On Vercel the filesystem is ephemeral: `MOCK_DB_PATH` points to `/tmp`. Records persist while the instance lives. This is documented as a known limitation.
 
 Seed users:
@@ -319,6 +328,7 @@ Session:
 - Attributes: `HttpOnly`, `SameSite=Lax`, `Path=/`, `Secure` in production, absolute expiry of 30 minutes.
 - `proxy.ts` verifies signature and expiry: redirects `/home` and `/transfers/*` to `/login` without a session, and `/login` and `/register` to `/home` with one. `/` redirects to `/login` or `/home`. An invalid or expired cookie counts as no session.
 - `proxy.ts` never redirects `/api/**`: Route Handlers answer `401` JSON themselves, and an API client must never receive a redirect to an HTML page.
+- `proxy.ts` keeps an incoming `x-request-id` only when `isRequestId` (`src/shared/lib/api/request-id.ts`) accepts it as a UUID, and generates one otherwise, so arbitrary text never reaches the logs. A client-chosen id only labels the client's own request (SPEC 08).
 - Defense in depth (doc `proxy.md` and the data security guide): every Server Action and every Route Handler re-checks the session with `requireSession()`. The proxy is not the only barrier.
 
 Credentials:
@@ -336,12 +346,12 @@ Web surface:
 
 ## 12. Error handling and traceability
 
-- **Correlation:** `proxy.ts` generates `x-request-id` (`crypto.randomUUID()`), injects it into the request headers and returns it in the response. Route Handlers, services and logs use it. Error screens show it as "Referencia".
+- **Correlation:** `proxy.ts` generates `x-request-id` (`crypto.randomUUID()`), or keeps a valid incoming UUID (SPEC 08), injects it into the request headers and returns it in the response. Route Handlers, services and logs use it. Error screens show it as "Referencia" through the `SupportReference` primitive, which adds a "Copiar" button (SPEC 08).
 - **Logger:** `src/shared/observability/logger.ts` writes structured JSON (`level`, `message`, `requestId`, `context`) with PII redaction.
 - **Reporter:** the `ErrorReporter { captureException(error, context) }` interface has `ConsoleErrorReporter` as the default implementation. Connecting Sentry means writing another adapter, without touching call sites.
 - **Server:** `instrumentation.ts` implements `onRequestError` and sends every unhandled error to the reporter.
 - **Browser:** `instrumentation-client.ts` listens to `error` and `unhandledrejection`. Per-segment `error.tsx` and `global-error.tsx` report and render a recoverable UI.
-- **Typed client errors:** `apiClient` turns every failure into the union `ApiFailure = ApiError | NetworkError | TimeoutError | UnknownError`. The UI runs an exhaustive `switch` on `kind`, and TypeScript fails if a case is missing. SPEC 06 lands the minimal client (`api`, `network`, `unknown` — `apiGet` only); SPEC 07 adds `apiPost` with no timeout, sharing `apiGet`'s failure mapping, so the wizard can create contacts; SPEC 08 extends it with `TimeoutError`, the 8 s `AbortController` and the `Idempotency-Key` header for the transfer.
+- **Typed client errors:** `apiClient` turns every failure into the union `ApiFailure = ApiError | NetworkError | TimeoutError | UnknownError`. The UI runs an exhaustive `switch` on `kind`, and TypeScript fails if a case is missing. SPEC 06 lands the minimal client (`api`, `network`, `unknown` — `apiGet` only); SPEC 07 adds `apiPost` with no timeout, sharing `apiGet`'s failure mapping, so the wizard can create contacts; SPEC 08 extends it with the `timeout` kind, an optional `timeoutMs` (an `AbortController` aborted by `setTimeout`, so fake timers drive it; 8 s for the transfer and the lookup), an optional client `requestId` sent as `x-request-id` and echoed by `network` and `timeout` failures, and the `Idempotency-Key` header. `query-provider.tsx` adds a `MutationCache` with the same `onError` as the `QueryCache`, so an `UNAUTHORIZED` mutation clears the client session and goes to `/login`. Every `unknown_error` outcome is sent to the `ErrorReporter` with `source: "browser"`.
 - **Isolation:** each Home block has its own `<Suspense>` and error boundary. If movements fail, the balance stays visible.
 
 ## 13. Scalability and maintainability
@@ -372,7 +382,7 @@ Approved tokens (extracted from spinbyoxxo.com.mx):
 | `--color-warning` / `-bg` | `#A15C00` / `#FFF3DF` | Timeout |
 | `--color-info` / `-bg` | `#3D1199` / `#EEE8FA` | Info alerts (processing) |
 | `--color-success-strong` | `#0E6B4C` | Text on `success-bg` (5.8:1); `success` stays for amounts on white |
-| `--color-on-brand-orange` | `var(--color-ink-900)` | Label on the orange CTA (option A, 5.1:1). White on orange fails AA and is not used |
+| `--color-on-brand-orange` | `var(--color-white)` | Label on the orange CTA. White matches Spin's brand; it is 2.9:1 and fails AA for normal text, an accepted trade-off (SPEC 08, user decision, replacing option A's `ink-900`) |
 | `--radius-s/m/l/xl/pill` | `10px` / `16px` / `24px` / `28px` / `999px` | Inputs, cards, purple headers, buttons |
 | `--radius-icon` | `12px` | Icon tiles (brand panel perks, movement icons) |
 
@@ -414,6 +424,9 @@ Scale tokens (SPEC 05). Spacing follows the same 4 px grid as Tailwind's spacing
 | `--size-progress-bar` | `4px` | `ProgressSteps` bar height (SPEC 07) |
 | `--size-checkbox` | `20px` | `Checkbox` box (SPEC 07) |
 | `--text-size-amount` | `34px` | The amount in the wizard's amount and review steps on mobile; `--text-size-hero` from `lg` (SPEC 07) |
+| `--container-focus` | `520px` | Results and receipt column; Tailwind `max-w-focus` (SPEC 08) |
+| `--size-result-icon` / `--size-result-icon-lg` | `48px` / `64px` | Receipt success icon on mobile and from `lg` (SPEC 08) |
+| `--size-dev-panel-offset` | `168px` | DEV pill bottom offset below `lg`, clearing a two-button `ActionBar` (SPEC 08) |
 
 - Typography: Montserrat (400–900) for headings and amounts, Open Sans (400–700) for body, both through `next/font/google`. Amounts use `tabular-nums`.
 - Tokens live as CSS variables in `src/app/globals.css` and are exposed to Tailwind with `@theme`.

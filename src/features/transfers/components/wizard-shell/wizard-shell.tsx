@@ -18,6 +18,8 @@ import { TRANSFER_STEP, TRANSFER_STEP_ORDER, type TransferStep } from "../../dra
 import { useDraftHydration } from "../../draft/use-draft-hydration";
 import { useNewRecipientMode } from "../../hooks/use-new-recipient-mode";
 import { useTransferBalance } from "../../hooks/use-transfer-balance";
+import { useSubmissionStore } from "../../submission/submission-store";
+import { SUBMISSION_STATUS } from "../../submission/types";
 import { LiveSummary } from "../live-summary/live-summary";
 import styles from "./wizard-shell.module.scss";
 
@@ -103,6 +105,7 @@ export function WizardShell({ children }: WizardShellProps) {
   const reset = useTransferDraft((draft) => draft.reset);
   const { summary } = useTransferBalance();
   const ownerId = summary.data?.user.id;
+  const focused = useSubmissionStore((store) => store.state.status === SUBMISSION_STATUS.FAILED);
 
   useEffect(() => {
     if (hydrated && ownerId) {
@@ -118,58 +121,74 @@ export function WizardShell({ children }: WizardShellProps) {
 
   return (
     <div className={styles["wizard-shell"]}>
-      <div className={styles["wizard-shell__mobile-top"]}>
-        <ModeAware
-          render={(isNew) => (
-            <AppBar
-              title={t(`titles.${titleKeyFor(step, isNew)}`)}
-              backHref={backRouteFor(step, isNew)}
-              step={{ current: currentIndex + 1, total }}
-            />
-          )}
-        />
-        <div className={styles["wizard-shell__progress"]}>
-          <ProgressSteps current={currentIndex + 1} total={total} label={t("steps.label")} />
+      {focused ? null : (
+        <div className={styles["wizard-shell__mobile-top"]}>
+          <ModeAware
+            render={(isNew) => (
+              <AppBar
+                title={t(`titles.${titleKeyFor(step, isNew)}`)}
+                backHref={backRouteFor(step, isNew)}
+                step={{ current: currentIndex + 1, total }}
+              />
+            )}
+          />
+          <div className={styles["wizard-shell__progress"]}>
+            <ProgressSteps current={currentIndex + 1} total={total} label={t("steps.label")} />
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className={styles["wizard-shell__desktop-top"]}>
-        <Link href={ROUTES.HOME} className={styles["wizard-shell__home"]}>
-          <Icon name={ICON_NAME.BACK} size={ICON_SIZE.SM} />
-          {t("actions.home")}
-        </Link>
-        <h1 className={styles["wizard-shell__h1"]}>{t("titles.desktop")}</h1>
-        <div className={styles["wizard-shell__stepper"]}>
-          <Stepper steps={stepperSteps} label={t("steps.label")} />
+      {focused ? null : (
+        <div className={styles["wizard-shell__desktop-top"]}>
+          <Link href={ROUTES.HOME} className={styles["wizard-shell__home"]}>
+            <Icon name={ICON_NAME.BACK} size={ICON_SIZE.SM} />
+            {t("actions.home")}
+          </Link>
+          <h1 className={styles["wizard-shell__h1"]}>{t("titles.desktop")}</h1>
+          <div className={styles["wizard-shell__stepper"]}>
+            <Stepper steps={stepperSteps} label={t("steps.label")} />
+          </div>
         </div>
-      </div>
+      )}
 
       <div
-        className={[styles["wizard-shell__body"], step === TRANSFER_STEP.REVIEW && styles["wizard-shell__body--single"]]
+        className={[
+          styles["wizard-shell__body"],
+          step === TRANSFER_STEP.REVIEW && styles["wizard-shell__body--single"],
+          focused && styles["wizard-shell__body--focus"],
+          focused && "mx-auto w-full max-w-focus",
+        ]
           .filter(Boolean)
           .join(" ")}
       >
-        <section aria-labelledby={headingId} className={styles["wizard-shell__card"]}>
-          <div className={styles["wizard-shell__card-head"]}>
-            <ModeAware
-              render={(isNew) => (
-                <StepHeading
-                  id={headingId}
-                  titleKey={titleKeyFor(step, isNew)}
-                  visuallyHidden={step === TRANSFER_STEP.AMOUNT}
-                />
-              )}
-            />
-            <Link href={ROUTES.HOME} onClick={reset} className={styles["wizard-shell__cancel"]}>
-              {t("actions.cancel")}
-            </Link>
-          </div>
+        <section
+          aria-labelledby={focused ? undefined : headingId}
+          className={[styles["wizard-shell__card"], focused && styles["wizard-shell__card--focus"]]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          {focused ? null : (
+            <div className={styles["wizard-shell__card-head"]}>
+              <ModeAware
+                render={(isNew) => (
+                  <StepHeading
+                    id={headingId}
+                    titleKey={titleKeyFor(step, isNew)}
+                    visuallyHidden={step === TRANSFER_STEP.AMOUNT}
+                  />
+                )}
+              />
+              <Link href={ROUTES.HOME} onClick={reset} className={styles["wizard-shell__cancel"]}>
+                {t("actions.cancel")}
+              </Link>
+            </div>
+          )}
           <div key={step} className={styles["wizard-shell__content"]}>
             {children}
           </div>
         </section>
 
-        {step !== TRANSFER_STEP.REVIEW ? (
+        {step !== TRANSFER_STEP.REVIEW && !focused ? (
           <div className={styles["wizard-shell__aside"]}>
             <LiveSummary step={step} />
           </div>

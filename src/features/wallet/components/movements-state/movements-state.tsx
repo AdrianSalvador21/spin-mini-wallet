@@ -1,10 +1,10 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { Button } from "@/shared/ui/button/button";
 import { BUTTON_VARIANT } from "@/shared/ui/button/types";
 import { Icon } from "@/shared/ui/icon/icon";
 import { ICON_SIZE, type IconName } from "@/shared/ui/icon/types";
+import { SupportReference } from "@/shared/ui/support-reference/support-reference";
 import styles from "./movements-state.module.scss";
 
 interface MovementsStateProps {
@@ -17,8 +17,6 @@ interface MovementsStateProps {
 }
 
 export function MovementsState({ icon, title, text, actionLabel, onAction, requestId }: MovementsStateProps) {
-  const tCommon = useTranslations("common");
-
   return (
     <div className={styles["movements-state"]} role={onAction ? "alert" : undefined}>
       <span className={styles["movements-state__icon"]}>
@@ -31,7 +29,7 @@ export function MovementsState({ icon, title, text, actionLabel, onAction, reque
           {actionLabel}
         </Button>
       )}
-      {requestId && <p className={styles["movements-state__reference"]}>{tCommon("reference", { requestId })}</p>}
+      {requestId && <SupportReference requestId={requestId} />}
     </div>
   );
 }

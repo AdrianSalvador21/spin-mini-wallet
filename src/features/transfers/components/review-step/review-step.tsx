@@ -32,7 +32,7 @@ import { WIZARD_SKELETON_WIDTH } from "../wizard-skeleton/types";
 import styles from "./review-step.module.scss";
 
 interface ReviewStepProps {
-  onConfirm?: (draft: ValidTransferDraft) => void;
+  onConfirm: (draft: ValidTransferDraft) => void;
 }
 
 export function ReviewStep({ onConfirm }: ReviewStepProps) {
@@ -62,7 +62,7 @@ function fixRouteFor(violation: TransferRuleViolation) {
 interface ReviewContentProps {
   amount: Money;
   recipient: DraftRecipient;
-  onConfirm?: (draft: ValidTransferDraft) => void;
+  onConfirm: (draft: ValidTransferDraft) => void;
 }
 
 function ReviewContent({ amount, recipient, onConfirm }: ReviewContentProps) {
@@ -86,7 +86,7 @@ function ReviewContent({ amount, recipient, onConfirm }: ReviewContentProps) {
       )
     : null;
   const violations = validation && !validation.ok ? validation.error : [];
-  const canConfirm = Boolean(onConfirm && validation?.ok && idempotencyKey);
+  const canConfirm = Boolean(validation?.ok && idempotencyKey);
 
   function violationMessage(violation: TransferRuleViolation) {
     return violation === TRANSFER_RULE_VIOLATION.INSUFFICIENT_FUNDS && balance
@@ -136,7 +136,7 @@ function ReviewContent({ amount, recipient, onConfirm }: ReviewContentProps) {
   }
 
   function confirm() {
-    if (!onConfirm || !validation?.ok || !idempotencyKey) {
+    if (!validation?.ok || !idempotencyKey) {
       return;
     }
 
@@ -179,12 +179,6 @@ function ReviewContent({ amount, recipient, onConfirm }: ReviewContentProps) {
           </ul>
         </Alert>
       ) : null}
-
-      {onConfirm ? null : (
-        <Alert tone={ALERT_TONE.INFO} role={ALERT_ROLE.STATUS}>
-          {t("review.confirmUnavailable")}
-        </Alert>
-      )}
 
       <WizardActions backHref={ROUTES.TRANSFER_AMOUNT} backLabel={t("actions.edit")} backOnMobile>
         <Button variant={BUTTON_VARIANT.PRIMARY} type={BUTTON_TYPE.BUTTON} disabled={!canConfirm} onClick={confirm}>

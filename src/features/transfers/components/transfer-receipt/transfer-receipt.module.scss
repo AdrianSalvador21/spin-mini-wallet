@@ -1,0 +1,137 @@
+@use "../../../../shared/styles/breakpoints" as bp;
+
+.transfer-receipt {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: calc(var(--space-4) + env(safe-area-inset-top)) var(--space-5) 0;
+
+  @include bp.lg {
+    flex: none;
+    gap: var(--space-8);
+    padding: var(--space-10);
+    border-radius: var(--radius-l);
+    background: var(--color-white);
+    box-shadow: var(--shadow-card);
+  }
+}
+
+.transfer-receipt__card {
+  padding: var(--space-4);
+  border-radius: var(--radius-l);
+  background: var(--color-white);
+  box-shadow: var(--shadow-card);
+
+  @include bp.lg {
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+.transfer-receipt__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: center;
+  padding-bottom: var(--space-3);
+  border-bottom: var(--border-width) dashed var(--color-lavender-300);
+  text-align: center;
+
+  @include bp.lg {
+    padding-bottom: var(--space-6);
+  }
+}
+
+.transfer-receipt__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-result-icon);
+  height: var(--size-result-icon);
+  border-radius: var(--radius-pill);
+  background: var(--color-success-bg);
+  color: var(--color-success-strong);
+
+  @include bp.lg {
+    width: var(--size-result-icon-lg);
+    height: var(--size-result-icon-lg);
+  }
+}
+
+.transfer-receipt__title {
+  font-family: var(--font-display);
+  font-size: var(--text-size-xl);
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--color-ink-900);
+
+  &:focus {
+    outline: none;
+  }
+
+  @include bp.lg {
+    font-size: var(--text-size-2xl);
+  }
+}
+
+.transfer-receipt__amount {
+  font-family: var(--font-display);
+  font-size: var(--text-size-amount);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--color-ink-900);
+  font-variant-numeric: tabular-nums;
+
+  @include bp.lg {
+    font-size: var(--text-size-balance);
+  }
+}
+
+.transfer-receipt__date {
+  font-size: var(--text-size-sm);
+  color: var(--color-ink-500);
+}
+
+.transfer-receipt__card .transfer-receipt__rows {
+  margin-top: var(--space-2);
+  padding-inline: 0;
+  background: transparent;
+}
+
+.transfer-receipt__bank {
+  display: block;
+  font-size: var(--text-size-xs);
+  font-weight: 400;
+  color: var(--color-ink-500);
+}
+
+.transfer-receipt__actions {
+  @include bp.lg {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+}
+
+.transfer-receipt__share-full {
+  @include bp.lg {
+    display: none;
+  }
+}
+
+.transfer-receipt__share-short {
+  display: none;
+
+  @include bp.lg {
+    display: inline;
+  }
+}
+
+.transfer-receipt__feedback {
+  font-size: var(--text-size-sm);
+  font-weight: 600;
+  text-align: center;
+  color: var(--color-ink-700);
+}

@@ -5,6 +5,7 @@ import { RECIPIENT_ACCOUNT_TYPE, type RecipientAccount } from "@/domain/contact/
 import { API_ERROR_CODE, type ApiErrorBody } from "@/shared/lib/api/contract";
 import type { ContactView, MovementView } from "@/shared/lib/api/views";
 import { buildContact, buildFavoriteContacts, MARIANA_PHONE } from "../factories/contacts";
+import { buildTransfer } from "../factories/transfers";
 import { buildMovement, buildWalletSummary } from "../factories/wallet";
 
 const CARLOS_PHONE = "5523456789";
@@ -36,6 +37,14 @@ const RECIPIENT_IS_SELF_BODY: ApiErrorBody = {
     message: `errors.api.${API_ERROR_CODE.VALIDATION_ERROR}`,
     requestId: "req-msw-self",
     details: { account: ["RECIPIENT_IS_SELF"] },
+  },
+};
+
+const TRANSFER_NOT_FOUND_BODY: ApiErrorBody = {
+  error: {
+    code: API_ERROR_CODE.NOT_FOUND,
+    message: `errors.api.${API_ERROR_CODE.NOT_FOUND}`,
+    requestId: "req-msw-lookup",
   },
 };
 
@@ -91,4 +100,6 @@ export const handlers: HttpHandler[] = [
 
     return HttpResponse.json(toMockContactView(body), { status: 201 });
   }),
+  http.post("/api/v1/transfers", () => HttpResponse.json(buildTransfer(), { status: 201 })),
+  http.get("/api/v1/transfers", () => HttpResponse.json(TRANSFER_NOT_FOUND_BODY, { status: 404 })),
 ];

@@ -39,7 +39,7 @@ function summaryRows() {
     .map((term) => [term.textContent, term.nextElementSibling?.textContent]);
 }
 
-async function renderReview(onConfirm?: () => void) {
+async function renderReview(onConfirm: () => void = vi.fn()) {
   renderWithProviders(<ReviewStep onConfirm={onConfirm} />);
 
   await screen.findByText("$12,100.80");
@@ -100,11 +100,11 @@ describe("ReviewStep", () => {
     expect(screen.getByRole("button", { name: "Confirmar envío" })).toBeDisabled();
   });
 
-  it("disables Confirmar envío with its note when no onConfirm is given", async () => {
+  it("enables Confirmar envío with a valid draft and no longer shows the SPEC 07 note", async () => {
     await renderReview();
 
-    expect(screen.getByRole("button", { name: "Confirmar envío" })).toBeDisabled();
-    expect(screen.getByRole("status")).toHaveTextContent("Pronto podrás confirmar tu envío desde aquí.");
+    expect(screen.getByRole("button", { name: "Confirmar envío" })).toBeEnabled();
+    expect(screen.queryByText(/Pronto podrás confirmar/)).not.toBeInTheDocument();
   });
 
   it("hands the valid draft to onConfirm when one is given", async () => {
@@ -132,7 +132,7 @@ describe("ReviewStep", () => {
   it("redirects to the recipient step when the draft has no recipient", async () => {
     useTransferDraft.setState({ ...DRAFT, recipient: null });
 
-    renderWithProviders(<ReviewStep />);
+    renderWithProviders(<ReviewStep onConfirm={vi.fn()} />);
 
     await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith("/transfers/new/recipient"));
   });

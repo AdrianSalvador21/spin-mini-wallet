@@ -2,8 +2,10 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { LogoutButton } from "@/features/auth/components/logout-button/logout-button";
 import { LOGOUT_BUTTON_VARIANT } from "@/features/auth/components/logout-button/types";
+import { DevPanel } from "@/features/dev-tools/components/dev-panel/dev-panel";
 import { getServices } from "@/server/container";
 import { getSession } from "@/server/session/session";
+import { getEnv } from "@/shared/config/env";
 import { getFirstName, getInitials } from "@/shared/lib/format/name";
 import { QueryProvider } from "@/shared/lib/query/query-provider";
 import { ROUTES } from "@/shared/lib/routes";
@@ -42,6 +44,8 @@ async function SideNavUser() {
 
 export default async function PrivateLayout({ children }: LayoutProps<"/">) {
   const t = await getTranslations("common.nav");
+  const env = getEnv();
+  const showDevTools = env.NEXT_PUBLIC_ENABLE_DEV_TOOLS && env.MOCK_ALLOW_SCENARIO_OVERRIDE;
 
   const items: SideNavItem[] = [
     { href: ROUTES.HOME, label: t("home"), icon: ICON_NAME.HOME },
@@ -62,6 +66,7 @@ export default async function PrivateLayout({ children }: LayoutProps<"/">) {
       />
       <QueryProvider>
         <div className="flex flex-1 flex-col">{children}</div>
+        {showDevTools ? <DevPanel /> : null}
       </QueryProvider>
     </div>
   );

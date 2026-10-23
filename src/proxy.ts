@@ -5,6 +5,7 @@ import { SESSION_COOKIE_NAME } from "@/server/session/session";
 import { verifySessionToken } from "@/server/session/token";
 import { getEnv } from "@/shared/config/env";
 import { REQUEST_ID_HEADER } from "@/shared/lib/api/contract";
+import { isRequestId } from "@/shared/lib/api/request-id";
 import { resolveRouteAccess, ROUTE_ACCESS } from "@/shared/lib/routes";
 
 function hasValidSession(request: NextRequest): boolean {
@@ -17,8 +18,14 @@ function hasValidSession(request: NextRequest): boolean {
   return verifySessionToken(token, getEnv().SESSION_SECRET, new Date()).ok;
 }
 
+function resolveRequestId(request: NextRequest): string {
+  const incoming = request.headers.get(REQUEST_ID_HEADER);
+
+  return isRequestId(incoming) ? incoming : randomUUID();
+}
+
 export function proxy(request: NextRequest): NextResponse {
-  const requestId = randomUUID();
+  const requestId = resolveRequestId(request);
   const access = resolveRouteAccess(request.nextUrl.pathname, hasValidSession(request));
 
   switch (access.action) {

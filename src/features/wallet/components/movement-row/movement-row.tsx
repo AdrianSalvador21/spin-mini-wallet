@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { assertUnreachable } from "@/domain/shared/assert-unreachable";
 import { RECIPIENT_ACCOUNT_TYPE } from "@/domain/contact/types";
@@ -7,6 +8,7 @@ import { MOVEMENT_DIRECTION, MOVEMENT_TYPE, type MovementType } from "@/domain/w
 import type { AccountView, MovementView } from "@/shared/lib/api/views";
 import { DATE_GROUP_KIND, formatDayAndTime, formatTime, getDateGroup } from "@/shared/lib/format/date";
 import { formatSignedMoney } from "@/shared/lib/format/money";
+import { transferReceiptRoute } from "@/shared/lib/routes";
 import { Icon } from "@/shared/ui/icon/icon";
 import { ICON_NAME, type IconName } from "@/shared/ui/icon/types";
 import styles from "./movement-row.module.scss";
@@ -115,9 +117,10 @@ export function MovementRow({ movement, now }: MovementRowProps) {
   const detail = getMovementDetail(t, tCommon, movement);
   const date = getMovementDate(movement.createdAt, now);
   const toneClass = isCredit ? "credit" : "debit";
+  const receiptId = movement.type === MOVEMENT_TYPE.TRANSFER_OUT ? movement.transferId : undefined;
 
-  return (
-    <li className={styles["movement-row"]}>
+  const content = (
+    <>
       <span className={[styles["movement-row__icon"], styles[`movement-row__icon--${toneClass}`]].join(" ")}>
         <Icon name={getMovementIcon(movement.type)} />
       </span>
@@ -129,6 +132,21 @@ export function MovementRow({ movement, now }: MovementRowProps) {
       <span className={[styles["movement-row__amount"], styles[`movement-row__amount--${toneClass}`]].join(" ")}>
         {formatSignedMoney(movement.amount, movement.direction)}
       </span>
+    </>
+  );
+
+  return (
+    <li className={styles["movement-row"]}>
+      {receiptId ? (
+        <Link
+          href={transferReceiptRoute(receiptId)}
+          className={[styles["movement-row__content"], styles["movement-row__content--link"]].join(" ")}
+        >
+          {content}
+        </Link>
+      ) : (
+        <div className={styles["movement-row__content"]}>{content}</div>
+      )}
     </li>
   );
 }

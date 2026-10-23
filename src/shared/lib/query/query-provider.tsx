@@ -1,6 +1,6 @@
 "use client";
 
-import { QueryCache, QueryClientProvider } from "@tanstack/react-query";
+import { MutationCache, QueryCache, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import { API_ERROR_CODE } from "@/shared/lib/api/contract";
 import { API_FAILURE_KIND, ApiFailureError } from "../api/api-client";
@@ -19,7 +19,10 @@ function handleQueryError(error: unknown): void {
 }
 
 function createBrowserQueryClient() {
-  return makeQueryClient({ queryCache: new QueryCache({ onError: handleQueryError }) });
+  return makeQueryClient({
+    queryCache: new QueryCache({ onError: handleQueryError }),
+    mutationCache: new MutationCache({ onError: handleQueryError }),
+  });
 }
 
 export interface QueryProviderProps {

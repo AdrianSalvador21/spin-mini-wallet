@@ -1,0 +1,25 @@
+{
+  "devTools": {
+    "toggle": "Panel DEV",
+    "tag": "DEV",
+    "title": "Escenarios simulados",
+    "transfer": "Envío",
+    "read": "Lecturas",
+    "random": "Aleatorio",
+    "normal": "Normal",
+    "reset": "Restablecer",
+    "transferScenarios": {
+      "success": "Éxito",
+      "network_error": "Error de red",
+      "insufficient_funds": "Saldo insuficiente",
+      "timeout": "Tiempo de espera",
+      "unknown_error": "Error desconocido"
+    },
+    "readScenarios": {
+      "ok": "Normal",
+      "slow": "Lento",
+      "error": "Error",
+      "movements_error": "Error en movimientos"
+    }
+  }
+}

@@ -27,7 +27,7 @@
   --color-info: #3d1199;
   --color-info-bg: #eee8fa;
   --color-success-strong: #0e6b4c;
-  --color-on-brand-orange: var(--color-ink-900);
+  --color-on-brand-orange: var(--color-white);
 
   --radius-s: 10px;
   --radius-m: 16px;
@@ -83,6 +83,7 @@
   --container-form: 400px;
   --container-app: 1040px;
   --container-wizard: 560px;
+  --container-focus: 520px;
 
   --size-rail: 72px;
   --size-sidebar: 240px;
@@ -100,6 +101,9 @@
   --size-step-dot: 28px;
   --size-progress-bar: 4px;
   --size-checkbox: 20px;
+  --size-result-icon: 48px;
+  --size-result-icon-lg: 64px;
+  --size-dev-panel-offset: 168px;
 
   --text-size-balance: 40px;
   --text-size-balance-cents: 22px;

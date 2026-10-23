@@ -60,7 +60,7 @@ describe("BalanceCard", () => {
     renderWithProviders(<BalanceCard initialHidden={false} />);
 
     expect(await screen.findByRole("alert")).toHaveTextContent("No pudimos cargar tu saldo");
-    expect(screen.getByText("Referencia: req-1")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("Referencia: req-1");
 
     await userEvent.click(screen.getByRole("button", { name: "Reintentar" }));
 

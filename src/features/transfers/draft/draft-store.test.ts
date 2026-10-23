@@ -3,7 +3,7 @@ import { RECIPIENT_ACCOUNT_TYPE, type ContactId } from "@/domain/contact/types";
 import type { Cents } from "@/domain/money/money";
 import type { UserId } from "@/domain/user/types";
 import { clearClientSession, SESSION_STORAGE_KEY } from "@/shared/lib/session-storage/client-session";
-import { DRAFT_STORAGE_VERSION, EMPTY_DRAFT, selectDraftState, useTransferDraft } from "./draft-store";
+import { DRAFT_STORAGE_VERSION, EMPTY_DRAFT, selectDraftState, selectValidDraft, useTransferDraft } from "./draft-store";
 import type { DraftRecipient } from "./types";
 
 const MARIANA = "usr_mariana" as UserId;
@@ -172,5 +172,33 @@ describe("persistence", () => {
 
     expect(draft()).toEqual(EMPTY_DRAFT);
     expect(storedDraft()).toBeNull();
+  });
+});
+
+describe("selectValidDraft", () => {
+  it("returns the confirmable draft when amount, recipient and key are set", () => {
+    useTransferDraft.setState({ amountInCents: 5_000 as Cents, concept: "Renta", recipient: CARLOS, idempotencyKey: "key-1" });
+
+    expect(selectValidDraft(useTransferDraft.getState())).toEqual({
+      amountInCents: 5_000,
+      concept: "Renta",
+      recipient: CARLOS,
+      idempotencyKey: "key-1",
+    });
+  });
+
+  it.each([
+    ["the amount", { amountInCents: null }],
+    ["the recipient", { recipient: null }],
+    ["the idempotency key", { idempotencyKey: null }],
+  ])("returns null without %s", (_label, missing) => {
+    useTransferDraft.setState({
+      amountInCents: 5_000 as Cents,
+      recipient: CARLOS,
+      idempotencyKey: "key-1",
+      ...missing,
+    });
+
+    expect(selectValidDraft(useTransferDraft.getState())).toBeNull();
   });
 });

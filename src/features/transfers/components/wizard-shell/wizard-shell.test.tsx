@@ -5,6 +5,7 @@ import type { Cents } from "@/domain/money/money";
 import type { UserId } from "@/domain/user/types";
 import { renderWithProviders, screen, waitFor, within } from "@/test/render";
 import { EMPTY_DRAFT, selectDraftState, useTransferDraft } from "../../draft/draft-store";
+import { IDLE_SUBMISSION, useSubmissionStore } from "../../submission/submission-store";
 import { WizardShell } from "./wizard-shell";
 
 const pathnameMock = vi.fn(() => "/transfers/new/amount");
@@ -159,5 +160,26 @@ describe("WizardShell", () => {
     );
 
     expect(screen.getByRole("heading", { level: 2, name: "¿A quién le envías?" })).toHaveFocus();
+  });
+
+  it("renders only the step content in a focus column while an outcome shows, keeping the same content node", () => {
+    pathnameMock.mockReturnValue("/transfers/new/review");
+    const { rerender } = renderShell();
+    const content = screen.getByText("Contenido del paso");
+
+    useSubmissionStore.setState({ state: { status: "failed", outcome: { kind: "timeout" } } });
+    rerender(
+      <WizardShell>
+        <p>Contenido del paso</p>
+      </WizardShell>,
+    );
+
+    expect(screen.getByText("Contenido del paso")).toBe(content);
+    expect(screen.queryByRole("banner")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { level: 1, name: "Enviar dinero" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Cancelar" })).not.toBeInTheDocument();
+    expect(content.closest('[class*="wizard-shell__body"]')?.className).toContain("max-w-focus");
+
+    useSubmissionStore.setState({ state: IDLE_SUBMISSION });
   });
 });

@@ -37,6 +37,22 @@ describe("Button", () => {
     expect(screen.getByRole("button").className).toContain("button--block");
   });
 
+  it("does not leak its own props onto the native button or warn about them", () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    renderWithProviders(
+      <Button variant={BUTTON_VARIANT.PRIMARY} block aria-label="Enviar ahora">
+        Enviar
+      </Button>,
+    );
+
+    const button = screen.getByRole("button", { name: "Enviar ahora" });
+    expect(button).not.toHaveAttribute("variant");
+    expect(button).not.toHaveAttribute("block");
+    expect(consoleError).not.toHaveBeenCalled();
+    consoleError.mockRestore();
+  });
+
   it("calls onClick when it is idle", async () => {
     const onClick = vi.fn();
     renderWithProviders(

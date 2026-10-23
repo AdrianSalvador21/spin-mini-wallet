@@ -37,6 +37,8 @@ describe("WizardState", () => {
     );
 
     expect(screen.getByRole("alert")).toHaveTextContent("Referencia: req-1");
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button").map((button) => button.getAttribute("aria-label"))).toEqual([
+      "Copiar referencia",
+    ]);
   });
 });

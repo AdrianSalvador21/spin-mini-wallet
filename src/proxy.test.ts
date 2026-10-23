@@ -66,15 +66,41 @@ describe("proxy request id", () => {
     expect(forwarded).toBe(response.headers.get(REQUEST_ID_HEADER));
   });
 
-  it("overwrites a spoofed incoming x-request-id on both the request and the response", () => {
+  it("replaces an incoming x-request-id that is not a UUID on both the request and the response", () => {
     const spoofed = new NextRequest(`${ORIGIN}/api/v1/wallet/summary`, {
-      headers: { [REQUEST_ID_HEADER]: "spoofed" },
+      headers: { [REQUEST_ID_HEADER]: "not-a-uuid" },
     });
 
     const response = proxy(spoofed);
 
-    expect(response.headers.get(REQUEST_ID_HEADER)).not.toBe("spoofed");
-    expect(response.headers.get("x-middleware-request-x-request-id")).not.toBe("spoofed");
+    expect(response.headers.get(REQUEST_ID_HEADER)).toMatch(UUID_PATTERN);
+    expect(response.headers.get(REQUEST_ID_HEADER)).not.toBe("not-a-uuid");
+    expect(response.headers.get("x-middleware-request-x-request-id")).toBe(response.headers.get(REQUEST_ID_HEADER));
+  });
+
+  it("keeps a valid incoming UUID on both the request and the response without generating one", () => {
+    const clientId = "3f2b8c1e-9a4d-4e7f-8b6a-1c2d3e4f5a6b";
+    const incoming = new NextRequest(`${ORIGIN}/api/v1/transfers`, {
+      headers: { [REQUEST_ID_HEADER]: clientId },
+    });
+
+    const response = proxy(incoming);
+
+    expect(response.headers.get(REQUEST_ID_HEADER)).toBe(clientId);
+    expect(response.headers.get("x-middleware-request-x-request-id")).toBe(clientId);
+    expect(randomUUID).not.toHaveBeenCalled();
+  });
+
+  it("keeps a valid incoming UUID on a redirect", () => {
+    const clientId = "3f2b8c1e-9a4d-4e7f-8b6a-1c2d3e4f5a6b";
+    const incoming = new NextRequest(`${ORIGIN}${ROUTES.HOME}`, {
+      headers: { [REQUEST_ID_HEADER]: clientId },
+    });
+
+    const response = proxy(incoming);
+
+    expect(response.status).toBe(TEMPORARY_REDIRECT);
+    expect(response.headers.get(REQUEST_ID_HEADER)).toBe(clientId);
   });
 
   it("generates a different id for each request", () => {
