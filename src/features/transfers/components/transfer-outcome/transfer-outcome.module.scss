@@ -1,0 +1,103 @@
+@use "../../../../shared/styles/breakpoints" as bp;
+
+.transfer-outcome {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6) var(--space-5) calc(var(--space-6) + env(safe-area-inset-bottom));
+  text-align: center;
+
+  @include bp.lg {
+    flex: none;
+    justify-content: flex-start;
+    padding: var(--space-10);
+    border-radius: var(--radius-l);
+    background: var(--color-white);
+    box-shadow: var(--shadow-card);
+  }
+}
+
+.transfer-outcome__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-state-icon);
+  height: var(--size-state-icon);
+  border-radius: var(--radius-pill);
+}
+
+.transfer-outcome__icon--danger {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.transfer-outcome__icon--warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.transfer-outcome__title {
+  font-family: var(--font-display);
+  font-size: var(--text-size-xl);
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--color-ink-900);
+
+  &:focus {
+    outline: none;
+  }
+
+  @include bp.lg {
+    font-size: var(--text-size-2xl);
+  }
+}
+
+.transfer-outcome__text {
+  max-width: 36ch;
+  font-size: var(--text-size-md);
+  color: var(--color-ink-500);
+
+  @include bp.lg {
+    font-size: var(--text-size-lg);
+  }
+}
+
+.transfer-outcome__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  margin-top: var(--space-3);
+
+  @include bp.lg {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+
+    > :first-child {
+      grid-column: 2;
+      grid-row: 1;
+    }
+  }
+}
+
+.transfer-outcome__actions--single {
+  @include bp.lg {
+    grid-template-columns: 1fr;
+
+    > :first-child {
+      grid-column: 1;
+    }
+  }
+}
+
+.transfer-outcome__footer {
+  width: 100%;
+}
+
+.transfer-outcome .transfer-outcome__reference {
+  justify-content: center;
+}

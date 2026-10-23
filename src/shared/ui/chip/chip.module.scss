@@ -1,0 +1,44 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--size-touch);
+  min-height: var(--size-touch);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-lavender-200);
+  font-family: var(--font-display);
+  font-size: var(--text-size-sm);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-brand-purple);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast),
+    color var(--duration-fast);
+
+  &:hover:not(:disabled) {
+    background: var(--color-lavender-300);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-lavender-500);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  &:disabled {
+    color: var(--color-ink-300);
+    cursor: not-allowed;
+  }
+}
+
+.chip--pressed {
+  background: var(--color-brand-purple);
+  color: var(--color-white);
+
+  &:hover:not(:disabled) {
+    background: var(--color-brand-purple);
+  }
+}

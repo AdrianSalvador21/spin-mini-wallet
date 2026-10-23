@@ -1,0 +1,226 @@
+@use "../../../../shared/styles/breakpoints" as bp;
+
+.wizard-shell {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  @include bp.lg {
+    width: 100%;
+    max-width: var(--container-app);
+    margin-inline: auto;
+    padding: var(--space-8) var(--space-6);
+  }
+
+  @include bp.xl {
+    padding-inline: var(--space-8);
+  }
+}
+
+.wizard-shell__mobile-top {
+  padding-top: calc(var(--space-3) + env(safe-area-inset-top));
+
+  @include bp.lg {
+    display: none;
+  }
+}
+
+.wizard-shell__progress {
+  padding: 0 var(--space-4) var(--space-2);
+}
+
+.wizard-shell__desktop-top {
+  display: none;
+
+  @include bp.lg {
+    display: block;
+  }
+}
+
+.wizard-shell__home {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: var(--size-touch);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: var(--text-size-sm);
+  font-weight: 700;
+  color: var(--color-brand-purple);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-lavender-500);
+    outline-offset: var(--focus-ring-offset);
+  }
+}
+
+.wizard-shell__h1 {
+  font-family: var(--font-display);
+  font-size: var(--text-size-2xl);
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--color-ink-900);
+}
+
+.wizard-shell__stepper {
+  max-width: var(--container-wizard);
+  margin-top: var(--space-5);
+}
+
+.wizard-shell__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  @include bp.lg {
+    display: grid;
+    grid-template-columns: minmax(0, var(--container-wizard)) var(--size-aside-lg);
+    gap: var(--space-6);
+    align-items: start;
+    margin-top: var(--space-6);
+  }
+
+  @include bp.xl {
+    grid-template-columns: minmax(0, var(--container-wizard)) var(--size-aside);
+    gap: var(--space-8);
+  }
+}
+
+.wizard-shell__body--single {
+  @include bp.lg {
+    grid-template-columns: minmax(0, var(--container-wizard));
+  }
+}
+
+.wizard-shell__body--focus {
+  @include bp.lg {
+    display: flex;
+    margin-top: var(--space-4);
+  }
+}
+
+.wizard-shell__card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 0 var(--space-5);
+
+  @include bp.lg {
+    padding: var(--space-6);
+    border-radius: var(--radius-l);
+    background: var(--color-white);
+    box-shadow: var(--shadow-card);
+  }
+}
+
+.wizard-shell__card--focus {
+  padding: 0;
+
+  @include bp.lg {
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+}
+
+.wizard-shell__card-head {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wizard-shell__title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+
+  &:focus {
+    outline: none;
+  }
+
+  @include bp.lg {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+    font-family: var(--font-display);
+    font-size: var(--text-size-xl);
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--color-ink-900);
+  }
+}
+
+.wizard-shell__title--hidden {
+  @include bp.lg {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+.wizard-shell__cancel {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-touch);
+  margin-left: auto;
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: var(--text-size-sm);
+  font-weight: 700;
+  color: var(--color-brand-purple);
+  text-decoration: underline;
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-lavender-500);
+    outline-offset: var(--focus-ring-offset);
+  }
+}
+
+.wizard-shell__content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  animation: wizard-step-enter var(--duration-fast) ease-out;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+.wizard-shell__aside {
+  display: none;
+
+  @include bp.lg {
+    display: block;
+    position: sticky;
+    top: var(--space-6);
+  }
+}
+
+@keyframes wizard-step-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-2));
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

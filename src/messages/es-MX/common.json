@@ -1,0 +1,46 @@
+{
+  "common": {
+    "appName": "Spin Mini Wallet",
+    "brand": {
+      "logoAlt": "Spin by OXXO"
+    },
+    "metadata": {
+      "description": "Envía dinero y consulta tu saldo y movimientos con Spin by OXXO."
+    },
+    "password": {
+      "show": "Mostrar contraseña",
+      "hide": "Ocultar contraseña"
+    },
+    "appBar": {
+      "back": "Regresar",
+      "step": "{current} de {total}"
+    },
+    "account": {
+      "phone": "Celular",
+      "clabe": "CLABE",
+      "card": "Tarjeta"
+    },
+    "supportReference": {
+      "label": "Referencia:",
+      "copy": "Copiar",
+      "copyLabel": "Copiar referencia",
+      "copied": "Copiado",
+      "copyFailed": "No se pudo copiar"
+    },
+    "nav": {
+      "label": "Navegación principal",
+      "home": "Inicio",
+      "send": "Enviar dinero"
+    },
+    "errorPage": {
+      "title": "Algo salió mal",
+      "text": "Ocurrió un error inesperado. Intenta de nuevo.",
+      "retry": "Reintentar",
+      "home": "Volver al inicio"
+    },
+    "blockError": {
+      "title": "No pudimos mostrar esta sección",
+      "retry": "Reintentar"
+    }
+  }
+}

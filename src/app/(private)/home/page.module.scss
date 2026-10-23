@@ -1,0 +1,45 @@
+@use "../../../shared/styles/breakpoints" as bp;
+
+.home-page {
+  display: flex;
+  flex-direction: column;
+
+  @include bp.lg {
+    display: grid;
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) var(--size-aside-lg);
+    grid-template-areas:
+      "header header"
+      "movements aside";
+    gap: var(--space-6);
+    max-width: var(--container-app);
+    padding-inline: var(--space-6);
+    margin-inline: auto;
+  }
+
+  @include bp.xl {
+    grid-template-columns: minmax(0, 1fr) var(--size-aside);
+    padding-inline: var(--space-8);
+  }
+}
+
+.home-page__header {
+  @include bp.lg {
+    grid-area: header;
+  }
+}
+
+.home-page__movements {
+  margin-top: var(--space-6);
+
+  @include bp.lg {
+    grid-area: movements;
+    margin-top: 0;
+  }
+}
+
+.home-page__aside {
+  @include bp.lg {
+    grid-area: aside;
+  }
+}

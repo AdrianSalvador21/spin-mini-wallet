@@ -1,0 +1,23 @@
+@use "../../../../shared/styles/breakpoints" as bp;
+
+.recipient-step {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding-top: var(--space-4);
+}
+
+.recipient-step__cta-desktop {
+  display: none;
+
+  @include bp.lg {
+    display: inline;
+  }
+}
+
+.recipient-step__cta-mobile {
+  @include bp.lg {
+    display: none;
+  }
+}

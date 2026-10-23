@@ -1,0 +1,29 @@
+.movements-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+}
+
+.movements-state__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-state-icon);
+  height: var(--size-state-icon);
+  border-radius: var(--radius-pill);
+  background: var(--color-lavender-200);
+  color: var(--color-brand-purple);
+}
+
+.movements-state__title {
+  color: var(--color-ink-900);
+  font-weight: 700;
+}
+
+.movements-state__text {
+  color: var(--color-ink-500);
+  font-size: var(--text-size-sm);
+}

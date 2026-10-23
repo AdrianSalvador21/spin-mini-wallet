@@ -1,0 +1,78 @@
+@use "../../../../shared/styles/breakpoints" as bp;
+
+.contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.contact-list__heading {
+  font-family: var(--font-display);
+  font-size: var(--text-size-sm);
+  font-weight: 700;
+  color: var(--color-ink-500);
+}
+
+.contact-list__rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.contact-list__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.contact-list__add {
+  display: flex;
+  order: -1;
+  gap: var(--space-3);
+  align-items: center;
+  min-height: var(--size-sheet-item);
+  padding: 0 var(--space-4);
+  border: var(--border-width-thin) dashed var(--color-brand-purple);
+  border-radius: var(--radius-m);
+  background: var(--color-white);
+  font-family: var(--font-display);
+  font-size: var(--text-size-md);
+  font-weight: 700;
+  color: var(--color-brand-purple);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-lavender-100);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-lavender-500);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  @include bp.lg {
+    order: 0;
+  }
+}
+
+.contact-list__skeleton {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  min-height: var(--size-contact-row);
+  padding: 0 var(--space-4);
+  border: var(--border-width-thin) solid var(--color-lavender-200);
+  border-radius: var(--radius-m);
+}
+
+.contact-list__skeleton-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.contact-list__error {
+  font-size: var(--text-size-sm);
+  color: var(--color-danger);
+}

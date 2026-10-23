@@ -1,0 +1,29 @@
+.wizard-state {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+}
+
+.wizard-state__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-state-icon);
+  height: var(--size-state-icon);
+  border-radius: var(--radius-pill);
+  background: var(--color-lavender-200);
+  color: var(--color-brand-purple);
+}
+
+.wizard-state__title {
+  font-weight: 700;
+  color: var(--color-ink-900);
+}
+
+.wizard-state__text {
+  font-size: var(--text-size-sm);
+  color: var(--color-ink-500);
+}

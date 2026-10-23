@@ -1,0 +1,77 @@
+@use "../../../../shared/styles/breakpoints" as bp;
+
+.amount-input {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  align-items: center;
+  text-align: center;
+}
+
+.amount-input__label {
+  font-size: var(--text-size-sm);
+  color: var(--color-ink-500);
+}
+
+.amount-input__control {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  max-width: 100%;
+  font-family: var(--font-display);
+  font-size: var(--text-size-amount);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--color-ink-900);
+  font-variant-numeric: tabular-nums;
+
+  @include bp.lg {
+    font-size: var(--text-size-hero);
+  }
+}
+
+.amount-input__control--error {
+  color: var(--color-danger);
+}
+
+.amount-input__symbol {
+  flex: none;
+}
+
+.amount-input__field {
+  min-width: 1ch;
+  max-width: 100%;
+  height: 1.2em;
+  padding: 0;
+  line-height: 1.2;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+  caret-color: var(--color-brand-purple);
+  field-sizing: content;
+
+  &::placeholder {
+    line-height: inherit;
+    color: inherit;
+    opacity: 1;
+  }
+
+  &:focus,
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+.amount-input__error {
+  font-size: var(--text-size-sm);
+  color: var(--color-danger);
+}
+
+.amount-input__hint {
+  font-size: var(--text-size-sm);
+  color: var(--color-ink-500);
+}

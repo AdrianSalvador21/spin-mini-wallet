@@ -1,0 +1,11 @@
+.summary-error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.summary-error__title {
+  color: var(--color-danger);
+  font-size: var(--text-size-md);
+}

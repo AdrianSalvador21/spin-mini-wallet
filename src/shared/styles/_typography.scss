@@ -1,0 +1,15 @@
+@mixin display($size, $weight: 800) {
+  font-family: var(--font-display);
+  font-size: $size;
+  font-weight: $weight;
+  line-height: 1.15;
+  color: var(--color-ink-900);
+  text-wrap: balance;
+}
+
+@mixin body($size: var(--text-size-lg), $weight: 400) {
+  font-family: var(--font-body);
+  font-size: $size;
+  font-weight: $weight;
+  line-height: 1.6;
+}
