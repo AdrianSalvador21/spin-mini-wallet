@@ -26,7 +26,7 @@
 | 06 | Home | [06-home.md](./06-home.md) | `feature/06-home` | Implemented |
 | 07 | New transfer flow | [07-transfer-flow.md](./07-transfer-flow.md) | `feature/07-transfer-flow` | Implemented |
 | 08 | Confirmation and receipt | [08-confirmation-receipt.md](./08-confirmation-receipt.md) | `feature/08-confirmation-receipt` | Implemented |
-| 09 | Final quality, deploy and documentation | [09-delivery.md](./09-delivery.md) | `feature/09-delivery` | In progress |
+| 09 | Final quality, deploy and documentation | [09-delivery.md](./09-delivery.md) | `feature/09-delivery-code`, `fix/09-validation-codes`, `feature/09-delivery-docs` | Implemented |
 
 **Next spec to write:** none. 09 is the last milestone.
 

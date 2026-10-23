@@ -269,7 +269,7 @@ SPEC 06: `direction` accepts `debit` or `credit`; any other value answers `400` 
 
 SPEC 07: `POST /api/v1/contacts` honors `saveAsFavorite` (a contact saved without it is not returned by `GET /api/v1/contacts`) and is idempotent by account: an existing contact keeps its id and name, can be upgraded to a favorite and is never downgraded. `ContactView` moves to `src/shared/lib/api/views.ts` so the client can type it.
 
-SPEC 09: the `POST /api/v1/transfers` body is `{ amountInCents, recipient: { contactId }, concept? }`. An invalid movements cursor answers `400` with `details.cursor: ["CURSOR_INVALID"]`. A valid session whose user no longer exists answers `401 UNAUTHORIZED`, like a missing session.
+SPEC 09: the `POST /api/v1/transfers` body is `{ amountInCents, recipient: { contactId }, concept? }`. An invalid movements cursor answers `400` with `details.cursor: ["CURSOR_INVALID"]`. Every `details` entry is a `ValidationCode`: a Zod message that is not one (a wrong type, a missing field) is reported as `INPUT_INVALID`. A valid session whose user no longer exists answers `401 UNAUTHORIZED`, like a missing session.
 
 SPEC 08: a client may send its own `x-request-id`; `proxy.ts` keeps it when it is a valid UUID and replaces anything else, and the response echoes the id actually used. The transfer client sends one fresh UUID per attempt, so a timeout or offline screen can show a reference that matches the server log. `TransferView` moves to `src/shared/lib/api/views.ts`, re-exported by `src/server/services/views.ts`, so the receipt and the submission hook can type it.
 
@@ -436,6 +436,7 @@ Scale tokens (SPEC 05). Spacing follows the same 4 px grid as Tailwind's spacing
 | `--size-result-icon` / `--size-result-icon-lg` | `48px` / `64px` | Receipt success icon on mobile and from `lg` (SPEC 08) |
 | `--size-dev-panel-offset` | `168px` | DEV pill bottom offset below `lg`, clearing a two-button `ActionBar` (SPEC 08) |
 | `--opacity-rings` | `0.14` | The `BrandRings` texture over purple surfaces (SPEC 09) |
+| `--size-logo-xs` / `--size-logo-sm` | `42px` / `56px` | Logo on the balance card, and in the Home header, the processing dialog and the receipt (SPEC 09) |
 | `--size-rings-sm` / `--size-rings-md` / `--size-rings-lg` | `380px` / `440px` / `640px` | `BrandRings` widths: cards and headers, the login header, the side navigation and the brand panel (SPEC 09) |
 | `--size-orbit` / `--size-orbit-core` | `132px` / `64px` | The processing orbit and its lavender core (SPEC 09) |
 | `--size-nav-indicator` | `3px` | Orange indicator on the current side-navigation item (SPEC 09) |

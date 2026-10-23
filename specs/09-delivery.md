@@ -1,6 +1,6 @@
 # SPEC 09 — Final quality, deploy and documentation
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 00, SPEC 01, SPEC 02, SPEC 03, SPEC 04, SPEC 05, SPEC 06, SPEC 07, SPEC 08
 > **Date:** 2026-10-22
 > **Objective:** Fix the defects a pre-delivery audit found, remove dead scope, ship the approved brand improvements in the flow, deploy to Vercel, and explain every decision through the repo docs and a Spin-branded Spanish presentation exported to PDF.

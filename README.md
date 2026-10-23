@@ -125,7 +125,7 @@ Layer boundaries are enforced by ESLint. See [Architecture](./docs/architecture.
 
 ## Deploy
 
-Deployed on Vercel: **[pending: the URL is added once `main` is deployed]**
+Deployed on Vercel: **https://spin-mini-wallet.vercel.app** (demo users below; the DEV panel is on).
 
 Environment variables, set for every environment (the build validates them too):
 
