@@ -16,6 +16,10 @@ function rows() {
     .map((term) => [term.textContent, term.nextElementSibling?.textContent]);
 }
 
+function shareButton() {
+  return screen.getByRole("button", { name: /^Compartir/ });
+}
+
 function stubNavigator(values: { share?: unknown; clipboard?: unknown }) {
   for (const [key, value] of Object.entries(values)) {
     Object.defineProperty(navigator, key, { value, configurable: true });
@@ -72,6 +76,13 @@ describe("TransferReceipt", () => {
     ]);
   });
 
+  it("labels the share button with the full and the short text, one per breakpoint", () => {
+    renderWithProviders(<TransferReceipt transfer={buildTransfer()} />);
+
+    expect(shareButton()).toHaveTextContent("Compartir comprobante");
+    expect(within(shareButton()).getByText("Compartir").className).toContain("transfer-receipt__share-short");
+  });
+
   it("links Volver al inicio home", () => {
     renderWithProviders(<TransferReceipt transfer={buildTransfer()} />);
 
@@ -83,7 +94,7 @@ describe("TransferReceipt", () => {
     stubNavigator({ share });
     renderWithProviders(<TransferReceipt transfer={buildTransfer()} />);
 
-    await userEvent.click(screen.getByRole("button", { name: "Compartir comprobante" }));
+    await userEvent.click(shareButton());
 
     expect(share).toHaveBeenCalledWith({ title: "Comprobante de envío Spin", text: SHARE_TEXT });
     expect(share.mock.calls[0]?.[0]).not.toHaveProperty("url");
@@ -100,7 +111,7 @@ describe("TransferReceipt", () => {
     });
     renderWithProviders(<TransferReceipt transfer={buildTransfer()} />);
 
-    await userEvent.click(screen.getByRole("button", { name: "Compartir comprobante" }));
+    await userEvent.click(shareButton());
 
     expect(writeText).not.toHaveBeenCalled();
     expect(screen.queryByText("Comprobante copiado")).not.toBeInTheDocument();
@@ -112,7 +123,7 @@ describe("TransferReceipt", () => {
     stubNavigator({ clipboard: { writeText } });
     renderWithProviders(<TransferReceipt transfer={buildTransfer()} />);
 
-    await userEvent.click(screen.getByRole("button", { name: "Compartir comprobante" }));
+    await userEvent.click(shareButton());
 
     expect(writeText).toHaveBeenCalledWith(SHARE_TEXT);
     expect(await screen.findByText("Comprobante copiado")).toHaveAttribute("role", "status");
@@ -123,7 +134,7 @@ describe("TransferReceipt", () => {
     stubNavigator({ share: vi.fn().mockRejectedValue(new TypeError("not allowed")), clipboard: { writeText } });
     renderWithProviders(<TransferReceipt transfer={buildTransfer()} />);
 
-    await userEvent.click(screen.getByRole("button", { name: "Compartir comprobante" }));
+    await userEvent.click(shareButton());
 
     expect(writeText).toHaveBeenCalledWith(SHARE_TEXT);
     expect(await screen.findByText("Comprobante copiado")).toBeInTheDocument();
@@ -133,7 +144,7 @@ describe("TransferReceipt", () => {
     stubNavigator({ clipboard: { writeText: vi.fn().mockRejectedValue(new Error("denied")) } });
     renderWithProviders(<TransferReceipt transfer={buildTransfer()} />);
 
-    await userEvent.click(screen.getByRole("button", { name: "Compartir comprobante" }));
+    await userEvent.click(shareButton());
 
     expect(await screen.findByText("No pudimos compartir el comprobante")).toHaveAttribute("role", "status");
   });

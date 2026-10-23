@@ -92,7 +92,8 @@ export function TransferReceipt({ transfer }: TransferReceiptProps) {
       <ActionBar className={styles["transfer-receipt__actions"]}>
         <Button variant={BUTTON_VARIANT.SECONDARY} block onClick={() => void share()}>
           <Icon name={ICON_NAME.SHARE} size={ICON_SIZE.SM} />
-          {t("share")}
+          <span className={styles["transfer-receipt__share-full"]}>{t("share")}</span>
+          <span className={styles["transfer-receipt__share-short"]}>{t("shareShort")}</span>
         </Button>
         <Button variant={BUTTON_VARIANT.PRIMARY} block href={ROUTES.HOME}>
           {t("home")}

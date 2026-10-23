@@ -115,6 +115,20 @@
   }
 }
 
+.transfer-receipt__share-full {
+  @include bp.lg {
+    display: none;
+  }
+}
+
+.transfer-receipt__share-short {
+  display: none;
+
+  @include bp.lg {
+    display: inline;
+  }
+}
+
 .transfer-receipt__feedback {
   font-size: var(--text-size-sm);
   font-weight: 600;

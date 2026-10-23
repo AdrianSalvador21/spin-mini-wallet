@@ -125,6 +125,7 @@
       "folio": "Folio",
       "trackingKey": "Clave de rastreo",
       "share": "Compartir comprobante",
+      "shareShort": "Compartir",
       "shareTitle": "Comprobante de envío Spin",
       "shareText": "Envié {amount} a {name} ({account}) el {date}. Folio: {folio}. Clave de rastreo: {trackingKey}.",
       "shared": "Comprobante copiado",

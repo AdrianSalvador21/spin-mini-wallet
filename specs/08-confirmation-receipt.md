@@ -229,7 +229,7 @@ export type SubmissionState =
   - the date from `formatReceiptDate` ("21 oct 2026, 10:42 h");
   - a `SummaryList` with "Para", "Cuenta" (`{accountType} •••• 1234` plus the bank when there is one), "Concepto" (only when set), "Folio" and "Clave de rastreo".
 - Actions:
-  - "Compartir comprobante" (secondary, `share` icon) and "Volver al inicio" (primary);
+  - "Compartir comprobante" (secondary, `share` icon; it reads "Compartir" from `lg`, as drawn, through `transfers.receipt.shareShort`, added during implementation) and "Volver al inicio" (primary);
   - below `lg` they are stacked in `ActionBar`;
   - from `lg` they sit side by side at 50 % in the card's footer, which is a white card with `--shadow-card` and `--space-10` padding in the 520 px focus column.
   - The mobile receipt has no `AppBar`, as drawn.
@@ -316,7 +316,7 @@ The outcome icon circle and the processing ring reuse `--size-state-icon` (56 px
 | `transfers.outcomes.unknownError.title` / `text` | "Algo salió mal" / "No pudimos completar tu envío. Inténtalo más tarde. Si el problema sigue, comparte esta referencia con soporte." |
 | `transfers.outcomes.actions.retry` / `checkStatus` / `checkAgain` / `changeAmount` / `home` | "Reintentar envío" / "Revisar estado del envío" / "Revisar de nuevo" / "Cambiar monto" / "Volver al inicio" |
 | `transfers.receipt.title` / `to` / `account` / `concept` / `folio` / `trackingKey` | "¡Envío exitoso!" / "Para" / "Cuenta" / "Concepto" / "Folio" / "Clave de rastreo" |
-| `transfers.receipt.share` / `shareTitle` / `shareText` / `shared` / `shareFailed` / `home` | "Compartir comprobante" / "Comprobante de envío Spin" / "Envié {amount} a {name} ({account}) el {date}. Folio: {folio}. Clave de rastreo: {trackingKey}." / "Comprobante copiado" / "No pudimos compartir el comprobante" / "Volver al inicio" |
+| `transfers.receipt.share` / `shareShort` / `shareTitle` / `shareText` / `shared` / `shareFailed` / `home` | "Compartir comprobante" / "Compartir" / "Comprobante de envío Spin" / "Envié {amount} a {name} ({account}) el {date}. Folio: {folio}. Clave de rastreo: {trackingKey}." / "Comprobante copiado" / "No pudimos compartir el comprobante" / "Volver al inicio" |
 | `transfers.receipt.notFound.title` / `text` | "No encontramos este comprobante" / "Revisa el enlace o vuelve al inicio." |
 
 `transfers.review.confirmUnavailable` is deleted.

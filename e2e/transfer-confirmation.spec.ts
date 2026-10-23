@@ -120,7 +120,12 @@ test.describe("transfer confirmation", () => {
       expect((home?.y ?? 0) + (home?.height ?? 0)).toBeGreaterThan((page.viewportSize()?.height ?? 0) - 120);
     }
 
-    await page.getByRole("button", { name: "Compartir comprobante" }).click();
+    const share = page.getByRole("button", {
+      name: testInfo.project.name === DESKTOP_PROJECT ? "Compartir" : "Compartir comprobante",
+      exact: true,
+    });
+    await expect(share).toBeVisible();
+    await share.click();
     const shared = await page.evaluate(() => window.sharedReceipts);
     expect(shared).toHaveLength(1);
     expect(shared[0].url).toBeUndefined();
