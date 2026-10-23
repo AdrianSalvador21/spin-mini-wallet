@@ -1,0 +1,20 @@
+@use "../../../../shared/styles/breakpoints" as bp;
+
+.receipt-not-found {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6) var(--space-5);
+
+  @include bp.lg {
+    flex: none;
+    justify-content: flex-start;
+    padding: var(--space-10);
+    border-radius: var(--radius-l);
+    background: var(--color-white);
+    box-shadow: var(--shadow-card);
+  }
+}
