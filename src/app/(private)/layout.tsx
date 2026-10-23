@@ -13,6 +13,7 @@ import { Avatar } from "@/shared/ui/avatar/avatar";
 import { AVATAR_SIZE, AVATAR_TONE } from "@/shared/ui/avatar/types";
 import { ICON_NAME } from "@/shared/ui/icon/types";
 import { SideNav, type SideNavItem } from "@/shared/ui/side-nav/side-nav";
+import { SessionGuard } from "./_components/session-guard";
 
 async function SideNavUser() {
   const session = await getSession();
@@ -54,6 +55,9 @@ export default async function PrivateLayout({ children }: LayoutProps<"/">) {
 
   return (
     <div className="flex flex-1 lg:grid lg:grid-cols-[var(--size-rail)_1fr] xl:grid-cols-[var(--size-sidebar)_1fr]">
+      <Suspense fallback={null}>
+        <SessionGuard />
+      </Suspense>
       <SideNav
         items={items}
         label={t("label")}

@@ -10,6 +10,7 @@ export const ROUTES = {
   TRANSFER_AMOUNT: "/transfers/new/amount",
   TRANSFER_RECIPIENT: "/transfers/new/recipient",
   TRANSFER_REVIEW: "/transfers/new/review",
+  SESSION_END: "/session/end",
 } as const;
 
 export function transferReceiptRoute(transferId: TransferId): Route {
