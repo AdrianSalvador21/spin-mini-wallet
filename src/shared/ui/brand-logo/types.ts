@@ -1,4 +1,6 @@
 export const BRAND_LOGO_SIZE = {
+  XS: "xs",
+  SM: "sm",
   MD: "md",
   LG: "lg",
 } as const;

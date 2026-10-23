@@ -1,5 +1,5 @@
 import "server-only";
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { createRepositories, type Repositories } from "../repositories";
 import { SCHEMA_VERSION, type DatabaseSnapshot } from "./schema";
@@ -30,8 +30,13 @@ async function writeSnapshot(filePath: string, snapshot: DatabaseSnapshot): Prom
   await mkdir(dirname(filePath), { recursive: true });
   const tempPath = `${filePath}.${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2)}.tmp`;
 
-  await writeFile(tempPath, JSON.stringify(snapshot, null, 2), "utf8");
-  await rename(tempPath, filePath);
+  try {
+    await writeFile(tempPath, JSON.stringify(snapshot, null, 2), "utf8");
+    await rename(tempPath, filePath);
+  } catch (error) {
+    await rm(tempPath, { force: true });
+    throw error;
+  }
 }
 
 async function readOrSeed(

@@ -6,8 +6,27 @@ import {
   parseAmount,
   subtractMoney,
   toMoney,
+  validateAmountInCents,
   type Cents,
 } from "./money";
+
+describe("validateAmountInCents", () => {
+  it.each([10.5, Number.NaN, Number.POSITIVE_INFINITY])("returns AMOUNT_INVALID_FORMAT for %s", (value) => {
+    expect(validateAmountInCents(value)).toEqual({ ok: false, error: "AMOUNT_INVALID_FORMAT" });
+  });
+
+  it("returns AMOUNT_EXCEEDS_MAXIMUM one cent above the maximum", () => {
+    expect(validateAmountInCents(MAX_AMOUNT_IN_CENTS + 1)).toEqual({ ok: false, error: "AMOUNT_EXCEEDS_MAXIMUM" });
+  });
+
+  it("accepts the maximum amount", () => {
+    expect(validateAmountInCents(MAX_AMOUNT_IN_CENTS)).toEqual({ ok: true, value: MAX_AMOUNT_IN_CENTS });
+  });
+
+  it.each([0, -1])("leaves %s to the AMOUNT_NOT_POSITIVE business rule", (value) => {
+    expect(validateAmountInCents(value)).toEqual({ ok: true, value });
+  });
+});
 
 describe("parseAmount", () => {
   it("parses a plain integer amount", () => {

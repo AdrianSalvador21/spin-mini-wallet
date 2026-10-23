@@ -32,12 +32,12 @@ function FailingMutation({ code }: { code: "UNAUTHORIZED" | "INTERNAL_ERROR" }) 
   return null;
 }
 
-let assignSpy: ReturnType<typeof vi.fn>;
+let replaceSpy: ReturnType<typeof vi.fn>;
 
 beforeEach(() => {
-  assignSpy = vi.fn();
+  replaceSpy = vi.fn();
   Object.defineProperty(window, "location", {
-    value: { ...window.location, assign: assignSpy },
+    value: { ...window.location, replace: replaceSpy },
     writable: true,
   });
 });
@@ -47,14 +47,14 @@ afterEach(() => {
 });
 
 describe("QueryProvider", () => {
-  it("redirects to /login when a query fails with UNAUTHORIZED", async () => {
+  it("redirects to /session/end when a query fails with UNAUTHORIZED", async () => {
     renderWithProviders(
       <QueryProvider>
         <Boom />
       </QueryProvider>,
     );
 
-    await waitFor(() => expect(assignSpy).toHaveBeenCalledWith("/login"));
+    await waitFor(() => expect(replaceSpy).toHaveBeenCalledWith("/session/end"));
   });
 
   it("clears the client session before redirecting on UNAUTHORIZED", async () => {
@@ -66,11 +66,11 @@ describe("QueryProvider", () => {
       </QueryProvider>,
     );
 
-    await waitFor(() => expect(assignSpy).toHaveBeenCalled());
+    await waitFor(() => expect(replaceSpy).toHaveBeenCalled());
     expect(window.sessionStorage.getItem(SESSION_STORAGE_KEY.TRANSFER_DRAFT)).toBeNull();
   });
 
-  it("clears the client session and redirects to /login when a mutation fails with UNAUTHORIZED", async () => {
+  it("clears the client session and redirects to /session/end when a mutation fails with UNAUTHORIZED", async () => {
     window.sessionStorage.setItem(SESSION_STORAGE_KEY.TRANSFER_DRAFT, "{}");
 
     renderWithProviders(
@@ -79,7 +79,7 @@ describe("QueryProvider", () => {
       </QueryProvider>,
     );
 
-    await waitFor(() => expect(assignSpy).toHaveBeenCalledWith("/login"));
+    await waitFor(() => expect(replaceSpy).toHaveBeenCalledWith("/session/end"));
     expect(window.sessionStorage.getItem(SESSION_STORAGE_KEY.TRANSFER_DRAFT)).toBeNull();
   });
 
@@ -93,7 +93,7 @@ describe("QueryProvider", () => {
     );
 
     await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(assignSpy).not.toHaveBeenCalled();
+    expect(replaceSpy).not.toHaveBeenCalled();
     expect(window.sessionStorage.getItem(SESSION_STORAGE_KEY.TRANSFER_DRAFT)).toBe("{}");
     window.sessionStorage.clear();
   });

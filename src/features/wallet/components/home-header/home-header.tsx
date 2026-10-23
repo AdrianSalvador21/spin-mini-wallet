@@ -7,6 +7,8 @@ import { useWalletSummary } from "@/features/wallet/hooks/use-wallet-summary";
 import { formatLongDate } from "@/shared/lib/format/date";
 import { getFirstName, getInitials } from "@/shared/lib/format/name";
 import { Avatar } from "@/shared/ui/avatar/avatar";
+import { BrandLogo } from "@/shared/ui/brand-logo/brand-logo";
+import { BRAND_LOGO_SIZE } from "@/shared/ui/brand-logo/types";
 import { AVATAR_SIZE, AVATAR_TONE } from "@/shared/ui/avatar/types";
 import { BUTTON_TYPE } from "@/shared/ui/button/types";
 import { Skeleton } from "@/shared/ui/skeleton/skeleton";
@@ -27,8 +29,11 @@ export function HomeHeader({ now, logoutSlot }: HomeHeaderProps) {
     return (
       <header className={styles["home-header"]} aria-hidden="true">
         <div className={styles["home-header__mobile"]}>
+          <div className={styles["home-header__bar"]}>
+            <BrandLogo size={BRAND_LOGO_SIZE.SM} priority />
+            <Skeleton shape={SKELETON_SHAPE.CIRCLE} size={SKELETON_SIZE.SM} />
+          </div>
           <Skeleton shape={SKELETON_SHAPE.LINE} size={SKELETON_SIZE.MD} width="50%" />
-          <Skeleton shape={SKELETON_SHAPE.CIRCLE} size={SKELETON_SIZE.SM} />
         </div>
         <div className={styles["home-header__desktop"]}>
           <Skeleton shape={SKELETON_SHAPE.LINE} size={SKELETON_SIZE.LG} width="40%" />
@@ -41,6 +46,9 @@ export function HomeHeader({ now, logoutSlot }: HomeHeaderProps) {
   if (isError || !data) {
     return (
       <header className={styles["home-header"]}>
+        <div className={`${styles["home-header__bar"]} ${styles["home-header__bar--mobile"]}`}>
+          <BrandLogo size={BRAND_LOGO_SIZE.SM} priority />
+        </div>
         <p className={styles["home-header__greeting"]}>{t("hello")}</p>
       </header>
     );
@@ -51,15 +59,18 @@ export function HomeHeader({ now, logoutSlot }: HomeHeaderProps) {
   return (
     <header className={styles["home-header"]}>
       <div className={styles["home-header__mobile"]}>
+        <div className={styles["home-header__bar"]}>
+          <BrandLogo size={BRAND_LOGO_SIZE.SM} priority />
+          <button
+            type={BUTTON_TYPE.BUTTON}
+            className={styles["home-header__avatar-button"]}
+            aria-label={t("openAccount")}
+            onClick={() => setSheetOpen(true)}
+          >
+            <Avatar initials={getInitials(data.user.fullName)} size={AVATAR_SIZE.TOUCH} tone={AVATAR_TONE.BRAND} />
+          </button>
+        </div>
         <p className={styles["home-header__greeting"]}>{t("greeting", { name: firstName })}</p>
-        <button
-          type={BUTTON_TYPE.BUTTON}
-          className={styles["home-header__avatar-button"]}
-          aria-label={t("openAccount")}
-          onClick={() => setSheetOpen(true)}
-        >
-          <Avatar initials={getInitials(data.user.fullName)} size={AVATAR_SIZE.TOUCH} tone={AVATAR_TONE.ON_BRAND} />
-        </button>
       </div>
       <div className={styles["home-header__desktop"]}>
         <h1 className={styles["home-header__title"]}>{t("greeting", { name: firstName })}</h1>

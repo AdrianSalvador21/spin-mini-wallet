@@ -43,6 +43,16 @@ describe("TransferReceipt", () => {
     expect(screen.getByText("21 oct 2026, 10:42 h")).toBeInTheDocument();
   });
 
+  it("styles the receipt as a ticket with the color logo and a decorative tear line", () => {
+    const { container } = renderWithProviders(<TransferReceipt transfer={buildTransfer()} />);
+
+    expect(screen.getByRole("img", { name: "Spin by OXXO" })).toHaveAttribute(
+      "src",
+      expect.stringContaining("spin-oxxo-logo-color.svg"),
+    );
+    expect(container.querySelector('[class*="transfer-receipt__tear"]')).toHaveAttribute("aria-hidden", "true");
+  });
+
   it("lists the recipient, masked account, folio and tracking key, without a concept row when there is none", () => {
     renderWithProviders(<TransferReceipt transfer={buildTransfer()} />);
 

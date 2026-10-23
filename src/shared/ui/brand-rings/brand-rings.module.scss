@@ -1,0 +1,43 @@
+.brand-rings {
+  position: absolute;
+  height: auto;
+  opacity: var(--opacity-rings);
+  pointer-events: none;
+  user-select: none;
+}
+
+.brand-rings--sm {
+  width: var(--size-rings-sm);
+}
+
+.brand-rings--md {
+  width: var(--size-rings-md);
+}
+
+.brand-rings--lg {
+  width: var(--size-rings-lg);
+}
+
+.brand-rings--top-right {
+  top: 0;
+  right: 0;
+  transform: translate(40%, -30%);
+}
+
+.brand-rings--bottom-right {
+  right: 0;
+  bottom: 0;
+  transform: translate(45%, 48%);
+}
+
+.brand-rings--bottom-left {
+  bottom: 0;
+  left: 0;
+  transform: translate(-50%, 48%);
+}
+
+.brand-rings--top-left {
+  top: 0;
+  left: 0;
+  transform: translate(-48%, -38%);
+}

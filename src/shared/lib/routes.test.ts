@@ -32,6 +32,8 @@ describe("resolveRouteAccess", () => {
     ["/api/v1/wallet/summary", true, next],
     ["/favicon.ico", false, next],
     ["/favicon.ico", true, next],
+    ["/session/end", false, next],
+    ["/session/end", true, next],
   ])("resolves %s with session=%s", (pathname, hasSession, expected) => {
     expect(resolveRouteAccess(pathname, hasSession)).toEqual(expected);
   });

@@ -100,7 +100,7 @@ describe("listMovements", () => {
 
     expect(result).toEqual({
       ok: false,
-      error: { code: "VALIDATION_ERROR", details: { cursor: ["INVALID_CURSOR"] } },
+      error: { code: "VALIDATION_ERROR", details: { cursor: ["CURSOR_INVALID"] } },
     });
   });
 

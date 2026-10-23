@@ -9,9 +9,10 @@ interface AppBarProps {
   title: ReactNode;
   backHref: ComponentProps<typeof Link>["href"];
   step?: { current: number; total: number };
+  action?: ReactNode;
 }
 
-export function AppBar({ title, backHref, step }: AppBarProps) {
+export function AppBar({ title, backHref, step, action }: AppBarProps) {
   const t = useTranslations("common.appBar");
 
   return (
@@ -24,6 +25,7 @@ export function AppBar({ title, backHref, step }: AppBarProps) {
       </Link>
       <h1 className={styles["app-bar__title"]}>{title}</h1>
       {step ? <span className={styles["app-bar__step"]}>{t("step", step)}</span> : null}
+      {action ? <div className={styles["app-bar__action"]}>{action}</div> : null}
     </header>
   );
 }

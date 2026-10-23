@@ -1,8 +1,8 @@
 import "server-only";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Cents } from "@/domain/money/money";
 import { toMoney } from "@/domain/money/money";
 import type { UserId } from "@/domain/user/types";
@@ -10,6 +10,12 @@ import { MOVEMENT_DIRECTION, MOVEMENT_TYPE, type MovementId } from "@/domain/wal
 import { createJsonDatabase } from "./json-database";
 import { createSeed } from "./seed";
 import { SCHEMA_VERSION, type DatabaseSnapshot } from "./schema";
+
+vi.mock("node:fs/promises", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:fs/promises")>();
+
+  return { ...actual, rename: vi.fn(actual.rename) };
+});
 
 let tempDir: string;
 let dbPath: string;
@@ -60,6 +66,16 @@ describe("createJsonDatabase", () => {
     const persisted = JSON.parse(raw) as DatabaseSnapshot;
     expect(persisted.schemaVersion).toBe(SCHEMA_VERSION);
     expect(persisted.users).toEqual([]);
+  });
+
+  it("removes the temp file and rethrows when the rename fails", async () => {
+    const db = createJsonDatabase(dbPath, buildStubSeed);
+    await db.read(() => undefined);
+    vi.mocked(rename).mockRejectedValueOnce(new Error("EPERM"));
+
+    await expect(db.transaction(() => undefined)).rejects.toThrow("EPERM");
+
+    expect((await readdir(tempDir)).filter((name) => name.endsWith(".tmp"))).toEqual([]);
   });
 
   it("writes nothing when the transaction throws", async () => {

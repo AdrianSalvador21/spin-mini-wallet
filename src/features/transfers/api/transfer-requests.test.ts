@@ -6,7 +6,7 @@ describe("buildTransferPayload", () => {
   it("sends the amount, the contact recipient and the concept", () => {
     expect(buildTransferPayload(buildValidDraft())).toEqual({
       amountInCents: 10_000,
-      recipient: { kind: "contact", contactId: "ctc_carlos" },
+      recipient: { contactId: "ctc_carlos" },
       concept: "Comida",
     });
   });

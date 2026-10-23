@@ -45,6 +45,18 @@ export function parseAmount(input: string): Result<Cents, AmountParseCode> {
   return ok(amountInCents as Cents);
 }
 
+export function validateAmountInCents(value: number): Result<Cents, AmountParseCode> {
+  if (!Number.isInteger(value)) {
+    return err("AMOUNT_INVALID_FORMAT");
+  }
+
+  if (value > MAX_AMOUNT_IN_CENTS) {
+    return err("AMOUNT_EXCEEDS_MAXIMUM");
+  }
+
+  return ok(value as Cents);
+}
+
 export function toMoney(amountInCents: Cents): Money {
   return { amountInCents, currency: "MXN" };
 }

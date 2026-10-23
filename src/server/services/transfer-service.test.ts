@@ -3,9 +3,9 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { RECIPIENT_ACCOUNT_TYPE } from "@/domain/contact/types";
+import { RECIPIENT_ACCOUNT_TYPE, type ContactId } from "@/domain/contact/types";
 import type { Cents } from "@/domain/money/money";
-import { TRANSFER_RECIPIENT_KIND, type TransferId, type TransferRecipientInput } from "@/domain/transfer/types";
+import type { TransferId, TransferRecipient } from "@/domain/transfer/types";
 import type { UserId } from "@/domain/user/types";
 import { createJsonDatabase } from "../db/json-database";
 import { SCHEMA_VERSION, type DatabaseSnapshot } from "../db/schema";
@@ -15,12 +15,14 @@ import { createTransferService, type TransferService } from "./transfer-service"
 
 const NOW = new Date("2026-10-21T12:00:00.000Z");
 
-const NEW_RECIPIENT: TransferRecipientInput = {
-  kind: TRANSFER_RECIPIENT_KIND.NEW,
-  name: "Carlos Ruiz",
-  account: { type: RECIPIENT_ACCOUNT_TYPE.PHONE, phone: "5523456789" },
-  saveAsFavorite: false,
-};
+const CARLOS: TransferRecipient = { contactId: "ctc_carlos" as ContactId };
+const ANA: TransferRecipient = { contactId: "ctc_ana" as ContactId };
+const LUIS: TransferRecipient = { contactId: "ctc_luis" as ContactId };
+const DIEGO: TransferRecipient = { contactId: "ctc_diego" as ContactId };
+
+function cents(value: number): Cents {
+  return value as Cents;
+}
 
 let tempDir: string;
 let service: TransferService;
@@ -54,11 +56,7 @@ afterEach(async () => {
 
 describe("TransferService.create", () => {
   it("debits the sender and stores the transfer", async () => {
-    const result = await service.create(
-      marianaId,
-      { amountInCents: 10_000, recipient: NEW_RECIPIENT },
-      "key-1",
-    );
+    const result = await service.create(marianaId, { amountInCents: cents(10_000), recipient: CARLOS }, "key-1");
 
     expect(result.ok).toBe(true);
     if (!result.ok) {
@@ -68,6 +66,7 @@ describe("TransferService.create", () => {
     expect(result.value.status).toBe("completed");
     expect(result.value.folio).toMatch(/^SPN-\d{8}$/);
     expect(result.value.trackingKey).toMatch(/^SPIN\d{14}$/);
+    expect(result.value.recipient.name).toBe("Carlos Ruiz");
 
     const summary = await deps.db.read((repositories) => repositories.wallets.findByUserId(marianaId));
     expect(summary?.balance.amountInCents).toBe(1_245_080 - 10_000);
@@ -75,11 +74,11 @@ describe("TransferService.create", () => {
     const movements = await deps.db.read((repositories) => repositories.movements.listByUserId(marianaId));
     const transferOut = movements.find((movement) => movement.transferId === result.value.id);
     expect(transferOut?.counterpartyName).toBe("Carlos Ruiz");
-    expect(transferOut?.counterpartyAccount).toEqual(NEW_RECIPIENT.account);
+    expect(transferOut?.counterpartyAccount?.type).toBe(RECIPIENT_ACCOUNT_TYPE.PHONE);
   });
 
   it("returns VALIDATION_ERROR when the amount is not positive", async () => {
-    const result = await service.create(marianaId, { amountInCents: 0, recipient: NEW_RECIPIENT }, "key-2");
+    const result = await service.create(marianaId, { amountInCents: cents(0), recipient: CARLOS }, "key-2");
 
     expect(result).toEqual({
       ok: false,
@@ -90,7 +89,7 @@ describe("TransferService.create", () => {
   it("returns INSUFFICIENT_FUNDS with the current balance", async () => {
     const result = await service.create(
       marianaId,
-      { amountInCents: 1_245_080 + 1, recipient: NEW_RECIPIENT },
+      { amountInCents: cents(1_245_080 + 1), recipient: CARLOS },
       "key-3",
     );
 
@@ -101,11 +100,7 @@ describe("TransferService.create", () => {
   });
 
   it("succeeds for an amount equal to the balance and leaves it at 0", async () => {
-    const result = await service.create(
-      marianaId,
-      { amountInCents: 1_245_080, recipient: NEW_RECIPIENT },
-      "key-4",
-    );
+    const result = await service.create(marianaId, { amountInCents: cents(1_245_080), recipient: CARLOS }, "key-4");
 
     expect(result.ok).toBe(true);
 
@@ -114,8 +109,8 @@ describe("TransferService.create", () => {
   });
 
   it("replays the same transfer for a repeated idempotency key and payload", async () => {
-    const first = await service.create(marianaId, { amountInCents: 10_000, recipient: NEW_RECIPIENT }, "key-5");
-    const second = await service.create(marianaId, { amountInCents: 10_000, recipient: NEW_RECIPIENT }, "key-5");
+    const first = await service.create(marianaId, { amountInCents: cents(10_000), recipient: CARLOS }, "key-5");
+    const second = await service.create(marianaId, { amountInCents: cents(10_000), recipient: CARLOS }, "key-5");
 
     expect(first.ok && second.ok).toBe(true);
     if (!first.ok || !second.ok) {
@@ -129,21 +124,24 @@ describe("TransferService.create", () => {
   });
 
   it("returns IDEMPOTENCY_CONFLICT for the same key with a different payload", async () => {
-    await service.create(marianaId, { amountInCents: 10_000, recipient: NEW_RECIPIENT }, "key-6");
-    const result = await service.create(marianaId, { amountInCents: 20_000, recipient: NEW_RECIPIENT }, "key-6");
+    await service.create(marianaId, { amountInCents: cents(10_000), recipient: CARLOS }, "key-6");
+    const result = await service.create(marianaId, { amountInCents: cents(20_000), recipient: CARLOS }, "key-6");
 
     expect(result).toEqual({ ok: false, error: { code: "IDEMPOTENCY_CONFLICT" } });
   });
 
-  it("returns NOT_FOUND for a contact that does not belong to the sender", async () => {
+  it("returns NOT_FOUND for a contact that does not exist", async () => {
     const result = await service.create(
       marianaId,
-      {
-        amountInCents: 10_000,
-        recipient: { kind: TRANSFER_RECIPIENT_KIND.CONTACT, contactId: "ctc_does_not_exist" },
-      },
+      { amountInCents: cents(10_000), recipient: { contactId: "ctc_does_not_exist" as ContactId } },
       "key-7",
     );
+
+    expect(result).toEqual({ ok: false, error: { code: "NOT_FOUND" } });
+  });
+
+  it("returns NOT_FOUND for a contact that belongs to another user", async () => {
+    const result = await service.create(diegoId, { amountInCents: cents(1_000), recipient: CARLOS }, "key-foreign");
 
     expect(result).toEqual({ ok: false, error: { code: "NOT_FOUND" } });
   });
@@ -152,6 +150,7 @@ describe("TransferService.create", () => {
     const concurrentTempDir = await mkdtemp(join(tmpdir(), "spin-mini-wallet-transfers-concurrent-"));
     const concurrentDbPath = join(concurrentTempDir, "db.json");
     const userId = "usr_concurrent" as UserId;
+    const contactId = "ctc_concurrent" as ContactId;
 
     const buildStubSeed = (): DatabaseSnapshot => ({
       schemaVersion: SCHEMA_VERSION,
@@ -166,10 +165,19 @@ describe("TransferService.create", () => {
         },
       ],
       wallets: [
-        { userId, balance: { amountInCents: 1_000_000 as Cents, currency: "MXN" }, updatedAt: NOW.toISOString() },
+        { userId, balance: { amountInCents: cents(1_000_000), currency: "MXN" }, updatedAt: NOW.toISOString() },
       ],
       movements: [],
-      contacts: [],
+      contacts: [
+        {
+          id: contactId,
+          ownerId: userId,
+          name: "Carlos Ruiz",
+          account: { type: RECIPIENT_ACCOUNT_TYPE.PHONE, phone: "5523456789" },
+          isFavorite: true,
+          createdAt: NOW.toISOString(),
+        },
+      ],
       transfers: [],
       idempotencyKeys: [],
     });
@@ -186,7 +194,7 @@ describe("TransferService.create", () => {
     const attempts = Array.from({ length: 10 }, (_, index) =>
       concurrentService.create(
         userId,
-        { amountInCents: 200_000, recipient: NEW_RECIPIENT },
+        { amountInCents: cents(200_000), recipient: { contactId } },
         `concurrent-key-${index}`,
       ),
     );
@@ -203,19 +211,24 @@ describe("TransferService.create", () => {
   });
 });
 
-describe("TransferService.create self-transfer, P2P credit and favorites", () => {
-  it("returns RECIPIENT_IS_SELF when sending to one's own phone", async () => {
+describe("TransferService.create self-transfer and P2P credit", () => {
+  it("returns RECIPIENT_IS_SELF for a contact holding the sender's own phone", async () => {
+    const selfContactId = "ctc_self" as ContactId;
+
+    await deps.db.transaction((repositories) => {
+      repositories.contacts.insert({
+        id: selfContactId,
+        ownerId: marianaId,
+        name: "Mariana López",
+        account: { type: RECIPIENT_ACCOUNT_TYPE.PHONE, phone: "5512345678" },
+        isFavorite: false,
+        createdAt: NOW.toISOString(),
+      });
+    });
+
     const result = await service.create(
       marianaId,
-      {
-        amountInCents: 10_000,
-        recipient: {
-          kind: TRANSFER_RECIPIENT_KIND.NEW,
-          name: "Mariana López",
-          account: { type: RECIPIENT_ACCOUNT_TYPE.PHONE, phone: "5512345678" },
-          saveAsFavorite: false,
-        },
-      },
+      { amountInCents: cents(10_000), recipient: { contactId: selfContactId } },
       "self-key",
     );
 
@@ -226,19 +239,7 @@ describe("TransferService.create self-transfer, P2P credit and favorites", () =>
   });
 
   it("credits Diego's wallet and creates his transfer_in when Mariana sends to his phone", async () => {
-    const result = await service.create(
-      marianaId,
-      {
-        amountInCents: 5_000,
-        recipient: {
-          kind: TRANSFER_RECIPIENT_KIND.NEW,
-          name: "Diego Ramírez",
-          account: { type: RECIPIENT_ACCOUNT_TYPE.PHONE, phone: "5587654321" },
-          saveAsFavorite: false,
-        },
-      },
-      "p2p-key",
-    );
+    const result = await service.create(marianaId, { amountInCents: cents(5_000), recipient: DIEGO }, "p2p-key");
 
     expect(result.ok).toBe(true);
 
@@ -255,20 +256,8 @@ describe("TransferService.create self-transfer, P2P credit and favorites", () =>
     });
   });
 
-  it("only debits the sender for a CLABE recipient, even if it belongs to a registered account holder", async () => {
-    const result = await service.create(
-      marianaId,
-      {
-        amountInCents: 5_000,
-        recipient: {
-          kind: TRANSFER_RECIPIENT_KIND.NEW,
-          name: "Ana Torres",
-          account: { type: RECIPIENT_ACCOUNT_TYPE.CLABE, clabe: "002180111198765433" },
-          saveAsFavorite: false,
-        },
-      },
-      "clabe-key",
-    );
+  it("only debits the sender for a CLABE recipient", async () => {
+    const result = await service.create(marianaId, { amountInCents: cents(5_000), recipient: ANA }, "clabe-key");
 
     expect(result.ok).toBe(true);
 
@@ -277,82 +266,18 @@ describe("TransferService.create self-transfer, P2P credit and favorites", () =>
   });
 
   it("only debits the sender for a card recipient", async () => {
-    const result = await service.create(
-      marianaId,
-      {
-        amountInCents: 5_000,
-        recipient: {
-          kind: TRANSFER_RECIPIENT_KIND.NEW,
-          name: "Luis García",
-          account: { type: RECIPIENT_ACCOUNT_TYPE.CARD, cardNumber: "4111111111111111" },
-          saveAsFavorite: false,
-        },
-      },
-      "card-key",
-    );
+    const result = await service.create(marianaId, { amountInCents: cents(5_000), recipient: LUIS }, "card-key");
 
     expect(result.ok).toBe(true);
 
     const wallet = await deps.db.read((repositories) => repositories.wallets.findByUserId(marianaId));
     expect(wallet?.balance.amountInCents).toBe(1_245_080 - 5_000);
   });
-
-  it("creates a favorite only when saveAsFavorite is true and the transfer succeeds", async () => {
-    const newRecipient: TransferRecipientInput = {
-      kind: TRANSFER_RECIPIENT_KIND.NEW,
-      name: "Nuevo Favorito",
-      account: { type: RECIPIENT_ACCOUNT_TYPE.PHONE, phone: "5511122233" },
-      saveAsFavorite: true,
-    };
-
-    const result = await service.create(marianaId, { amountInCents: 5_000, recipient: newRecipient }, "fav-key");
-
-    expect(result.ok).toBe(true);
-
-    const contacts = await deps.db.read((repositories) => repositories.contacts.listByOwnerId(marianaId));
-    expect(contacts.some((contact) => contact.name === "Nuevo Favorito")).toBe(true);
-  });
-
-  it("creates no contact when a saveAsFavorite transfer fails on balance", async () => {
-    const newRecipient: TransferRecipientInput = {
-      kind: TRANSFER_RECIPIENT_KIND.NEW,
-      name: "Sin Fondos",
-      account: { type: RECIPIENT_ACCOUNT_TYPE.PHONE, phone: "5544455566" },
-      saveAsFavorite: true,
-    };
-
-    const result = await service.create(
-      marianaId,
-      { amountInCents: 1_245_080 + 1, recipient: newRecipient },
-      "fav-fail-key",
-    );
-
-    expect(result.ok).toBe(false);
-
-    const contacts = await deps.db.read((repositories) => repositories.contacts.listByOwnerId(marianaId));
-    expect(contacts.some((contact) => contact.name === "Sin Fondos")).toBe(false);
-  });
-
-  it("reuses the existing contact for a duplicate account when saving as favorite twice", async () => {
-    const newRecipient: TransferRecipientInput = {
-      kind: TRANSFER_RECIPIENT_KIND.NEW,
-      name: "Favorito Repetido",
-      account: { type: RECIPIENT_ACCOUNT_TYPE.PHONE, phone: "5566677788" },
-      saveAsFavorite: true,
-    };
-
-    await service.create(marianaId, { amountInCents: 1_000, recipient: newRecipient }, "dup-key-1");
-    await service.create(marianaId, { amountInCents: 1_000, recipient: newRecipient }, "dup-key-2");
-
-    const contacts = await deps.db.read((repositories) => repositories.contacts.listByOwnerId(marianaId));
-    const matches = contacts.filter((contact) => contact.name === "Favorito Repetido");
-    expect(matches).toHaveLength(1);
-  });
 });
 
 describe("TransferService.getById", () => {
   it("returns the transfer when it belongs to the sender", async () => {
-    const created = await service.create(marianaId, { amountInCents: 5_000, recipient: NEW_RECIPIENT }, "key-8");
+    const created = await service.create(marianaId, { amountInCents: cents(5_000), recipient: CARLOS }, "key-8");
     expect(created.ok).toBe(true);
     if (!created.ok) {
       return;
@@ -372,7 +297,7 @@ describe("TransferService.getById", () => {
 
 describe("TransferService.findByIdempotencyKey", () => {
   it("returns the transfer stored under that key", async () => {
-    const created = await service.create(marianaId, { amountInCents: 5_000, recipient: NEW_RECIPIENT }, "key-9");
+    const created = await service.create(marianaId, { amountInCents: cents(5_000), recipient: CARLOS }, "key-9");
     expect(created.ok).toBe(true);
     if (!created.ok) {
       return;

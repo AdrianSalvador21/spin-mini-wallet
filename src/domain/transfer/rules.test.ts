@@ -1,14 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { RECIPIENT_ACCOUNT_TYPE } from "../contact/types";
+import type { ContactId } from "../contact/types";
 import { toMoney, type Cents } from "../money/money";
 import { validateTransfer, validateTransferAmount, type TransferDraft } from "./rules";
-import { TRANSFER_RECIPIENT_KIND, type TransferRecipientInput } from "./types";
+import type { TransferRecipient } from "./types";
 
 const BALANCE = toMoney(10_000 as Cents);
-const RECIPIENT: TransferRecipientInput = {
-  kind: TRANSFER_RECIPIENT_KIND.CONTACT,
-  contactId: "contact-1",
-};
+const RECIPIENT: TransferRecipient = { contactId: "contact-1" as ContactId };
 
 describe("validateTransferAmount", () => {
   it("returns AMOUNT_NOT_POSITIVE for a zero amount", () => {
@@ -41,6 +38,19 @@ describe("validateTransferAmount", () => {
 
   it("returns INSUFFICIENT_FUNDS for any positive amount when the balance is zero", () => {
     expect(validateTransferAmount(toMoney(1 as Cents), toMoney(0 as Cents))).toEqual({
+      ok: false,
+      error: ["INSUFFICIENT_FUNDS"],
+    });
+  });
+
+  it("counts the fee against the balance", () => {
+    const fee = toMoney(100 as Cents);
+
+    expect(validateTransferAmount(toMoney(9_900 as Cents), BALANCE, fee)).toEqual({
+      ok: true,
+      value: toMoney(9_900 as Cents),
+    });
+    expect(validateTransferAmount(toMoney(9_901 as Cents), BALANCE, fee)).toEqual({
       ok: false,
       error: ["INSUFFICIENT_FUNDS"],
     });
@@ -121,20 +131,5 @@ describe("validateTransfer", () => {
       expect(transferResult.ok).toBe(amountResult.ok);
       expect(transferResult.ok ? [] : transferResult.error).toEqual(amountResult.ok ? [] : amountResult.error);
     }
-  });
-
-  it("accepts a new, non-contact recipient", () => {
-    const newRecipient: TransferRecipientInput = {
-      kind: TRANSFER_RECIPIENT_KIND.NEW,
-      name: "Ana Pérez",
-      account: { type: RECIPIENT_ACCOUNT_TYPE.PHONE, phone: "5512345678" },
-      saveAsFavorite: false,
-    };
-    const draft: TransferDraft = { amount: toMoney(5_000 as Cents), recipient: newRecipient };
-
-    expect(validateTransfer(draft, BALANCE)).toEqual({
-      ok: true,
-      value: { amount: toMoney(5_000 as Cents), recipient: newRecipient },
-    });
   });
 });

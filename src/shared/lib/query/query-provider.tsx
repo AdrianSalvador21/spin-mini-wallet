@@ -3,6 +3,7 @@
 import { MutationCache, QueryCache, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import { API_ERROR_CODE } from "@/shared/lib/api/contract";
+import { ROUTES } from "@/shared/lib/routes";
 import { API_FAILURE_KIND, ApiFailureError } from "../api/api-client";
 import { clearClientSession } from "../session-storage/client-session";
 import { makeQueryClient } from "./query-client";
@@ -14,7 +15,7 @@ function handleQueryError(error: unknown): void {
     error.failure.code === API_ERROR_CODE.UNAUTHORIZED
   ) {
     clearClientSession();
-    window.location.assign("/login");
+    window.location.replace(ROUTES.SESSION_END);
   }
 }
 
