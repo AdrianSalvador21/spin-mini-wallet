@@ -71,7 +71,7 @@ export function createJsonDatabase(
 ): Database {
   return {
     read<T>(work: (repositories: Repositories) => T): Promise<T> {
-      return readOrSeed(filePath, createSeed).then((snapshot) => work(createRepositories(snapshot)));
+      return withLock(async () => work(createRepositories(await readOrSeed(filePath, createSeed))));
     },
     transaction<T>(work: (repositories: Repositories) => T): Promise<T> {
       return withLock(async () => {

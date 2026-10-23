@@ -120,4 +120,35 @@ describe("createJsonDatabase", () => {
 
     expect(total).toBe(20);
   });
+
+  it("serializes reads with transactions, so a read never overlaps the file being replaced", async () => {
+    const db = createJsonDatabase(dbPath, buildStubSeed);
+    await db.read(() => undefined);
+    const order: string[] = [];
+
+    const operations = Array.from({ length: 10 }, (_, index) =>
+      index % 2 === 0
+        ? db.transaction((repositories) => {
+            order.push(`write-${index}`);
+            repositories.movements.insert({
+              id: `mov_${index}` as MovementId,
+              userId: "usr_1" as UserId,
+              type: MOVEMENT_TYPE.CASH_DEPOSIT,
+              direction: MOVEMENT_DIRECTION.CREDIT,
+              amount: toMoney(100 as Cents),
+              merchantName: "Test",
+              createdAt: new Date().toISOString(),
+            });
+          })
+        : db.read((repositories) => {
+            order.push(`read-${index}`);
+            return repositories.movements.listByUserId("usr_1" as UserId).length;
+          }),
+    );
+
+    const results = await Promise.all(operations);
+
+    expect(order).toEqual(Array.from({ length: 10 }, (_, index) => `${index % 2 === 0 ? "write" : "read"}-${index}`));
+    expect(results.filter((value) => typeof value === "number")).toEqual([1, 2, 3, 4, 5]);
+  });
 });
