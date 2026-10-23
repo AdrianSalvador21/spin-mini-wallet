@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 import type { MovementView } from "@/shared/lib/api/views";
-import { DATE_GROUP_KIND, formatDayAndTime, formatLongDate, formatMonthLabel, formatTime, getDateGroup, groupMovements } from "./date";
+import {
+  DATE_GROUP_KIND,
+  formatDayAndTime,
+  formatLongDate,
+  formatMonthLabel,
+  formatReceiptDate,
+  formatTime,
+  getDateGroup,
+  groupMovements,
+} from "./date";
 
 const NOW_ISO = "2026-10-22T18:00:00.000Z";
 
@@ -53,6 +62,16 @@ describe("formatTime", () => {
 describe("formatDayAndTime", () => {
   it("formats the day, abbreviated month and time", () => {
     expect(formatDayAndTime("2026-10-19T14:12:00.000Z")).toBe("19 oct, 08:12");
+  });
+});
+
+describe("formatReceiptDate", () => {
+  it("formats the day, abbreviated month, year and Mexico City time with an h suffix", () => {
+    expect(formatReceiptDate("2026-10-21T16:42:00.000Z")).toBe("21 oct 2026, 10:42 h");
+  });
+
+  it("keeps a two-digit hour for a morning time", () => {
+    expect(formatReceiptDate("2026-01-05T14:05:00.000Z")).toBe("5 ene 2026, 08:05 h");
   });
 });
 

@@ -11,27 +11,17 @@ import type {
   ContactView,
   MovementsPage,
   MovementView,
+  TransferView,
   WalletSummary,
 } from "@/shared/lib/api/views";
 
-export type { AccountView, ContactsList, ContactView, MovementsPage, MovementView, WalletSummary };
+export type { AccountView, ContactsList, ContactView, MovementsPage, MovementView, TransferView, WalletSummary };
 
 export interface UserView {
   id: User["id"];
   fullName: string;
   phone: string;
   email: string;
-}
-
-export interface TransferView {
-  id: Transfer["id"];
-  folio: string;
-  trackingKey: string;
-  recipient: { name: string; account: AccountView };
-  amount: Transfer["amount"];
-  concept?: string;
-  status: Transfer["status"];
-  createdAt: string;
 }
 
 export function toUserView(user: User): UserView {

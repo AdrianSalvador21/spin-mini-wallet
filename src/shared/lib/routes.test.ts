@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { resolveRouteAccess, ROUTE_ACCESS, ROUTES } from "./routes";
+import type { TransferId } from "@/domain/transfer/types";
+import { resolveRouteAccess, ROUTE_ACCESS, ROUTES, transferReceiptRoute } from "./routes";
+
+describe("transferReceiptRoute", () => {
+  it("builds the receipt path for a transfer id", () => {
+    expect(transferReceiptRoute("trf_x" as TransferId)).toBe("/transfers/trf_x");
+  });
+});
 
 const next = { action: ROUTE_ACCESS.NEXT };
 const toLogin = { action: ROUTE_ACCESS.REDIRECT, to: ROUTES.LOGIN };

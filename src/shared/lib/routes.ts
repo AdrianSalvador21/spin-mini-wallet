@@ -1,3 +1,6 @@
+import type { Route } from "next";
+import type { TransferId } from "@/domain/transfer/types";
+
 export const ROUTES = {
   ROOT: "/",
   LOGIN: "/login",
@@ -8,6 +11,10 @@ export const ROUTES = {
   TRANSFER_RECIPIENT: "/transfers/new/recipient",
   TRANSFER_REVIEW: "/transfers/new/review",
 } as const;
+
+export function transferReceiptRoute(transferId: TransferId): Route {
+  return `${ROUTES.TRANSFERS}/${transferId}` as Route;
+}
 
 export const ROUTE_ACCESS = {
   NEXT: "next",

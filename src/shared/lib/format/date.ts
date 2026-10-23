@@ -82,6 +82,21 @@ export function formatDayAndTime(iso: string): string {
   return `${day} ${month}, ${formatTime(iso)}`;
 }
 
+export function formatReceiptDate(iso: string): string {
+  const date = new Date(iso);
+  const parts = new Intl.DateTimeFormat(locale, {
+    timeZone,
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).formatToParts(date);
+  const day = getPart(parts, "day");
+  const month = getPart(parts, "month").replace(".", "");
+  const year = getPart(parts, "year");
+
+  return `${day} ${month} ${year}, ${formatTime(iso)} h`;
+}
+
 export function formatLongDate(iso: string): string {
   const date = new Date(iso);
   const formatted = new Intl.DateTimeFormat(locale, {
