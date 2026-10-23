@@ -13,7 +13,8 @@ import { Icon } from "@/shared/ui/icon/icon";
 import { ICON_NAME, type IconName } from "@/shared/ui/icon/types";
 import styles from "./movement-row.module.scss";
 
-export type Translator = (key: string, values?: Record<string, string | number>) => string;
+export type MovementsTranslator = ReturnType<typeof useTranslations<"home.movements">>;
+export type CommonTranslator = ReturnType<typeof useTranslations<"common">>;
 
 export function getMovementIcon(type: MovementType): IconName {
   switch (type) {
@@ -31,7 +32,7 @@ export function getMovementIcon(type: MovementType): IconName {
 }
 
 export function getMovementTitle(
-  t: Translator,
+  t: MovementsTranslator,
   movement: Pick<MovementView, "type" | "counterpartyName" | "merchantName">,
 ): string {
   switch (movement.type) {
@@ -56,7 +57,7 @@ export function getMovementTitle(
   }
 }
 
-export function getAccountTypeLabel(tCommon: Translator, type: AccountView["type"]): string {
+export function getAccountTypeLabel(tCommon: CommonTranslator, type: AccountView["type"]): string {
   switch (type) {
     case RECIPIENT_ACCOUNT_TYPE.PHONE:
       return tCommon("account.phone");
@@ -70,8 +71,8 @@ export function getAccountTypeLabel(tCommon: Translator, type: AccountView["type
 }
 
 export function getMovementDetail(
-  t: Translator,
-  tCommon: Translator,
+  t: MovementsTranslator,
+  tCommon: CommonTranslator,
   movement: Pick<MovementView, "type" | "counterpartyAccount">,
 ): string | undefined {
   switch (movement.type) {
@@ -110,8 +111,8 @@ interface MovementRowProps {
 }
 
 export function MovementRow({ movement, now }: MovementRowProps) {
-  const t = useTranslations("home.movements") as Translator;
-  const tCommon = useTranslations("common") as Translator;
+  const t = useTranslations("home.movements");
+  const tCommon = useTranslations("common");
   const isCredit = movement.direction === MOVEMENT_DIRECTION.CREDIT;
   const title = getMovementTitle(t, movement);
   const detail = getMovementDetail(t, tCommon, movement);
