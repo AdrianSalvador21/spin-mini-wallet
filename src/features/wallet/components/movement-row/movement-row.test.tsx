@@ -166,4 +166,43 @@ describe("MovementRow", () => {
     expect(screen.getByText("−$35.00")).toBeInTheDocument();
     expect(screen.getByText("−$35.00").className).toContain("movement-row__amount--debit");
   });
+
+  it("links a sent transfer with a transferId to its receipt, named by the row's text", () => {
+    renderWithProviders(
+      <ul>
+        <MovementRow
+          movement={buildMovement({
+            type: "transfer_out",
+            direction: "debit",
+            amount: toMoney(3_500 as Cents),
+            counterpartyName: "Carlos Ruiz",
+            transferId: "trf_42" as MovementView["transferId"],
+          })}
+          now={NOW}
+        />
+      </ul>,
+    );
+
+    const link = screen.getByRole("link");
+
+    expect(link).toHaveAttribute("href", "/transfers/trf_42");
+    expect(link).toHaveAccessibleName(expect.stringContaining("Envío a Carlos Ruiz"));
+    expect(link.closest("li")).toBeInTheDocument();
+  });
+
+  it.each<[string, Partial<MovementView>]>([
+    ["a received transfer", { type: "transfer_in", direction: "credit", transferId: "trf_in" as MovementView["transferId"] }],
+    ["a cash deposit", { type: "cash_deposit", direction: "credit" }],
+    ["a QR payment", { type: "qr_payment", direction: "debit", merchantName: "OXXO" }],
+    ["a sent transfer without a transferId", { type: "transfer_out", direction: "debit" }],
+  ])("does not link %s", (_label, overrides) => {
+    renderWithProviders(
+      <ul>
+        <MovementRow movement={buildMovement(overrides)} now={NOW} />
+      </ul>,
+    );
+
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.getByRole("listitem")).toBeInTheDocument();
+  });
 });

@@ -1,11 +1,14 @@
 @use "../../../../shared/styles/breakpoints" as bp;
 
 .movement-row {
+  border-bottom: var(--border-width-thin) solid var(--color-lavender-200);
+}
+
+.movement-row__content {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   padding-block: var(--space-3);
-  border-bottom: var(--border-width-thin) solid var(--color-lavender-200);
 
   @include bp.lg {
     display: grid;
@@ -14,6 +17,24 @@
     column-gap: var(--space-4);
     height: var(--size-movement-row);
     padding-block: 0;
+  }
+}
+
+.movement-row__content--link {
+  margin-inline: calc(var(--space-2) * -1);
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-s);
+  color: inherit;
+  text-decoration: none;
+  transition: background-color var(--duration-fast);
+
+  &:hover {
+    background: var(--color-lavender-100);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-lavender-500);
+    outline-offset: calc(var(--focus-ring-offset) * -1);
   }
 }
 
