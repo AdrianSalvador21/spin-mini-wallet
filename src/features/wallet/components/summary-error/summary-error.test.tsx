@@ -18,7 +18,8 @@ describe("SummaryError", () => {
   it("shows the reference when a requestId is present", () => {
     renderWithProviders(<SummaryError onRetry={vi.fn()} requestId="req-1" />);
 
-    expect(screen.getByText("Referencia: req-1")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("Referencia: req-1");
+    expect(screen.getByRole("button", { name: "Copiar referencia" })).toBeInTheDocument();
   });
 
   it("omits the reference when there is none", () => {

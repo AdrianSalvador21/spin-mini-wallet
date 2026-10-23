@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@/shared/ui/button/button";
 import { BUTTON_VARIANT } from "@/shared/ui/button/types";
+import { SupportReference } from "@/shared/ui/support-reference/support-reference";
 import styles from "./summary-error.module.scss";
 
 interface SummaryErrorProps {
@@ -12,7 +13,6 @@ interface SummaryErrorProps {
 
 export function SummaryError({ requestId, onRetry }: SummaryErrorProps) {
   const t = useTranslations("home.balance.error");
-  const tCommon = useTranslations("common");
 
   return (
     <div className={styles["summary-error"]} role="alert">
@@ -20,7 +20,7 @@ export function SummaryError({ requestId, onRetry }: SummaryErrorProps) {
       <Button variant={BUTTON_VARIANT.SECONDARY} onClick={onRetry}>
         {t("retry")}
       </Button>
-      {requestId && <p className={styles["summary-error__reference"]}>{tCommon("reference", { requestId })}</p>}
+      {requestId && <SupportReference requestId={requestId} />}
     </div>
   );
 }

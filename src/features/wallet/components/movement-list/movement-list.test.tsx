@@ -126,7 +126,7 @@ describe("MovementList", () => {
     renderWithProviders(<MovementList now={NOW} />);
 
     expect(await screen.findByRole("alert")).toHaveTextContent("No pudimos cargar tus movimientos");
-    expect(screen.getByText("Referencia: req-1")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("Referencia: req-1");
   });
 
   it("shows the empty state for the all filter", async () => {

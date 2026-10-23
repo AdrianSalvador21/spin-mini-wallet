@@ -5,6 +5,7 @@ import { assertUnreachable } from "@/domain/shared/assert-unreachable";
 import { AUTH_FAILURE_KIND, type AuthFailure } from "@/shared/lib/auth/form-state";
 import { Alert } from "@/shared/ui/alert/alert";
 import { ALERT_ROLE, ALERT_TONE } from "@/shared/ui/alert/types";
+import { SupportReference } from "@/shared/ui/support-reference/support-reference";
 
 interface AuthFailureAlertProps {
   failure: AuthFailure;
@@ -32,7 +33,7 @@ export function AuthFailureAlert({ failure }: AuthFailureAlertProps) {
       return (
         <Alert tone={ALERT_TONE.DANGER} role={ALERT_ROLE.ALERT}>
           <p>{t("unexpected")}</p>
-          <p>{t("reference", { requestId: failure.requestId })}</p>
+          <SupportReference requestId={failure.requestId} />
         </Alert>
       );
     default:

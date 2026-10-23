@@ -29,7 +29,7 @@ describe("MovementsState", () => {
     );
 
     expect(screen.getByRole("alert")).toBeInTheDocument();
-    expect(screen.getByText("Referencia: req-1")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("Referencia: req-1");
 
     await userEvent.click(screen.getByRole("button", { name: "Reintentar" }));
 

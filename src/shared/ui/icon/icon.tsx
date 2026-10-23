@@ -179,6 +179,46 @@ const ICON_PATHS: Record<IconName, ReactNode> = {
     </>
   ),
   [ICON_NAME.PLUS]: <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />,
+  [ICON_NAME.SHARE]: (
+    <path
+      d="M12 4v11M7.5 8.5L12 4l4.5 4.5M5 14v5h14v-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+  [ICON_NAME.WIFI]: (
+    <>
+      <path
+        d="M3 9a14 14 0 0118 0M6.5 12.5a9 9 0 0111 0M10 16a4 4 0 014 0M4 4l16 16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <circle cx="12" cy="19" r="1.2" fill="currentColor" />
+    </>
+  ),
+  [ICON_NAME.WALLET]: (
+    <>
+      <rect x="3" y="6" width="18" height="13" rx="3" fill="none" stroke="currentColor" strokeWidth="2" />
+      <path d="M16 12.5h2M3 9.5h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </>
+  ),
+  [ICON_NAME.COPY]: (
+    <>
+      <rect x="9" y="9" width="11" height="11" rx="2.5" fill="none" stroke="currentColor" strokeWidth="2" />
+      <path
+        d="M15 5.5A1.5 1.5 0 0013.5 4h-8A1.5 1.5 0 004 5.5v8A1.5 1.5 0 005.5 15"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </>
+  ),
 };
 
 interface IconProps {

@@ -20,7 +20,13 @@
       "clabe": "CLABE",
       "card": "Tarjeta"
     },
-    "reference": "Referencia: {requestId}",
+    "supportReference": {
+      "label": "Referencia:",
+      "copy": "Copiar",
+      "copyLabel": "Copiar referencia",
+      "copied": "Copiado",
+      "copyFailed": "No se pudo copiar"
+    },
     "nav": {
       "label": "Navegación principal",
       "home": "Inicio",

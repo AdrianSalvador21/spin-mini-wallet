@@ -1,9 +1,9 @@
-import { useTranslations } from "next-intl";
 import type { AlertRole } from "@/shared/ui/alert/types";
 import { Button } from "@/shared/ui/button/button";
 import { BUTTON_VARIANT } from "@/shared/ui/button/types";
 import { Icon } from "@/shared/ui/icon/icon";
 import { ICON_SIZE, type IconName } from "@/shared/ui/icon/types";
+import { SupportReference } from "@/shared/ui/support-reference/support-reference";
 import styles from "./wizard-state.module.scss";
 
 interface WizardStateProps {
@@ -17,8 +17,6 @@ interface WizardStateProps {
 }
 
 export function WizardState({ icon, title, text, actionLabel, onAction, requestId, role }: WizardStateProps) {
-  const tCommon = useTranslations("common");
-
   return (
     <div className={styles["wizard-state"]} role={role}>
       <span className={styles["wizard-state__icon"]}>
@@ -31,7 +29,7 @@ export function WizardState({ icon, title, text, actionLabel, onAction, requestI
           {actionLabel}
         </Button>
       )}
-      {requestId && <p className={styles["wizard-state__reference"]}>{tCommon("reference", { requestId })}</p>}
+      {requestId && <SupportReference requestId={requestId} />}
     </div>
   );
 }
