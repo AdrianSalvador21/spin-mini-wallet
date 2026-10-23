@@ -71,18 +71,19 @@ describe("BalanceCard", () => {
     renderWithProviders(<BalanceCard initialHidden={false} />);
 
     const link = await screen.findByRole("link", { name: /Enviar dinero/ });
-    const panel = screen.getByRole("region", { name: "Saldo disponible" });
+    const panel = (await screen.findByText("Celular 55 •••• 5678")).closest('[class*="balance-card__panel"]');
 
     expect(link).toHaveAttribute("href", "/transfers/new/amount");
+    expect(screen.getByRole("region", { name: "Saldo disponible" })).toContainElement(link);
+    expect(panel).not.toBeNull();
     expect(panel).not.toContainElement(link);
   });
 
   it("shows the masked phone, the white logo and the rings on the loaded panel", async () => {
     const { container } = renderWithProviders(<BalanceCard initialHidden={false} />);
 
-    expect(await screen.findByText("Celular 55 •••• 5678")).toBeInTheDocument();
-    const panel = screen.getByRole("region", { name: "Saldo disponible" });
-    expect(panel.querySelector('img[src*="spin-oxxo-logo.svg"]')).not.toBeNull();
+    const panel = (await screen.findByText("Celular 55 •••• 5678")).closest('[class*="balance-card__panel"]');
+    expect(panel?.querySelector('img[src*="spin-oxxo-logo.svg"]')).not.toBeNull();
     expect(container.querySelector('img[src*="spin-rings.svg"]')).toHaveAttribute("aria-hidden", "true");
   });
 });

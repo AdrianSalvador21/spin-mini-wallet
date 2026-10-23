@@ -55,11 +55,11 @@ export function BalanceCard({ initialHidden }: BalanceCardProps) {
   );
 
   return (
-    <div className={styles["balance-card"]}>
+    <section className={styles["balance-card"]} aria-label={t("label")}>
       {data && !isError ? (
         <BrandPanel summary={data} hidden={hidden} eyeButton={eyeButton} />
       ) : (
-        <section className={styles["balance-card__panel"]} aria-label={t("label")}>
+        <div className={styles["balance-card__panel"]}>
           <div className={styles["balance-card__row"]}>
             <p className={styles["balance-card__label"]}>{t("label")}</p>
             {eyeButton}
@@ -71,14 +71,14 @@ export function BalanceCard({ initialHidden }: BalanceCardProps) {
           ) : (
             <SummaryError requestId={requestId} onRetry={() => refetch()} />
           )}
-        </section>
+        </div>
       )}
 
       <Button variant={BUTTON_VARIANT.PRIMARY} href={ROUTES.TRANSFER_AMOUNT} block>
         <Icon name={ICON_NAME.SEND} />
         {t("send")}
       </Button>
-    </div>
+    </section>
   );
 }
 
@@ -92,10 +92,7 @@ function BrandPanel({ summary, hidden, eyeButton }: BrandPanelProps) {
   const t = useTranslations("home.balance");
 
   return (
-    <section
-      className={`${styles["balance-card__panel"]} ${styles["balance-card__panel--brand"]}`}
-      aria-label={t("label")}
-    >
+    <div className={`${styles["balance-card__panel"]} ${styles["balance-card__panel--brand"]}`}>
       <BrandRings placement={RINGS_PLACEMENT.BOTTOM_RIGHT} size={RINGS_SIZE.MD} />
       <div className={styles["balance-card__row"]}>
         <p className={styles["balance-card__label"]}>{t("label")}</p>
@@ -112,7 +109,7 @@ function BrandPanel({ summary, hidden, eyeButton }: BrandPanelProps) {
         <p className={styles["balance-card__account"]}>{t("account", { masked: summary.user.maskedPhone })}</p>
         <BrandLogo onDark size={BRAND_LOGO_SIZE.XS} className={styles["balance-card__logo"]} />
       </div>
-    </section>
+    </div>
   );
 }
 

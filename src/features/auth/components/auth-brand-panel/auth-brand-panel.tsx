@@ -1,6 +1,8 @@
 import { useTranslations } from "next-intl";
 import { BrandLogo } from "@/shared/ui/brand-logo/brand-logo";
 import { BRAND_LOGO_SIZE } from "@/shared/ui/brand-logo/types";
+import { BrandRings } from "@/shared/ui/brand-rings/brand-rings";
+import { RINGS_PLACEMENT, RINGS_SIZE } from "@/shared/ui/brand-rings/types";
 import { Icon } from "@/shared/ui/icon/icon";
 import { ICON_NAME, type IconName } from "@/shared/ui/icon/types";
 import styles from "./auth-brand-panel.module.scss";
@@ -24,6 +26,9 @@ export function AuthBrandPanel() {
 
   return (
     <aside className={`${styles["auth-brand-panel"]} flex flex-1 flex-col px-14 py-12`}>
+      <div className={styles["auth-brand-panel__texture"]}>
+        <BrandRings placement={RINGS_PLACEMENT.TOP_RIGHT} size={RINGS_SIZE.LG} />
+      </div>
       <BrandLogo onDark size={BRAND_LOGO_SIZE.LG} />
       <p className={`${styles["auth-brand-panel__headline"]} mt-auto`}>{t("headline")}</p>
       <p className={`${styles["auth-brand-panel__lead"]} mt-4`}>{t("lead")}</p>
