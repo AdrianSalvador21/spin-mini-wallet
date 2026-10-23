@@ -4,9 +4,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { RECIPIENT_ACCOUNT_TYPE, type ContactId } from "@/domain/contact/types";
 import type { UserId } from "@/domain/user/types";
 import type { Services } from "@/server/container";
-import { createJsonDatabase } from "@/server/db/json-database";
+import { createJsonDatabase, type Database } from "@/server/db/json-database";
 import { createSeed } from "@/server/db/seed";
 import type { HttpDependencies } from "@/server/http/route-handler";
 import { createAuthService } from "@/server/services/auth-service";
@@ -53,6 +54,7 @@ vi.mock("next/headers", () => ({
 
 let tempDir: string;
 let services: Services;
+let database: Database;
 let marianaId: UserId;
 let sleepCalls: number[];
 
@@ -63,6 +65,7 @@ beforeEach(async () => {
   sleepCalls = [];
 
   const db = createJsonDatabase(join(tempDir, "db.json"), () => createSeed(NOW));
+  database = db;
   let idCounter = 0;
   const deps: ServiceDependencies = {
     db,
@@ -204,6 +207,95 @@ describe("createCreateTransferHandler", () => {
     expect(body.error.code).toBe("INSUFFICIENT_FUNDS");
     expect(body.error.balance.amountInCents).toBe(balanceBefore);
     expect(await getBalance()).toBe(balanceBefore);
+  });
+
+  describe("business pre-check before the scenario draw", () => {
+    async function send(body: string, scenario: string) {
+      await signIn(marianaId);
+      const handler = createCreateTransferHandler(buildHttpDeps());
+
+      return handler(buildRequest({ body, idempotencyKey: VALID_KEY, cookie: `mock_scenario=${scenario}` }), {
+        params: Promise.resolve({}),
+      });
+    }
+
+    it("answers 400 AMOUNT_NOT_POSITIVE for 0 instead of the forced 503", async () => {
+      const response = await send(transferPayload(0), "network_error");
+
+      expect(response.status).toBe(400);
+      expect((await response.json()).error.details).toEqual({ amountInCents: ["AMOUNT_NOT_POSITIVE"] });
+      expect(sleepCalls).toEqual([]);
+    });
+
+    it("answers 400 AMOUNT_INVALID_FORMAT for fractional cents and changes no balance", async () => {
+      const balanceBefore = await getBalance();
+      const response = await send(transferPayload(10.5), "success");
+
+      expect(response.status).toBe(400);
+      expect((await response.json()).error.details).toEqual({ amountInCents: ["AMOUNT_INVALID_FORMAT"] });
+      expect(await getBalance()).toBe(balanceBefore);
+    });
+
+    it("answers the real 422 for an amount over the balance instead of the forced 500", async () => {
+      const balanceBefore = await getBalance();
+      const response = await send(transferPayload(balanceBefore + 1), "unknown_error");
+
+      expect(response.status).toBe(422);
+      const body = await response.json();
+      expect(body.error.code).toBe("INSUFFICIENT_FUNDS");
+      expect(body.error.balance.amountInCents).toBe(balanceBefore);
+    });
+
+    it("answers 404 for a contact that is not the sender's, whatever the scenario", async () => {
+      const response = await send(
+        JSON.stringify({ amountInCents: 1_000, recipient: { contactId: "ctc_unknown" } }),
+        "network_error",
+      );
+
+      expect(response.status).toBe(404);
+      expect((await response.json()).error.code).toBe("NOT_FOUND");
+    });
+
+    it("answers 400 RECIPIENT_IS_SELF for a contact holding the sender's own phone", async () => {
+      await database.transaction((repositories) => {
+        repositories.contacts.insert({
+          id: "ctc_self" as ContactId,
+          ownerId: marianaId,
+          name: "Mariana López",
+          account: { type: RECIPIENT_ACCOUNT_TYPE.PHONE, phone: "5512345678" },
+          isFavorite: false,
+          createdAt: NOW.toISOString(),
+        });
+      });
+      const response = await send(
+        JSON.stringify({ amountInCents: 1_000, recipient: { contactId: "ctc_self" } }),
+        "network_error",
+      );
+
+      expect(response.status).toBe(400);
+      expect((await response.json()).error.details).toEqual({ recipient: ["RECIPIENT_IS_SELF"] });
+    });
+
+    it("still replays a completed transfer after its debit instead of re-checking the balance", async () => {
+      await signIn(marianaId);
+      const handler = createCreateTransferHandler(buildHttpDeps());
+      const balanceBefore = await getBalance();
+      const body = transferPayload(balanceBefore);
+
+      const first = await handler(
+        buildRequest({ body, idempotencyKey: VALID_KEY, cookie: "mock_scenario=success" }),
+        { params: Promise.resolve({}) },
+      );
+      const replay = await handler(
+        buildRequest({ body, idempotencyKey: VALID_KEY, cookie: "mock_scenario=success" }),
+        { params: Promise.resolve({}) },
+      );
+
+      expect(first.status).toBe(201);
+      expect(replay.status).toBe(201);
+      expect((await replay.json()).id).toBe((await first.json()).id);
+      expect(await getBalance()).toBe(0);
+    });
   });
 
   it("under forced network_error, answers 503 and leaves the balance unchanged", async () => {

@@ -2,23 +2,23 @@ import "server-only";
 import { createHash } from "node:crypto";
 import type { z } from "zod";
 import { RECIPIENT_ACCOUNT_TYPE } from "@/domain/contact/types";
-import { addMoney, subtractMoney, toMoney, type Cents } from "@/domain/money/money";
+import { addMoney, subtractMoney, toMoney, type Money } from "@/domain/money/money";
 import { err, ok, type Result } from "@/domain/shared/result";
 import type { ValidationCode } from "@/domain/shared/validation-codes";
-import { validateTransfer } from "@/domain/transfer/rules";
+import { TRANSFER_RULE_VIOLATION, validateTransfer, type TransferRuleViolation } from "@/domain/transfer/rules";
 import type { createTransferSchema } from "@/domain/transfer/schemas";
-import type { Transfer, TransferId } from "@/domain/transfer/types";
-import type { UserId } from "@/domain/user/types";
-import { MOVEMENT_DIRECTION, MOVEMENT_TYPE, type MovementId } from "@/domain/wallet/types";
+import { TRANSFER_STATUS, type Transfer, type TransferId } from "@/domain/transfer/types";
+import type { User, UserId } from "@/domain/user/types";
+import { MOVEMENT_DIRECTION, MOVEMENT_TYPE, type MovementId, type Wallet } from "@/domain/wallet/types";
+import type { Repositories } from "../repositories";
 import { SERVICE_ERROR_CODE, type ServiceDependencies, type ServiceError } from "./types";
 import { toTransferView, type TransferView } from "./views";
 
+export type CreateTransferInput = z.infer<typeof createTransferSchema>;
+
 export interface TransferService {
-  create(
-    userId: UserId,
-    input: z.infer<typeof createTransferSchema>,
-    idempotencyKey: string,
-  ): Promise<Result<TransferView, ServiceError>>;
+  check(userId: UserId, input: CreateTransferInput): Promise<Result<void, ServiceError>>;
+  create(userId: UserId, input: CreateTransferInput, idempotencyKey: string): Promise<Result<TransferView, ServiceError>>;
   getById(userId: UserId, transferId: TransferId): Promise<Result<TransferView, ServiceError>>;
   findByIdempotencyKey(userId: UserId, key: string): Promise<Result<TransferView, ServiceError>>;
 }
@@ -57,8 +57,71 @@ function buildTrackingKey(random: () => number, now: Date): string {
   return `SPIN${yy}${mm}${dd}${randomDigits(random, 8)}`;
 }
 
+interface CheckedTransfer {
+  sender: User;
+  wallet: Wallet;
+  recipient: Transfer["recipient"];
+  amount: Money;
+}
+
+function toRuleError(violations: TransferRuleViolation[], balance: Money): ServiceError {
+  if (violations.includes(TRANSFER_RULE_VIOLATION.INSUFFICIENT_FUNDS)) {
+    return { code: SERVICE_ERROR_CODE.INSUFFICIENT_FUNDS, balance };
+  }
+
+  const details: Record<string, ValidationCode[]> = {};
+
+  if (violations.includes(TRANSFER_RULE_VIOLATION.AMOUNT_NOT_POSITIVE)) {
+    details.amountInCents = [TRANSFER_RULE_VIOLATION.AMOUNT_NOT_POSITIVE];
+  }
+
+  if (violations.includes(TRANSFER_RULE_VIOLATION.RECIPIENT_REQUIRED)) {
+    details.recipient = [TRANSFER_RULE_VIOLATION.RECIPIENT_REQUIRED];
+  }
+
+  return { code: SERVICE_ERROR_CODE.VALIDATION_ERROR, details };
+}
+
+function checkTransfer(
+  repositories: Repositories,
+  userId: UserId,
+  input: CreateTransferInput,
+): Result<CheckedTransfer, ServiceError> {
+  const contact = repositories.contacts.findById(input.recipient.contactId);
+
+  if (!contact || contact.ownerId !== userId) {
+    return err({ code: SERVICE_ERROR_CODE.NOT_FOUND });
+  }
+
+  const sender = repositories.users.findById(userId);
+  const wallet = repositories.wallets.findByUserId(userId);
+
+  if (!sender || !wallet) {
+    return err({ code: SERVICE_ERROR_CODE.NOT_FOUND });
+  }
+
+  if (contact.account.type === RECIPIENT_ACCOUNT_TYPE.PHONE && contact.account.phone === sender.phone) {
+    return err({ code: SERVICE_ERROR_CODE.VALIDATION_ERROR, details: { recipient: ["RECIPIENT_IS_SELF"] } });
+  }
+
+  const amount = toMoney(input.amountInCents);
+  const validation = validateTransfer({ amount, recipient: input.recipient }, wallet.balance);
+
+  if (!validation.ok) {
+    return err(toRuleError(validation.error, wallet.balance));
+  }
+
+  return ok({ sender, wallet, recipient: { name: contact.name, account: contact.account }, amount });
+}
+
 export function createTransferService({ db, now, random, createId }: ServiceDependencies): TransferService {
   return {
+    async check(userId, input) {
+      const checked = await db.read((repositories) => checkTransfer(repositories, userId, input));
+
+      return checked.ok ? ok(undefined) : checked;
+    },
+
     async create(userId, input, idempotencyKey) {
       return db.transaction((repositories) => {
         const payloadHash = hashPayload(input);
@@ -76,48 +139,13 @@ export function createTransferService({ db, now, random, createId }: ServiceDepe
           }
         }
 
-        const contact = repositories.contacts.findById(input.recipient.contactId);
+        const checked = checkTransfer(repositories, userId, input);
 
-        if (!contact || contact.ownerId !== userId) {
-          return err({ code: SERVICE_ERROR_CODE.NOT_FOUND });
+        if (!checked.ok) {
+          return checked;
         }
 
-        const recipient: Transfer["recipient"] = { name: contact.name, account: contact.account };
-
-        const sender = repositories.users.findById(userId);
-        const wallet = repositories.wallets.findByUserId(userId);
-
-        if (!sender || !wallet) {
-          return err({ code: SERVICE_ERROR_CODE.NOT_FOUND });
-        }
-
-        if (recipient.account.type === RECIPIENT_ACCOUNT_TYPE.PHONE && recipient.account.phone === sender.phone) {
-          return err({
-            code: SERVICE_ERROR_CODE.VALIDATION_ERROR,
-            details: { recipient: ["RECIPIENT_IS_SELF"] },
-          });
-        }
-
-        const amount = toMoney(input.amountInCents as Cents);
-        const validation = validateTransfer({ amount, recipient: input.recipient }, wallet.balance);
-
-        if (!validation.ok) {
-          if (validation.error.includes("INSUFFICIENT_FUNDS")) {
-            return err({ code: SERVICE_ERROR_CODE.INSUFFICIENT_FUNDS, balance: wallet.balance });
-          }
-
-          const details: Record<string, ValidationCode[]> = {};
-
-          if (validation.error.includes("AMOUNT_NOT_POSITIVE")) {
-            details.amountInCents = ["AMOUNT_NOT_POSITIVE"];
-          }
-
-          if (validation.error.includes("RECIPIENT_REQUIRED")) {
-            details.recipient = ["RECIPIENT_REQUIRED"];
-          }
-
-          return err({ code: SERVICE_ERROR_CODE.VALIDATION_ERROR, details });
-        }
+        const { sender, wallet, recipient, amount } = checked.value;
 
         wallet.balance = subtractMoney(wallet.balance, amount);
         wallet.updatedAt = now().toISOString();
@@ -166,7 +194,7 @@ export function createTransferService({ db, now, random, createId }: ServiceDepe
           recipient,
           amount,
           concept: input.concept,
-          status: "completed",
+          status: TRANSFER_STATUS.COMPLETED,
           idempotencyKey,
           createdAt: now().toISOString(),
         };
