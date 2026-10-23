@@ -8,12 +8,17 @@
   color: var(--color-white);
 
   @include bp.lg {
+    position: sticky;
+    top: 0;
     display: flex;
+    align-self: start;
     width: var(--size-rail);
+    height: 100dvh;
   }
 
   @include bp.xl {
     width: var(--size-sidebar);
+    overflow-y: auto;
   }
 }
 

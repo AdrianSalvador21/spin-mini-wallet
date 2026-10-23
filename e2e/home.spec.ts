@@ -7,6 +7,7 @@ const MARIANA_BALANCE = "$12,450.80";
 const DIEGO_BALANCE = "$500.00";
 const PAGE_SIZE = 10;
 const MARIANA_MOVEMENT_COUNT = 25;
+const SHORT_VIEWPORT_HEIGHT = 600;
 
 test.describe("home", () => {
   test("shows Mariana's name and balance", async ({ page }, testInfo) => {
@@ -148,4 +149,31 @@ test.describe("home desktop shell", () => {
     const label = homeLink.locator("span", { hasText: "Inicio" });
     await expect(label).toHaveCSS("opacity", "0");
   });
+
+  for (const width of [1100, 1280]) {
+    test(`keeps the sidebar at the viewport height with Cerrar sesión visible on a long page at ${width}px`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(testInfo.project.name !== DESKTOP_PROJECT, "desktop-only sidebar");
+
+      await page.setViewportSize({ width, height: SHORT_VIEWPORT_HEIGHT });
+      await loginAs(page, MARIANA);
+      await page.getByRole("button", { name: "Ver más movimientos" }).click();
+      await page.getByRole("button", { name: "Ver más movimientos" }).click();
+      await expect(page.getByRole("button", { name: "Ver más movimientos" })).toBeHidden();
+
+      const pageHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+      expect(pageHeight).toBeGreaterThan(SHORT_VIEWPORT_HEIGHT * 2);
+
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+
+      const nav = await page.getByRole("navigation", { name: "Navegación principal" }).boundingBox();
+      const logout = await page.getByRole("button", { name: "Cerrar sesión" }).boundingBox();
+
+      expect(Math.abs(nav?.y ?? 99)).toBeLessThanOrEqual(1);
+      expect(Math.abs((nav?.height ?? 0) - SHORT_VIEWPORT_HEIGHT)).toBeLessThanOrEqual(1);
+      expect((logout?.y ?? 0) + (logout?.height ?? 0)).toBeLessThanOrEqual(SHORT_VIEWPORT_HEIGHT);
+      await expect(page.getByRole("button", { name: "Cerrar sesión" })).toBeInViewport();
+    });
+  }
 });
