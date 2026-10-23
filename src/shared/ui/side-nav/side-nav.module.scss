@@ -22,6 +22,20 @@
   }
 }
 
+.side-nav__texture {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.side-nav__logo,
+.side-nav__user,
+.side-nav__list,
+.side-nav__footer {
+  position: relative;
+}
+
 .side-nav__logo {
   display: none;
   padding: var(--space-5) var(--space-4);
@@ -76,7 +90,7 @@
 
 .side-nav__item--active {
   background: color-mix(in srgb, var(--color-white) 16%, transparent);
-  box-shadow: inset var(--space-1) 0 0 0 var(--color-brand-orange);
+  box-shadow: inset var(--size-nav-indicator) 0 0 0 var(--color-brand-orange);
 }
 
 .side-nav__label {

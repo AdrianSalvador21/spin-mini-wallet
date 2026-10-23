@@ -66,8 +66,10 @@
   --size-touch: 44px;
   --size-button-desktop: 48px;
   --size-button-min-width: 200px;
-  --size-logo-md: 84px;
   --size-logo-lg: 104px;
+  --size-logo-md: 84px;
+  --size-logo-sm: 56px;
+  --size-logo-xs: 42px;
 
   --border-width-thin: 1.5px;
   --border-width: 2px;

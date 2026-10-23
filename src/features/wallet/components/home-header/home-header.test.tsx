@@ -16,6 +16,16 @@ describe("HomeHeader", () => {
     expect(screen.getAllByText("Hola, Mariana")).toHaveLength(2);
   });
 
+  it("shows the color logo and the account button in the mobile header", async () => {
+    renderWithProviders(<HomeHeader now={NOW} logoutSlot={LOGOUT_SLOT} />);
+
+    expect(await screen.findByRole("button", { name: "Abrir mi cuenta" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Spin by OXXO" })).toHaveAttribute(
+      "src",
+      expect.stringContaining("spin-oxxo-logo-color.svg"),
+    );
+  });
+
   it("shows Hola without a name or avatar on error", async () => {
     server.use(
       http.get(

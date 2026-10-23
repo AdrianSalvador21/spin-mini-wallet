@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import { BrandLogo } from "@/shared/ui/brand-logo/brand-logo";
 import { BRAND_LOGO_SIZE } from "@/shared/ui/brand-logo/types";
+import { BrandRings } from "@/shared/ui/brand-rings/brand-rings";
+import { RINGS_PLACEMENT, RINGS_SIZE } from "@/shared/ui/brand-rings/types";
 import { Icon } from "@/shared/ui/icon/icon";
 import { ICON_SIZE, type IconName } from "@/shared/ui/icon/types";
 import styles from "./side-nav.module.scss";
@@ -64,6 +66,9 @@ function CurrentSideNavList({ items }: { items: SideNavItem[] }) {
 export function SideNav({ items, label, user, footer }: SideNavProps) {
   return (
     <nav aria-label={label} className={styles["side-nav"]}>
+      <div className={styles["side-nav__texture"]}>
+        <BrandRings placement={RINGS_PLACEMENT.BOTTOM_LEFT} size={RINGS_SIZE.LG} />
+      </div>
       <div className={styles["side-nav__logo"]}>
         <BrandLogo onDark size={BRAND_LOGO_SIZE.MD} />
       </div>
