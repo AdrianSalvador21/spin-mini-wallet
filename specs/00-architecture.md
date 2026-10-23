@@ -436,6 +436,7 @@ Scale tokens (SPEC 05). Spacing follows the same 4 px grid as Tailwind's spacing
 | `--size-result-icon` / `--size-result-icon-lg` | `48px` / `64px` | Receipt success icon on mobile and from `lg` (SPEC 08) |
 | `--size-dev-panel-offset` | `168px` | DEV pill bottom offset below `lg`, clearing a two-button `ActionBar` (SPEC 08) |
 | `--opacity-rings` | `0.14` | The `BrandRings` texture over purple surfaces (SPEC 09) |
+| `--size-rings-sm` / `--size-rings-md` / `--size-rings-lg` | `380px` / `440px` / `640px` | `BrandRings` widths: cards and headers, the login header, the side navigation and the brand panel (SPEC 09) |
 | `--size-orbit` / `--size-orbit-core` | `132px` / `64px` | The processing orbit and its lavender core (SPEC 09) |
 | `--size-nav-indicator` | `3px` | Orange indicator on the current side-navigation item (SPEC 09) |
 | `--size-ticket-notch` | `24px` | Side notches of the receipt ticket (SPEC 09) |
