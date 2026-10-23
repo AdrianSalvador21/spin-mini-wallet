@@ -36,6 +36,18 @@ describe("toFieldErrors", () => {
     expect(fieldErrors).toEqual({ name: ["NAME_INVALID_CHARACTERS"] });
   });
 
+  it("maps Zod's own messages, which are not validation codes, to INPUT_INVALID", () => {
+    const schema = z.object({ amountInCents: z.number(), recipient: z.object({ contactId: z.string() }) });
+
+    const result = schema.safeParse({ amountInCents: "10", recipient: {} });
+
+    expect(result.success).toBe(false);
+    expect(toFieldErrors(result.error!)).toEqual({
+      amountInCents: ["INPUT_INVALID"],
+      "recipient.contactId": ["INPUT_INVALID"],
+    });
+  });
+
   it("groups multiple issues for the same field", () => {
     const error = new z.ZodError([
       { code: "custom", message: "AMOUNT_REQUIRED", path: ["amount"], input: "" },
