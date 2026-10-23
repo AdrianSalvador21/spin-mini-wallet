@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { ReviewStep } from "@/features/transfers/components/review-step/review-step";
+import { TransferConfirmation } from "@/features/transfers/components/transfer-confirmation/transfer-confirmation";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("transfers.metaTitles");
@@ -9,5 +9,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function TransferReviewPage() {
-  return <ReviewStep />;
+  return <TransferConfirmation />;
 }

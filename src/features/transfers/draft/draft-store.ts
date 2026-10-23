@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { onClientSessionClear, safeSessionStorage, SESSION_STORAGE_KEY } from "@/shared/lib/session-storage/client-session";
-import type { DraftRecipient, TransferDraftState, TransferDraftStore } from "./types";
+import type { DraftRecipient, TransferDraftState, TransferDraftStore, ValidTransferDraft } from "./types";
 
 export const DRAFT_STORAGE_VERSION = 1;
 
@@ -25,6 +25,19 @@ export function selectDraftState({
   idempotencyKey,
 }: TransferDraftState): TransferDraftState {
   return { ownerId, amountInCents, concept, recipient, idempotencyKey };
+}
+
+export function selectValidDraft({
+  amountInCents,
+  concept,
+  recipient,
+  idempotencyKey,
+}: TransferDraftState): ValidTransferDraft | null {
+  if (amountInCents === null || recipient === null || idempotencyKey === null) {
+    return null;
+  }
+
+  return { amountInCents, concept, recipient, idempotencyKey };
 }
 
 export const useTransferDraft = create<TransferDraftStore>()(

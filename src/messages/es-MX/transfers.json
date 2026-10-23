@@ -3,7 +3,8 @@
     "metaTitles": {
       "amount": "Enviar dinero",
       "recipient": "Elegir destinatario",
-      "review": "Revisar envío"
+      "review": "Revisar envío",
+      "receipt": "Comprobante"
     },
     "steps": {
       "amount": "Monto",
@@ -72,13 +73,67 @@
       "concept": "Concepto",
       "fee": "Comisión",
       "balanceAfter": "Saldo después",
-      "confirmUnavailable": "Pronto podrás confirmar tu envío desde aquí.",
       "ruleFailed": "Algo cambió desde que empezaste:",
       "fix": "Corregir"
     },
     "summary": {
       "title": "Resumen",
       "note": "Revisarás todo antes de confirmar."
+    },
+    "processing": {
+      "sending": "Enviando {amount} a {name}",
+      "checking": "Revisando el estado de tu envío",
+      "text": "Esto toma unos segundos. No cierres esta ventana.",
+      "progress": "Procesando"
+    },
+    "outcomes": {
+      "networkError": {
+        "title": "Se perdió la conexión",
+        "text": "Tu envío no se realizó y no se hizo ningún cargo. Revisa tu conexión e inténtalo otra vez."
+      },
+      "insufficientFunds": {
+        "title": "Saldo insuficiente",
+        "changed": "Tu saldo cambió mientras enviabas. Hoy tienes {balance} disponibles y el envío es de {amount}.",
+        "simulated": "No pudimos completar el envío por falta de saldo. Tu saldo disponible es {balance}.",
+        "generic": "No pudimos completar el envío por falta de saldo."
+      },
+      "timeout": {
+        "title": "Está tardando más de lo normal",
+        "text": "No recibimos respuesta a tiempo. Antes de reintentar, revisa el estado de tu envío para saber si se hizo."
+      },
+      "notFoundYet": {
+        "title": "Todavía no encontramos tu envío",
+        "text": "Puede tardar unos segundos más. Revisa de nuevo; si sigue sin aparecer, reintenta: no se te cobrará dos veces."
+      },
+      "unknownError": {
+        "title": "Algo salió mal",
+        "text": "No pudimos completar tu envío. Inténtalo más tarde. Si el problema sigue, comparte esta referencia con soporte."
+      },
+      "actions": {
+        "retry": "Reintentar envío",
+        "checkStatus": "Revisar estado del envío",
+        "checkAgain": "Revisar de nuevo",
+        "changeAmount": "Cambiar monto",
+        "home": "Volver al inicio"
+      }
+    },
+    "receipt": {
+      "title": "¡Envío exitoso!",
+      "to": "Para",
+      "account": "Cuenta",
+      "concept": "Concepto",
+      "folio": "Folio",
+      "trackingKey": "Clave de rastreo",
+      "share": "Compartir comprobante",
+      "shareTitle": "Comprobante de envío Spin",
+      "shareText": "Envié {amount} a {name} ({account}) el {date}. Folio: {folio}. Clave de rastreo: {trackingKey}.",
+      "shared": "Comprobante copiado",
+      "shareFailed": "No pudimos compartir el comprobante",
+      "home": "Volver al inicio",
+      "notFound": {
+        "title": "No encontramos este comprobante",
+        "text": "Revisa el enlace o vuelve al inicio."
+      }
     }
   }
 }
