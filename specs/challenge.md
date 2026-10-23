@@ -129,7 +129,7 @@ Approved on 2026-10-21, before SPEC 00 was written. Tokens were taken from the p
 ### 8.1 Foundations
 
 - Tokens, typography, radii and breakpoints are in SPEC 00 §14 and already live in `src/app/globals.css`.
-- One orange (`brand-orange`) button per screen: it marks the main action, with an `ink-900` label (option A of the mobile review, 5.1:1; white on orange fails AA). Purple carries structure and navigation, and links are purple and underlined, never orange.
+- One orange (`brand-orange`) button per screen: it marks the main action, with a white label, as on Spin's own platform. SPEC 08 replaced option A of the mobile review (`ink-900`, 5.1:1) to match the brand, accepting that white on orange is 2.9:1 and fails AA for normal text (user decision). Purple carries structure and navigation, and links are purple and underlined, never orange.
 - Pill buttons (`radius-pill`) in the variants `primary`, `secondary` (outlined purple), `ghost` and a disabled state. The loading state shows a spinner and blocks double submission.
 - Fields: label above, 50 px control, input text at 16 px (no iOS zoom), optional prefix (`+52`), hint and inline error; focus ring in lavender and error ring in red.
 - Touch targets of at least 44 × 44 px. When the drawing must stay smaller (the 32 px back circle, an 18 px eye icon), the hit area grows with padding, not the drawing.
@@ -181,10 +181,10 @@ The design shows them, but SPEC 00 does not mention them. The spec of the listed
 | "Contactos" item in the desktop side navigation | 06 — No; no spec builds a contacts page, so the side navigation keeps only "Inicio" and "Enviar dinero" |
 | Quick amount chips (`$100`, `$200`, `$500`, `Todo`) | 07 — Yes, ships; the chips replace the amount and "Todo" sets the whole available balance |
 | "Comisión $0.00" and "Saldo después" rows in the review | 07 — Yes, ships, in the review and the desktop live summary; the fee is the domain constant `TRANSFER_FEE` (`$0.00`) |
-| "Compartir comprobante" on the receipt | 08 |
+| "Compartir comprobante" on the receipt | 08 — Yes, ships as shared text built from the masked receipt (amount, recipient, masked account, folio, tracking key, date) through `navigator.share`, falling back to the clipboard; never the private URL or a full account |
 | Mobile review: avatar button that opens the "Mi cuenta" bottom sheet with logout; movements grouped by "Hoy / Ayer / Esta semana" | 06 — Yes, ships as specified |
 | Desktop proposal: icon rail, `xl` sidebar, 1040 px container and sticky aside | 06 — Yes, ships as specified |
 | Mobile review: optional "Concepto" field with a 0/40 counter in step 1, "Continuar" always enabled, recents row plus search and a vertical contact list in step 2 | 07 — Partly. Ship: the concept with its counter, "Continuar" always enabled (pressing it shows the errors inline) and the vertical favorites list. No: the "Recientes" row and the search, cut to fit the deadline (recents need a `lastUsedAt` from movements, and a few favorites need no search) |
 | Desktop proposal: wizard card with stepper and live summary | 07 — Yes, ships: a 560 px card with the `Stepper` and a 340 px sticky live summary in steps 1 and 2; in step 3 the review fills the card and the summary is not rendered |
-| Mobile review: "Copiar" button next to the support reference; text never under 12 px | 08 |
-| Desktop proposal: 520 px focus column for results and the receipt | 08 |
+| Mobile review: "Copiar" button next to the support reference; text never under 12 px | 08 — Yes, ships on every reference in the app (Home, wizard, login and the outcomes) through the `SupportReference` primitive, at 12 px with a 44 px "Copiar" target |
+| Desktop proposal: 520 px focus column for results and the receipt | 08 — Yes, ships: `--container-focus` (`max-w-focus`), aligned to the top, with the actions side by side at 50 % |

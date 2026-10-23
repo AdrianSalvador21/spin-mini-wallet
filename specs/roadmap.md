@@ -25,10 +25,10 @@
 | 05 | Authentication | [05-auth.md](./05-auth.md) | `feature/05-auth` | Implemented |
 | 06 | Home | [06-home.md](./06-home.md) | `feature/06-home` | Implemented |
 | 07 | New transfer flow | [07-transfer-flow.md](./07-transfer-flow.md) | `feature/07-transfer-flow` | Implemented |
-| 08 | Confirmation and receipt | To be written | `feature/08-confirmation-receipt` | Pending |
+| 08 | Confirmation and receipt | [08-confirmation-receipt.md](./08-confirmation-receipt.md) | `feature/08-confirmation-receipt` | Implemented |
 | 09 | Final quality, deploy and documentation | To be written | `feature/09-delivery` | Pending |
 
-**Next spec to write:** 08 — Confirmation and receipt.
+**Next spec to write:** 09 — Final quality, deploy and documentation.
 
 The original milestone 02 ("Domain and simulated backend") was split on 2026-10-21 because it touched more than three areas. Session primitives moved from the authentication milestone into the simulated backend so every `/api/v1/*` route is protected from the start.
 
@@ -98,7 +98,7 @@ Repo base: branches, Node 24, `src/`, Sass and Spin tokens, fonts, next-intl, ES
 - Receipt at `/transfers/[transferId]`.
 - DEV scenario panel and Home cache invalidation.
 - 520 px focus column on desktop and a "Copiar" button next to the support reference.
-- Covers: PDF screen 4 and the end of screen 3.
+- Covers: PDF screen 4 and the end of screen 3. See [08-confirmation-receipt.md](./08-confirmation-receipt.md).
 
 ### 09 — Final quality, deploy and documentation
 
