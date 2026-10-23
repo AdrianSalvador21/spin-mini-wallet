@@ -13,11 +13,10 @@ import {
   getMovementIcon,
   getMovementTitle,
   MovementRow,
-  type Translator,
 } from "./movement-row";
 
-const t = createTranslator({ locale: "es-MX", messages, namespace: "home.movements" }) as Translator;
-const tCommon = createTranslator({ locale: "es-MX", messages, namespace: "common" }) as Translator;
+const t = createTranslator({ locale: "es-MX", messages, namespace: "home.movements" });
+const tCommon = createTranslator({ locale: "es-MX", messages, namespace: "common" });
 const NOW = "2026-10-22T18:00:00.000Z";
 
 function buildMovement(overrides: Partial<MovementView> = {}): MovementView {

@@ -8,7 +8,7 @@ import { renderWithProviders, screen, waitFor } from "@/test/render";
 import { server } from "@/test/msw/server";
 import { getGroupLabel, getMovementsViewKind, MovementList } from "./movement-list";
 import type { DateGroup } from "@/shared/lib/format/date";
-import type { Translator } from "@/features/wallet/components/movement-row/movement-row";
+import type { MovementsTranslator } from "@/features/wallet/components/movement-row/movement-row";
 
 const searchParamsMock = vi.fn(() => new URLSearchParams(""));
 
@@ -41,7 +41,7 @@ afterEach(() => {
 
 describe("getGroupLabel", () => {
   it("throws for a DateGroup kind outside the union", () => {
-    const t = (() => "") as Translator;
+    const t = (() => "") as unknown as MovementsTranslator;
     const invalid = { kind: "unknown" } as unknown as DateGroup;
 
     expect(() => getGroupLabel(t, invalid, NOW)).toThrow();
