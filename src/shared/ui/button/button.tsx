@@ -39,17 +39,27 @@ function buttonClassNames(variant: ButtonVariant, block: boolean, loading: boole
 }
 
 export function Button(props: ButtonProps) {
-  const { variant, block = false, className, children } = props;
-
   if (props.href) {
+    const { variant, block = false, className, children, href } = props;
+
     return (
-      <Link href={props.href} className={buttonClassNames(variant, block, false, className)}>
+      <Link href={href} className={buttonClassNames(variant, block, false, className)}>
         {children}
       </Link>
     );
   }
 
-  const { loading = false, loadingLabel, type = BUTTON_TYPE.BUTTON, disabled, ...rest } = props;
+  const {
+    variant,
+    block = false,
+    className,
+    children,
+    loading = false,
+    loadingLabel,
+    type = BUTTON_TYPE.BUTTON,
+    disabled,
+    ...rest
+  } = props;
 
   return (
     <button
