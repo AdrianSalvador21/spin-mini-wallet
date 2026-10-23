@@ -18,6 +18,7 @@
       "hiddenAmount": "$ •••••",
       "hiddenLabel": "Saldo oculto",
       "send": "Enviar dinero",
+      "account": "Celular {masked}",
       "error": {
         "title": "No pudimos cargar tu saldo",
         "retry": "Reintentar"
