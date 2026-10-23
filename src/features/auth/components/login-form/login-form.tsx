@@ -3,8 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { startTransition, useActionState, useEffect, useState, type ReactNode } from "react";
-import { useForm, useWatch, type Resolver } from "react-hook-form";
-import { LOGIN_METHOD, loginSchema } from "@/domain/user/schemas";
+import { useForm, useWatch } from "react-hook-form";
+import { LOGIN_METHOD } from "@/domain/user/schemas";
 import { useValidationMessage } from "@/shared/i18n/use-validation-message";
 import { AUTH_FAILURE_KIND, AUTH_FORM_STATUS, type AuthFormState, type LoginMethod } from "@/shared/lib/auth/form-state";
 import { formatPhoneInput, PHONE_COUNTRY_PREFIX } from "@/shared/lib/format/phone";
@@ -16,14 +16,14 @@ import { ActionBar } from "@/shared/ui/action-bar/action-bar";
 import { PasswordInput } from "@/shared/ui/password-input/password-input";
 import { Segmented, type SegmentedOption } from "@/shared/ui/segmented/segmented";
 import { loginAction } from "../../actions";
-import { toLoginInput, type LoginFields } from "../../login-values";
+import { loginFieldsSchema, toLoginInput, type LoginFields } from "../../login-values";
 import { AuthFailureAlert } from "../auth-failure-alert/auth-failure-alert";
 
 const INITIAL_STATE: AuthFormState = { status: AUTH_FORM_STATUS.IDLE };
 const SERVER_ERROR_TYPE = "server";
 const LOGIN_FIELD_NAMES: readonly (keyof LoginFields)[] = ["phone", "email", "password"];
 
-const resolver = zodResolver(loginSchema, undefined, { raw: true }) as unknown as Resolver<LoginFields>;
+const resolver = zodResolver(loginFieldsSchema, undefined, { raw: true });
 
 function isLoginField(name: string): name is keyof LoginFields {
   return (LOGIN_FIELD_NAMES as readonly string[]).includes(name);
