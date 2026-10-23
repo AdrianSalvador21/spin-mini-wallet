@@ -124,7 +124,7 @@ These criteria are the yardstick for every spec decision. When two options are e
 
 ## 8. Design reference
 
-Approved on 2026-10-21, before SPEC 00 was written. Tokens were taken from the production CSS of spinbyoxxo.com.mx. Mobile-first, light theme, es-MX copy. On 2026-10-22 two more sections of the design were approved, the **mobile review** and the **desktop proposal**; where they differ from the original screens, they win. The rows below already reflect them.
+Approved on 2026-10-21, before SPEC 00 was written. Tokens were taken from the production CSS of spinbyoxxo.com.mx. Mobile-first, light theme, es-MX copy. On 2026-10-22 two more sections of the design were approved, the **mobile review** and the **desktop proposal**; where they differ from the original screens, they win. The rows below already reflect them. Later that day a third pass, the **brand improvements in the flow** (§8.5), was approved; it wins over the rows below where they differ.
 
 ### 8.1 Foundations
 
@@ -188,3 +188,18 @@ The design shows them, but SPEC 00 does not mention them. The spec of the listed
 | Desktop proposal: wizard card with stepper and live summary | 07 — Yes, ships: a 560 px card with the `Stepper` and a 340 px sticky live summary in steps 1 and 2; in step 3 the review fills the card and the summary is not rendered |
 | Mobile review: "Copiar" button next to the support reference; text never under 12 px | 08 — Yes, ships on every reference in the app (Home, wizard, login and the outcomes) through the `SupportReference` primitive, at 12 px with a 44 px "Copiar" target |
 | Desktop proposal: 520 px focus column for results and the receipt | 08 — Yes, ships: `--container-focus` (`max-w-focus`), aligned to the top, with the actions side by side at 50 % |
+| Brand improvements: Home proposal B (light header with the logo, gradient balance card with the rings, "Enviar dinero" below the card) | 09 — Yes, ships on mobile; from `lg` the aside's card gains the rings, the masked phone and the logo |
+| Brand improvements: rings texture on the login header, the desktop brand panel and the side navigation; orange indicator on the current item | 09 — Yes, ships |
+| Brand improvements: processing orbit | 09 — Yes, ships; under reduced motion it slows to 3 s per turn instead of stopping (user decision) |
+| Brand improvements: ticket receipt over a purple band | 09 — Yes, ships on mobile and in the 520 px focus column |
+| Brand improvements: "Cancelar envío" as an X button | 09 — Yes, ships: in the mobile app bar and next to the desktop H1 |
+| Brand improvements: Home proposal A (purple header with the rings over a white balance card) | 09 — No; discarded in favor of proposal B |
+
+### 8.5 Brand improvements in the flow (third design approval)
+
+Approved on 2026-10-22, after SPEC 08: the canvas "Spin Mini Wallet · Marca en mobile", published at https://claude.ai/artifact/61hP4ttWPTCChC2GH2MBVR (private, owner only). Its goal is to carry Spin's identity through every step of the flow, not only the login.
+
+- Approved artboards: Propuesta B · Home, Login, Enviar dinero paso 1, Procesando, Comprobante, and the four desktop artboards (Home, Enviar dinero, Comprobante, Login).
+- Discarded: Propuesta A · Home. "Actual · Home" is the before state for comparison.
+- New assets: the rings texture (`public/assets/shared/spin-rings.svg`) and a color logo for light backgrounds (`public/assets/shared/spin-oxxo-logo-color.svg`).
+- Where they differ from §8.2, this section wins. SPEC 09 builds them.
