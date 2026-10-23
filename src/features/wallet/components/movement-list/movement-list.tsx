@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { assertUnreachable } from "@/domain/shared/assert-unreachable";
 import { MovementFilter as MovementFilterControl } from "@/features/wallet/components/movement-filter/movement-filter";
-import { MovementRow, type Translator } from "@/features/wallet/components/movement-row/movement-row";
+import { MovementRow, type MovementsTranslator } from "@/features/wallet/components/movement-row/movement-row";
 import { MovementsSkeleton } from "@/features/wallet/components/movements-skeleton/movements-skeleton";
 import { MovementsState } from "@/features/wallet/components/movements-state/movements-state";
 import { useMovementFilter } from "@/features/wallet/hooks/use-movement-filter";
@@ -47,7 +47,7 @@ export function getGroupKey(group: DateGroup): string {
   return group.kind === DATE_GROUP_KIND.MONTH ? `${group.kind}-${group.year}-${group.month}` : group.kind;
 }
 
-export function getGroupLabel(t: Translator, group: DateGroup, now: string): string {
+export function getGroupLabel(t: MovementsTranslator, group: DateGroup, now: string): string {
   switch (group.kind) {
     case DATE_GROUP_KIND.TODAY:
       return t("groups.today");
@@ -73,7 +73,7 @@ interface MovementListProps {
 }
 
 export function MovementList({ now }: MovementListProps) {
-  const t = useTranslations("home.movements") as Translator;
+  const t = useTranslations("home.movements");
   const [filter, setFilter] = useMovementFilter();
   const {
     items,

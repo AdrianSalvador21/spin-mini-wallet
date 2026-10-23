@@ -39,7 +39,8 @@
       "BODY_INVALID_JSON": "No pudimos leer la solicitud. Intenta de nuevo.",
       "LIMIT_INVALID": "El número de movimientos solicitado no es válido.",
       "DIRECTION_INVALID": "El filtro de movimientos no es válido.",
-      "CURSOR_INVALID": "El cursor de paginación no es válido."
+      "CURSOR_INVALID": "El cursor de paginación no es válido.",
+      "INPUT_INVALID": "Este dato no tiene el formato esperado."
     },
     "api": {
       "VALIDATION_ERROR": "Revisa los datos e intenta de nuevo.",

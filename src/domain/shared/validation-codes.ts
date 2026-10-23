@@ -38,6 +38,11 @@ export const VALIDATION_CODES = [
   "LIMIT_INVALID",
   "DIRECTION_INVALID",
   "CURSOR_INVALID",
+  "INPUT_INVALID",
 ] as const;
 
 export type ValidationCode = (typeof VALIDATION_CODES)[number];
+
+export function isValidationCode(value: string): value is ValidationCode {
+  return (VALIDATION_CODES as readonly string[]).includes(value);
+}
