@@ -2,7 +2,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 
-const FEATURES = ["auth", "wallet", "transfers"];
+const FEATURES = ["auth", "wallet", "transfers", "dev-tools"];
 
 const frameworkImports = {
   group: ["react", "react/**", "react-dom", "react-dom/**", "next", "next/**", "next-intl", "next-intl/**"],
