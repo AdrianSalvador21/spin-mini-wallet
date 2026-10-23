@@ -9,6 +9,8 @@ import { formatReceiptDate } from "@/shared/lib/format/date";
 import { formatMoney } from "@/shared/lib/format/money";
 import { ROUTES } from "@/shared/lib/routes";
 import { ActionBar } from "@/shared/ui/action-bar/action-bar";
+import { BrandLogo } from "@/shared/ui/brand-logo/brand-logo";
+import { BRAND_LOGO_SIZE } from "@/shared/ui/brand-logo/types";
 import { Button } from "@/shared/ui/button/button";
 import { BUTTON_VARIANT } from "@/shared/ui/button/types";
 import { Icon } from "@/shared/ui/icon/icon";
@@ -72,6 +74,7 @@ export function TransferReceipt({ transfer }: TransferReceiptProps) {
     <div className={styles["transfer-receipt"]}>
       <section className={styles["transfer-receipt__card"]}>
         <div className={styles["transfer-receipt__head"]}>
+          <BrandLogo size={BRAND_LOGO_SIZE.SM} className={styles["transfer-receipt__logo"]} />
           <span className={styles["transfer-receipt__icon"]}>
             <Icon name={ICON_NAME.CHECK} size={ICON_SIZE.XL} />
           </span>
@@ -83,6 +86,7 @@ export function TransferReceipt({ transfer }: TransferReceiptProps) {
           <p className={styles["transfer-receipt__amount"]}>{formatMoney(transfer.amount)}</p>
           <p className={styles["transfer-receipt__date"]}>{formatReceiptDate(transfer.createdAt)}</p>
         </div>
+        <div className={styles["transfer-receipt__tear"]} aria-hidden="true" />
         <SummaryList items={items} className={styles["transfer-receipt__rows"]} />
         <p role="status" className={styles["transfer-receipt__feedback"]}>
           {feedbackMessage(feedback)}

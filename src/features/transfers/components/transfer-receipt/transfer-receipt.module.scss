@@ -1,6 +1,9 @@
 @use "../../../../shared/styles/breakpoints" as bp;
 
 .transfer-receipt {
+  --receipt-inset: var(--space-5);
+
+  position: relative;
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -8,6 +11,8 @@
   padding: calc(var(--space-4) + env(safe-area-inset-top)) var(--space-5) 0;
 
   @include bp.lg {
+    --receipt-inset: var(--space-10);
+
     flex: none;
     gap: var(--space-8);
     padding: var(--space-10);
@@ -18,7 +23,8 @@
 }
 
 .transfer-receipt__card {
-  padding: var(--space-4);
+  position: relative;
+  padding: var(--receipt-inset);
   border-radius: var(--radius-l);
   background: var(--color-white);
   box-shadow: var(--shadow-card);
@@ -35,12 +41,37 @@
   flex-direction: column;
   gap: var(--space-2);
   align-items: center;
-  padding-bottom: var(--space-3);
-  border-bottom: var(--border-width) dashed var(--color-lavender-300);
   text-align: center;
+}
 
-  @include bp.lg {
-    padding-bottom: var(--space-6);
+.transfer-receipt__logo {
+  margin-bottom: var(--space-2);
+}
+
+.transfer-receipt__tear {
+  position: relative;
+  height: var(--size-ticket-notch);
+  margin: var(--space-2) 0;
+
+  &::before {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    left: 0;
+    border-top: var(--border-width) dashed var(--color-lavender-300);
+    content: "";
+  }
+
+  &::after {
+    position: absolute;
+    top: 0;
+    right: calc((var(--receipt-inset) + var(--size-ticket-notch) / 2) * -1);
+    left: calc((var(--receipt-inset) + var(--size-ticket-notch) / 2) * -1);
+    height: var(--size-ticket-notch);
+    background:
+      radial-gradient(circle, var(--color-lavender-100) 70%, transparent 71%) left center / var(--size-ticket-notch) var(--size-ticket-notch) no-repeat,
+      radial-gradient(circle, var(--color-lavender-100) 70%, transparent 71%) right center / var(--size-ticket-notch) var(--size-ticket-notch) no-repeat;
+    content: "";
   }
 }
 

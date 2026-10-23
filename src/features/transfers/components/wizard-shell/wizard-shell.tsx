@@ -129,6 +129,16 @@ export function WizardShell({ children }: WizardShellProps) {
                 title={t(`titles.${titleKeyFor(step, isNew)}`)}
                 backHref={backRouteFor(step, isNew)}
                 step={{ current: currentIndex + 1, total }}
+                action={
+                  <Link
+                    href={ROUTES.HOME}
+                    onClick={reset}
+                    aria-label={t("actions.cancelTransfer")}
+                    className={styles["wizard-shell__close"]}
+                  >
+                    <Icon name={ICON_NAME.CLOSE} size={ICON_SIZE.MD} />
+                  </Link>
+                }
               />
             )}
           />
@@ -144,7 +154,13 @@ export function WizardShell({ children }: WizardShellProps) {
             <Icon name={ICON_NAME.BACK} size={ICON_SIZE.SM} />
             {t("actions.home")}
           </Link>
-          <h1 className={styles["wizard-shell__h1"]}>{t("titles.desktop")}</h1>
+          <div className={styles["wizard-shell__title-row"]}>
+            <h1 className={styles["wizard-shell__h1"]}>{t("titles.desktop")}</h1>
+            <Link href={ROUTES.HOME} onClick={reset} className={styles["wizard-shell__cancel"]}>
+              <Icon name={ICON_NAME.CLOSE} size={ICON_SIZE.SM} />
+              {t("actions.cancelTransfer")}
+            </Link>
+          </div>
           <div className={styles["wizard-shell__stepper"]}>
             <Stepper steps={stepperSteps} label={t("steps.label")} />
           </div>
@@ -178,9 +194,6 @@ export function WizardShell({ children }: WizardShellProps) {
                   />
                 )}
               />
-              <Link href={ROUTES.HOME} onClick={reset} className={styles["wizard-shell__cancel"]}>
-                {t("actions.cancel")}
-              </Link>
             </div>
           )}
           <div key={step} className={styles["wizard-shell__content"]}>

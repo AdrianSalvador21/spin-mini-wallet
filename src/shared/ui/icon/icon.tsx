@@ -219,6 +219,9 @@ const ICON_PATHS: Record<IconName, ReactNode> = {
       />
     </>
   ),
+  [ICON_NAME.CLOSE]: (
+    <path d="M18 6 6 18M6 6l12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+  ),
 };
 
 interface IconProps {

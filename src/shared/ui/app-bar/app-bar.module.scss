@@ -97,3 +97,9 @@
   color: var(--color-ink-500);
   font-variant-numeric: tabular-nums;
 }
+
+.app-bar__action {
+  display: flex;
+  flex: none;
+  margin-right: calc(var(--space-2) * -1);
+}

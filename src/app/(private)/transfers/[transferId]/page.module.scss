@@ -1,0 +1,40 @@
+@use "../../../../shared/styles/breakpoints" as bp;
+
+.receipt-page {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    var(--color-brand-purple) 0,
+    var(--color-brand-purple-2) var(--size-receipt-band),
+    transparent var(--size-receipt-band)
+  );
+
+  @include bp.lg {
+    background: linear-gradient(
+      180deg,
+      var(--color-brand-purple) 0,
+      var(--color-brand-purple-2) var(--size-receipt-band-lg),
+      transparent var(--size-receipt-band-lg)
+    );
+  }
+}
+
+.receipt-page__texture {
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--size-receipt-band);
+  overflow: hidden;
+  pointer-events: none;
+
+  @include bp.lg {
+    height: var(--size-receipt-band-lg);
+  }
+}
+
+.receipt-page__content {
+  position: relative;
+}
